@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { PropsWithChildren } from "react";
 
 export const metadata: Metadata = {
-  title: "blog",
+  title: "editor-blog-dkpark10",
   description: "my blog",
   viewport: "width=device-width, initial-scale=1",
 };
