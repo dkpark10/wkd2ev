@@ -18,20 +18,21 @@ export class TextEditorHandler extends AbstractTextEditorHandler {
 
     const firstNode =
       clonedContents.childNodes.length > 1
-        ? this.getActionFirstNodeAllLine(endContainer, endOffset, "bold")
-        : this.getActionFirstNode(endContainer, startOffset, endOffset, "bold");
+        ? this.getActionFirstNodeAllLine(startContainer, startOffset, "bold")
+        : this.getActionFirstNode(startContainer, startOffset, endOffset, "bold");
 
     const middleNode = this.getActionMiddleNode(clonedContents.childNodes, "bold");
-    const lastNode = this.getActionLastNode(startContainer, startOffset, "bold");
+    const lastNode = this.getActionLastNode(endContainer, endOffset, "bold");
 
     this.range.deleteContents();
-
-    this.range.insertNode(firstNode);
-    middleNode.forEach((node) => this.range.insertNode(node));
 
     if (clonedContents.childNodes.length > 1) {
       this.range.insertNode(lastNode);
     }
+
+    middleNode.forEach((node) => this.range.insertNode(node));
+
+    this.range.insertNode(firstNode);
 
     this.selection.removeAllRanges();
   }

@@ -11,7 +11,7 @@ export default forwardRef<HTMLDivElement, TextEditorBlockProps>(function TextEdi
   ref: ForwardedRef<HTMLDivElement>,
 ) {
   return (
-    <div data-block-id={dataBlockId} contentEditable ref={ref}>
+    <div data-block-id={dataBlockId} contentEditable ref={ref} data-testid="editor-block1">
       1111111111
       <div>2222222222</div>
       <div>3333333333</div>
