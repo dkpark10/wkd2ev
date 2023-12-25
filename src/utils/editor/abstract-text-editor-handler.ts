@@ -22,12 +22,14 @@ export abstract class AbstractTextEditorHandler {
 
   protected selection: Selection;
 
-  /** @description classname은 tailwind */
+  /** @description className은 tailwind */
   protected classNameByTextAction: Editor.ClassNameByEditorAction = {
     bold: "font-bold",
     cancelLine: "todo temp",
     inclination: "todo temp",
   };
+
+  protected dataActionAttribute = "data-action-attribute";
 
   constructor({ contentEditableDom, selection, range }: AbstractTextEditorHandlerProps) {
     this.contentEditableDom = contentEditableDom;
@@ -54,6 +56,8 @@ export abstract class AbstractTextEditorHandler {
   protected createTextActionElement(action: Editor.EditorAction): HTMLSpanElement {
     const wrapperElement = document.createElement("span");
     wrapperElement.className = this.classNameByTextAction[action];
+    wrapperElement.setAttribute(this.dataActionAttribute, "");
+
     return wrapperElement;
   }
 }
