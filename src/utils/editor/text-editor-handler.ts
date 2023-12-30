@@ -18,11 +18,11 @@ export class TextEditorHandler extends AbstractTextEditorHandler {
 
     const firstNode =
       clonedContents.childNodes.length > 1
-        ? this.getActionFirstNodeAllLine(startContainer, startOffset, "bold")
-        : this.getActionFirstNode(startContainer, startOffset, endOffset, "bold");
+        ? this.getProcessedRightNode(startContainer, startOffset, "bold")
+        : this.getProcessedNode(startContainer, startOffset, endOffset, "bold");
 
     const middleNode = this.getActionMiddleNode(clonedContents.childNodes, "bold");
-    const lastNode = this.getActionLastNode(endContainer, endOffset, "bold");
+    const lastNode = this.getProcessedLeftNode(endContainer, endOffset, "bold");
 
     this.range.deleteContents();
 
@@ -43,7 +43,7 @@ export class TextEditorHandler extends AbstractTextEditorHandler {
     this.range.setEndAfter(this.range.endContainer);
   }
 
-  public getActionFirstNodeAllLine(node: Node, startOffset: number, action: Editor.EditorAction) {
+  public getProcessedRightNode(node: Node, startOffset: number, action: Editor.EditorAction) {
     const beforeText = node.textContent?.slice(0, startOffset);
     const afterText = node.textContent?.slice(startOffset);
 
@@ -58,7 +58,23 @@ export class TextEditorHandler extends AbstractTextEditorHandler {
     return newElement;
   }
 
-  public getActionFirstNode(node: Node, startOffset: number, endOffset: number, action: Editor.EditorAction) {
+  public getProcessedLeftNode(node: Node, endOffset: number, action: Editor.EditorAction) {
+    const beforeText = node.textContent?.slice(0, endOffset);
+    const afterText = node.textContent?.slice(endOffset);
+
+    const beforeElement = this.createTextActionElement(action);
+    beforeElement.textContent = beforeText ?? "";
+
+    const afterElement = document.createTextNode(afterText ?? "");
+
+    const newElement = document.createElement("div");
+    newElement.appendChild(beforeElement);
+    newElement.appendChild(afterElement);
+
+    return newElement;
+  }
+
+  public getProcessedNode(node: Node, startOffset: number, endOffset: number, action: Editor.EditorAction) {
     const beforeText = node.textContent?.slice(0, startOffset);
     const middleText = node.textContent?.slice(startOffset, endOffset);
     const afterText = node.textContent?.slice(endOffset);
@@ -72,22 +88,6 @@ export class TextEditorHandler extends AbstractTextEditorHandler {
     const newElement = document.createElement("div");
     newElement.appendChild(beforeElement);
     newElement.appendChild(middleElement);
-    newElement.appendChild(afterElement);
-
-    return newElement;
-  }
-
-  public getActionLastNode(node: Node, endOffset: number, action: Editor.EditorAction) {
-    const beforeText = node.textContent?.slice(0, endOffset);
-    const afterText = node.textContent?.slice(endOffset);
-
-    const beforeElement = this.createTextActionElement(action);
-    beforeElement.textContent = beforeText ?? "";
-
-    const afterElement = document.createTextNode(afterText ?? "");
-
-    const newElement = document.createElement("div");
-    newElement.appendChild(beforeElement);
     newElement.appendChild(afterElement);
 
     return newElement;

@@ -8,7 +8,7 @@ import { runTextEditorAction } from "@/utils/editor";
 import { v4 as uuidv4 } from "uuid";
 import type { Editor } from "types";
 
-const buttonContents = ["굵기1", "굵기2", "굵기3", "굵기4", "굵기5"] as const;
+const buttonContents = ["bold", "inclination"] as const;
 
 export default function EditorComponent() {
   const [currentEditorBlockId, setCurrentEditorBlockId] = useState("");
@@ -48,7 +48,13 @@ export default function EditorComponent() {
       <div className="border border-red-900 h-[50vh] w-[75vw]" onClick={onEditorBoundClick}>
         <div className="border border-stone-900 flex justify-between">
           {buttonContents.map((content) => (
-            <button className="border border-stone-900 w-24" key={content} type="button" onClick={onBoldClick}>
+            <button
+              data-testid={`button-action-${content}`}
+              className="border border-stone-900 w-24"
+              key={content}
+              type="button"
+              onClick={onBoldClick}
+            >
               {content}
             </button>
           ))}
