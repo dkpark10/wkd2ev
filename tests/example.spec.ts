@@ -1,50 +1,53 @@
 import { test, expect } from "@playwright/test";
 
+const replaceHtml = (initHtmlList: Array<string>, value: string, idx: number) => {
+  return initHtmlList.reduce((acc, content, i) => {
+    return i === idx ? acc + value : acc + content;
+  }, "");
+};
+
 test.beforeEach(async ({ page }) => {
   await page.goto("/");
 });
 
 test.describe("에디터 액션 테스트", () => {
   test("한 줄 전체 bold 처리 테스트", async ({ page }) => {
+    const initHtmlList = [
+      "1111111111",
+      "<div>2222222222</div>",
+      "<div>3333333333</div>",
+      "<div>4444444444</div>",
+      "<div>5555555555</div>",
+      "<div>6666666666</div>",
+    ];
+
     const editorBlock = await page.$('div[data-testid="editor-block1"]');
     if (!editorBlock) return;
 
-    await page.evaluateHandle(() => {
+    await page.evaluateHandle(({ editorBlock, initHtml }) => {
       const range = new Range();
-      const editorBlockElement = document.querySelector('div[data-testid="editor-block1"]');
 
-      if (!editorBlockElement) return;
+      editorBlock.innerHTML = initHtml;
 
-      editorBlockElement.innerHTML = `
-        1111111111
-        <div>2222222222</div>
-        <div>3333333333</div>
-        <div>4444444444</div>
-        <div>5555555555</div>
-        <div>6666666666</div>
-      `;
-
-      const len = editorBlockElement.children[0].firstChild?.textContent?.length as number;
-      range.setStart(editorBlockElement.children[0].firstChild as Node, 0);
-      range.setEnd(editorBlockElement.children[0].firstChild as Node, len);
+      const len = editorBlock.children[0].firstChild?.textContent?.length as number;
+      range.setStart(editorBlock.children[0].firstChild as Node, 0);
+      range.setEnd(editorBlock.children[0].firstChild as Node, len);
 
       window.getSelection()?.removeAllRanges();
       window.getSelection()?.addRange(range);
-    });
+    }, { editorBlock, initHtml: initHtmlList.join('') });
 
-    const boldButton = page.getByTestId('button-action-bold');
+    const boldButton = page.getByTestId("button-action-bold");
     await boldButton.click();
 
-    const html = await editorBlock.innerHTML(); 
+    const html = await editorBlock.innerHTML();
+    const expectedValue = replaceHtml(
+      initHtmlList,
+      '<div><span class="font-bold" data-action-attribute="">2222222222</span></div>',
+      1,
+    );
 
-    expect(html).toBe(`
-      1111111111
-      <div><span class="font-bold" data-action-attribute="">2222222222</span></div>
-      <div>3333333333</div>
-      <div>4444444444</div>
-      <div>5555555555</div>
-      <div>6666666666</div>    
-    `)
+    expect(html).toBe(expectedValue);
   });
 
   // test("한 줄 일부 bold 처리 테스트", async () => {});

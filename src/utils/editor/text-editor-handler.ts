@@ -51,7 +51,7 @@ export class TextEditorHandler extends AbstractTextEditorHandler {
     const afterElement = this.createTextActionElement(action);
     afterElement.textContent = afterText ?? "";
 
-    const newElement = document.createElement("div");
+    const newElement = document.createDocumentFragment();
     newElement.appendChild(beforeElement);
     newElement.appendChild(afterElement);
 
@@ -67,7 +67,7 @@ export class TextEditorHandler extends AbstractTextEditorHandler {
 
     const afterElement = document.createTextNode(afterText ?? "");
 
-    const newElement = document.createElement("div");
+    const newElement = document.createDocumentFragment();
     newElement.appendChild(beforeElement);
     newElement.appendChild(afterElement);
 
@@ -85,7 +85,7 @@ export class TextEditorHandler extends AbstractTextEditorHandler {
 
     const afterElement = document.createTextNode(afterText ?? "");
 
-    const newElement = document.createElement("div");
+    const newElement = document.createDocumentFragment();
     newElement.appendChild(beforeElement);
     newElement.appendChild(middleElement);
     newElement.appendChild(afterElement);
