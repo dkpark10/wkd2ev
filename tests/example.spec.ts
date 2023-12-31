@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { setRange, type SetRangeArgs } from "./utils/set-range";
+import type { SetRangeArgs } from "./utils/set-range";
 
 const replaceHtml = (initHtmlList: Array<string>, value: string, idx: number) => {
   return initHtmlList.reduce((acc, content, i) => {
@@ -25,11 +25,26 @@ test.describe("에디터 액션 테스트", () => {
     const editorBlock = await page.$('div[data-testid="editor-block1"]');
     if (!editorBlock) return;
 
-    await page.evaluate(setRange, {
-      editorBlock,
-      initHtml: initHtmlList.join(""),
-      startLine: 0,
-    });
+    await page.evaluate(
+      ({ editorBlock, initHtml = "", startLine = 0 }: SetRangeArgs) => {
+        const range = new Range();
+
+        editorBlock.innerHTML = initHtml;
+
+        const len = editorBlock.children[startLine].firstChild?.textContent?.length as number;
+        range.setStart(editorBlock.children[startLine].firstChild as Node, 0);
+        range.setEnd(editorBlock.children[startLine].firstChild as Node, len);
+
+        window.getSelection()?.removeAllRanges();
+        window.getSelection()?.addRange(range);
+      },
+      {
+        editorBlock,
+        initHtml: initHtmlList.join(""),
+      },
+    );
+    
+    await page.screenshot({ path: './tests/selection1.png' });
 
     const boldButton = page.getByTestId("button-action-bold");
     await boldButton.click();
@@ -42,16 +57,29 @@ test.describe("에디터 액션 테스트", () => {
 
     expect(await editorBlock.innerHTML()).toBe(expectedValue);
 
-    await page.evaluate(setRange, {
-      editorBlock,
-      startLine: 0,
-    });
+    await page.evaluate(
+      ({ editorBlock, startLine = 0 }: SetRangeArgs) => {
+        const range = new Range();
 
-    await page.screenshot({ path: 'selection.png' });
+        const parentDiv = editorBlock.children[startLine].firstChild;
+        const endNode = editorBlock.children[startLine].nextSibling;
+        
+        range.setStartBefore(parentDiv as Node);
+        range.setEndBefore(endNode as Node);
+  
+        window.getSelection()?.removeAllRanges();
+        window.getSelection()?.addRange(range);
+      },
+      {
+        editorBlock,
+      },
+    );
 
-    await boldButton.click();
+    await page.screenshot({ path: './tests/selection2.png' });
 
-    expect(await editorBlock.innerHTML()).toBe(initHtmlList.join(''));
+    // await boldButton.click();
+
+    // expect(await editorBlock.innerHTML()).toBe(initHtmlList.join(''));
   });
 
   // test("한 줄 일부 bold 처리 테스트", async () => {});

@@ -1,11 +1,11 @@
 export interface SetRangeArgs {
   editorBlock: SVGElement | HTMLElement;
-  startLine: number;
+  startLine?: number;
   initHtml?: string;
   endOffset?: number;
 }
 
-export const setRange = ({ editorBlock, initHtml, startLine, endOffset }: SetRangeArgs) => {
+export const setRange = ({ editorBlock, initHtml, startLine = 0, endOffset }: SetRangeArgs) => {
   const range = new Range();
 
   if (initHtml) editorBlock.innerHTML = initHtml;
