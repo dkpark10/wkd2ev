@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { setRange, type SetRangeArgs } from "./utils/set-range";
 
 const replaceHtml = (initHtmlList: Array<string>, value: string, idx: number) => {
   return initHtmlList.reduce((acc, content, i) => {
@@ -11,43 +12,46 @@ test.beforeEach(async ({ page }) => {
 });
 
 test.describe("에디터 액션 테스트", () => {
-  test("한 줄 전체 bold 처리 테스트", async ({ page }) => {
-    const initHtmlList = [
-      "1111111111",
-      "<div>2222222222</div>",
-      "<div>3333333333</div>",
-      "<div>4444444444</div>",
-      "<div>5555555555</div>",
-      "<div>6666666666</div>",
-    ];
+  const initHtmlList = [
+    "1111111111",
+    "<div>2222222222</div>",
+    "<div>3333333333</div>",
+    "<div>4444444444</div>",
+    "<div>5555555555</div>",
+    "<div>6666666666</div>",
+  ];
 
+  test("한 줄 전체 bold 처리 후 다시 bold를 누르면 bold 처리를 없앤다.", async ({ page }) => {
     const editorBlock = await page.$('div[data-testid="editor-block1"]');
     if (!editorBlock) return;
 
-    await page.evaluateHandle(({ editorBlock, initHtml }) => {
-      const range = new Range();
-
-      editorBlock.innerHTML = initHtml;
-
-      const len = editorBlock.children[0].firstChild?.textContent?.length as number;
-      range.setStart(editorBlock.children[0].firstChild as Node, 0);
-      range.setEnd(editorBlock.children[0].firstChild as Node, len);
-
-      window.getSelection()?.removeAllRanges();
-      window.getSelection()?.addRange(range);
-    }, { editorBlock, initHtml: initHtmlList.join('') });
+    await page.evaluate(setRange, {
+      editorBlock,
+      initHtml: initHtmlList.join(""),
+      startLine: 0,
+    });
 
     const boldButton = page.getByTestId("button-action-bold");
     await boldButton.click();
 
-    const html = await editorBlock.innerHTML();
     const expectedValue = replaceHtml(
       initHtmlList,
       '<div><span class="font-bold" data-action-attribute="">2222222222</span></div>',
       1,
     );
 
-    expect(html).toBe(expectedValue);
+    expect(await editorBlock.innerHTML()).toBe(expectedValue);
+
+    await page.evaluate(setRange, {
+      editorBlock,
+      startLine: 0,
+    });
+
+    await page.screenshot({ path: 'selection.png' });
+
+    await boldButton.click();
+
+    expect(await editorBlock.innerHTML()).toBe(initHtmlList.join(''));
   });
 
   // test("한 줄 일부 bold 처리 테스트", async () => {});
