@@ -13,22 +13,23 @@ export class TextEditorHandler extends AbstractTextEditorHandler {
   public runBold() {
     const clonedContents = this.range.cloneContents();
 
-    const firstNode =
-      clonedContents.childNodes.length > 1 ? this.getProcessedRightNode("bold") : this.getProcessedNode("bold");
+    // const firstNode =
+    //   clonedContents.childNodes.length > 1 ? this.getProcessedRightNode("bold") : this.getProcessedNode("bold");
+    this.getProcessedNode("bold");
 
-    const middleNode = this.getActionMiddleNode(clonedContents.childNodes, "bold");
-    const lastNode = this.getProcessedLeftNode("bold");
+    // const middleNode = this.getActionMiddleNode(clonedContents.childNodes, "bold");
+    // const lastNode = this.getProcessedLeftNode("bold");
 
-    this.setRangeAll();
-    this.range.deleteContents();
+    // this.setRangeAll();
+    // this.range.deleteContents();
 
-    if (clonedContents.childNodes.length > 1) {
-      this.range.insertNode(lastNode);
-    }
+    // if (clonedContents.childNodes.length > 1) {
+    //   this.range.insertNode(lastNode);
+    // }
 
-    middleNode.forEach((node) => this.range.insertNode(node));
+    // middleNode.forEach((node) => this.range.insertNode(node));
 
-    this.range.insertNode(firstNode);
+    // this.range.insertNode(firstNode);
 
     this.selection.removeAllRanges();
   }
@@ -77,28 +78,36 @@ export class TextEditorHandler extends AbstractTextEditorHandler {
   public getProcessedNode(action: Editor.EditorAction) {
     const { startContainer, startOffset, endOffset } = this.range;
 
-    if (this.isAlreadyHaveActionElement(startContainer)) {
-      if (this.isAlreadyHaveSameActionOnlyOne(startContainer, action)) {
-        //
+    if (this.isAlreadyHaveActionElement()) {
+      if (this.isAlreadyHaveSameActionOnlyOne(action)) {
+        if (this.isAccurateMatch()) {
+          startContainer.parentElement?.remove();
+          const newElement = document.createTextNode(startContainer.textContent as string);
+          this.range.setStart(this.range.startContainer, 0);
+          this.range.deleteContents();
+          this.range.insertNode(newElement);
+        }
       }
+    } else {
+      const beforeText = startContainer.textContent?.slice(0, startOffset);
+      const middleText = startContainer.textContent?.slice(startOffset, endOffset);
+      const afterText = startContainer.textContent?.slice(endOffset);
+
+      const beforeElement = document.createTextNode(beforeText ?? "");
+      const middleElement = this.createTextActionElement(action);
+      middleElement.textContent = middleText ?? "";
+
+      const afterElement = document.createTextNode(afterText ?? "");
+
+      const newElement = document.createDocumentFragment();
+      newElement.appendChild(beforeElement);
+      newElement.appendChild(middleElement);
+      newElement.appendChild(afterElement);
+
+      this.setRangeAll();
+      this.range.deleteContents();
+      this.range.insertNode(newElement);
     }
-
-    const beforeText = startContainer.textContent?.slice(0, startOffset);
-    const middleText = startContainer.textContent?.slice(startOffset, endOffset);
-    const afterText = startContainer.textContent?.slice(endOffset);
-
-    const beforeElement = document.createTextNode(beforeText ?? "");
-    const middleElement = this.createTextActionElement(action);
-    middleElement.textContent = middleText ?? "";
-
-    const afterElement = document.createTextNode(afterText ?? "");
-
-    const newElement = document.createDocumentFragment();
-    newElement.appendChild(beforeElement);
-    newElement.appendChild(middleElement);
-    newElement.appendChild(afterElement);
-
-    return newElement;
   }
 
   public getActionMiddleNode(middleRangeNode: NodeListOf<ChildNode>, action: Editor.EditorAction) {
@@ -121,21 +130,28 @@ export class TextEditorHandler extends AbstractTextEditorHandler {
     return wrapperElement;
   }
 
-  public isAlreadyHaveActionElement(node: Node) {
-    const { parentElement } = node;
-    const isTagNameSpan = parentElement?.nodeName === this.actionTagName;
-    const hasAttributeAction = Object.prototype.hasOwnProperty.call(parentElement?.dataset, "actionAttribute");
+  public isAlreadyHaveActionElement() {
+    const { startContainer } = this.range;
+    const isTagNameSpan = startContainer.parentElement?.nodeName === this.actionTagName;
+    const hasAttributeAction = Object.prototype.hasOwnProperty.call(
+      startContainer.parentElement?.dataset,
+      "actionAttribute",
+    );
 
     return isTagNameSpan && hasAttributeAction;
   }
 
-  public isAlreadyHaveSameActionOnlyOne(node: Node, action: Editor.EditorAction) {
-    const { parentElement } = node;
-    return parentElement?.classList.length === 1 && parentElement.className === this.classNameByTextAction[action];
+  public isAlreadyHaveSameActionOnlyOne(action: Editor.EditorAction) {
+    const { startContainer } = this.range;
+    return (
+      startContainer.parentElement?.classList.length === 1 &&
+      startContainer.parentElement.className === this.classNameByTextAction[action]
+    );
   }
 
-  // public isAccurateMatch(startOffset: number, endOffset: number) {
-  //   const { parentElement } = node;
-  //   return parentElement?.classList.length === 1 && parentElement.className === this.classNameByTextAction[action];
-  // }
+  public isAccurateMatch() {
+    const { startContainer, startOffset, endOffset } = this.range;
+    const textLen = endOffset - startOffset;
+    return startContainer.textContent?.length === textLen;
+  }
 }

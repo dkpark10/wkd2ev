@@ -31,11 +31,11 @@ export default function EditorComponent() {
     setCurrentEditorBlockId(lastTextEditorElement.key);
   };
 
-  const onBoldClick = () => {
+  const onActionClick = (action: Editor.EditorAction) => () => {
     const currentContentDom = textEditorBlockRefs.current.get(currentEditorBlockId);
     if (!currentContentDom) return;
 
-    runTextEditorAction(currentContentDom, "bold");
+    runTextEditorAction(currentContentDom, action);
   };
 
   useEffect(() => {
@@ -53,7 +53,7 @@ export default function EditorComponent() {
               className="border border-stone-900 w-24"
               key={content}
               type="button"
-              onClick={onBoldClick}
+              onClick={onActionClick(content)}
             >
               {content}
             </button>

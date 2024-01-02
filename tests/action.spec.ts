@@ -44,7 +44,7 @@ test.describe("에디터 액션 테스트", () => {
       },
     );
     
-    await page.screenshot({ path: './tests/selection1.png' });
+    await page.screenshot({ path: './tests/case1/range1.png' });
 
     const boldButton = page.getByTestId("button-action-bold");
     await boldButton.click();
@@ -61,10 +61,11 @@ test.describe("에디터 액션 테스트", () => {
       ({ editorBlock, startLine = 0 }: SetRangeArgs) => {
         const range = new Range();
 
+        /** @todo range 영역 다시 설정 해야 함 */
         const startNode = editorBlock.children[startLine].firstChild;
         const endNode = editorBlock.children[startLine].nextSibling;
         
-        range.setStartBefore(startNode as Node);
+        range.setStartAfter(startNode as Node);
         range.setEndBefore(endNode as Node);
   
         window.getSelection()?.removeAllRanges();
@@ -75,11 +76,11 @@ test.describe("에디터 액션 테스트", () => {
       },
     );
 
-    await page.screenshot({ path: './tests/selection2.png' });
+    await page.screenshot({ path: './tests/case1/range2.png' });
 
-    // await boldButton.click();
+    await boldButton.click();
 
-    // expect(await editorBlock.innerHTML()).toBe(initHtmlList.join(''));
+    expect(await editorBlock.innerHTML()).toBe(initHtmlList.join(''));
   });
 
   // test("한 줄 일부 bold 처리 테스트", async () => {});
