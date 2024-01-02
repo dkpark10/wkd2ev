@@ -13,17 +13,13 @@ export class TextEditorHandler extends AbstractTextEditorHandler {
   public runBold() {
     const clonedContents = this.range.cloneContents();
 
-    const { startContainer, endContainer, startOffset, endOffset } = this.range;
-    this.setRangeAll();
-
     const firstNode =
-      clonedContents.childNodes.length > 1
-        ? this.getProcessedRightNode(startContainer, startOffset, "bold")
-        : this.getProcessedNode(startContainer, endContainer, startOffset, endOffset, "bold");
+      clonedContents.childNodes.length > 1 ? this.getProcessedRightNode("bold") : this.getProcessedNode("bold");
 
     const middleNode = this.getActionMiddleNode(clonedContents.childNodes, "bold");
-    const lastNode = this.getProcessedLeftNode(endContainer, endOffset, "bold");
+    const lastNode = this.getProcessedLeftNode("bold");
 
+    this.setRangeAll();
     this.range.deleteContents();
 
     if (clonedContents.childNodes.length > 1) {
@@ -43,7 +39,9 @@ export class TextEditorHandler extends AbstractTextEditorHandler {
     this.range.setEndAfter(this.range.endContainer);
   }
 
-  public getProcessedRightNode(node: Node, startOffset: number, action: Editor.EditorAction) {
+  public getProcessedRightNode(action: Editor.EditorAction) {
+    const { startContainer: node, startOffset } = this.range;
+
     const beforeText = node.textContent?.slice(0, startOffset);
     const afterText = node.textContent?.slice(startOffset);
 
@@ -58,7 +56,9 @@ export class TextEditorHandler extends AbstractTextEditorHandler {
     return newElement;
   }
 
-  public getProcessedLeftNode(node: Node, endOffset: number, action: Editor.EditorAction) {
+  public getProcessedLeftNode(action: Editor.EditorAction) {
+    const { endContainer: node, endOffset } = this.range;
+
     const beforeText = node.textContent?.slice(0, endOffset);
     const afterText = node.textContent?.slice(endOffset);
 
@@ -74,14 +74,15 @@ export class TextEditorHandler extends AbstractTextEditorHandler {
     return newElement;
   }
 
-  public getProcessedNode(
-    startContainer: Node,
-    endContainer: Node,
-    startOffset: number,
-    endOffset: number,
-    action: Editor.EditorAction,
-  ) {
-    this.isAlreadyHaveActionElement(startContainer);
+  public getProcessedNode(action: Editor.EditorAction) {
+    const { startContainer, startOffset, endOffset } = this.range;
+
+    if (this.isAlreadyHaveActionElement(startContainer)) {
+      if (this.isAlreadyHaveSameActionOnlyOne(startContainer, action)) {
+        //
+      }
+    }
+
     const beforeText = startContainer.textContent?.slice(0, startOffset);
     const middleText = startContainer.textContent?.slice(startOffset, endOffset);
     const afterText = startContainer.textContent?.slice(endOffset);
@@ -128,10 +129,13 @@ export class TextEditorHandler extends AbstractTextEditorHandler {
     return isTagNameSpan && hasAttributeAction;
   }
 
-  // public isCollapsedAction(action: Editor.EditorAction) {
-  //   const commonAncestor = this.range.commonAncestorContainer.parentElement;
-  //   const actionClassName = commonAncestor?.className;
+  public isAlreadyHaveSameActionOnlyOne(node: Node, action: Editor.EditorAction) {
+    const { parentElement } = node;
+    return parentElement?.classList.length === 1 && parentElement.className === this.classNameByTextAction[action];
+  }
 
-  //   if (!actionClassName) return false;
+  // public isAccurateMatch(startOffset: number, endOffset: number) {
+  //   const { parentElement } = node;
+  //   return parentElement?.classList.length === 1 && parentElement.className === this.classNameByTextAction[action];
   // }
 }
