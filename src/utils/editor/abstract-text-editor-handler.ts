@@ -31,6 +31,8 @@ export abstract class AbstractTextEditorHandler {
 
   protected dataActionAttribute = "data-action-attribute";
 
+  protected actionTagName = "SPAN";
+
   constructor({ contentEditableDom, selection, range }: AbstractTextEditorHandlerProps) {
     this.contentEditableDom = contentEditableDom;
     this.selection = selection;
@@ -54,7 +56,7 @@ export abstract class AbstractTextEditorHandler {
   protected abstract runBold(): void;
 
   protected createTextActionElement(action: Editor.EditorAction): HTMLSpanElement {
-    const wrapperElement = document.createElement("span");
+    const wrapperElement = document.createElement(this.actionTagName);
     wrapperElement.className = this.classNameByTextAction[action];
     wrapperElement.setAttribute(this.dataActionAttribute, "");
 

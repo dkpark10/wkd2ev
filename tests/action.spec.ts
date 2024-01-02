@@ -61,10 +61,10 @@ test.describe("에디터 액션 테스트", () => {
       ({ editorBlock, startLine = 0 }: SetRangeArgs) => {
         const range = new Range();
 
-        const parentDiv = editorBlock.children[startLine].firstChild;
+        const startNode = editorBlock.children[startLine].firstChild;
         const endNode = editorBlock.children[startLine].nextSibling;
         
-        range.setStartBefore(parentDiv as Node);
+        range.setStartBefore(startNode as Node);
         range.setEndBefore(endNode as Node);
   
         window.getSelection()?.removeAllRanges();

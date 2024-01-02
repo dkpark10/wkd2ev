@@ -19,7 +19,7 @@ export class TextEditorHandler extends AbstractTextEditorHandler {
     const firstNode =
       clonedContents.childNodes.length > 1
         ? this.getProcessedRightNode(startContainer, startOffset, "bold")
-        : this.getProcessedNode(startContainer, startOffset, endOffset, "bold");
+        : this.getProcessedNode(startContainer, endContainer, startOffset, endOffset, "bold");
 
     const middleNode = this.getActionMiddleNode(clonedContents.childNodes, "bold");
     const lastNode = this.getProcessedLeftNode(endContainer, endOffset, "bold");
@@ -74,10 +74,17 @@ export class TextEditorHandler extends AbstractTextEditorHandler {
     return newElement;
   }
 
-  public getProcessedNode(node: Node, startOffset: number, endOffset: number, action: Editor.EditorAction) {
-    const beforeText = node.textContent?.slice(0, startOffset);
-    const middleText = node.textContent?.slice(startOffset, endOffset);
-    const afterText = node.textContent?.slice(endOffset);
+  public getProcessedNode(
+    startContainer: Node,
+    endContainer: Node,
+    startOffset: number,
+    endOffset: number,
+    action: Editor.EditorAction,
+  ) {
+    this.isAlreadyHaveActionElement(startContainer);
+    const beforeText = startContainer.textContent?.slice(0, startOffset);
+    const middleText = startContainer.textContent?.slice(startOffset, endOffset);
+    const afterText = startContainer.textContent?.slice(endOffset);
 
     const beforeElement = document.createTextNode(beforeText ?? "");
     const middleElement = this.createTextActionElement(action);
@@ -112,4 +119,19 @@ export class TextEditorHandler extends AbstractTextEditorHandler {
 
     return wrapperElement;
   }
+
+  public isAlreadyHaveActionElement(node: Node) {
+    const { parentElement } = node;
+    const isTagNameSpan = parentElement?.nodeName === this.actionTagName;
+    const hasAttributeAction = Object.prototype.hasOwnProperty.call(parentElement?.dataset, "actionAttribute");
+
+    return isTagNameSpan && hasAttributeAction;
+  }
+
+  // public isCollapsedAction(action: Editor.EditorAction) {
+  //   const commonAncestor = this.range.commonAncestorContainer.parentElement;
+  //   const actionClassName = commonAncestor?.className;
+
+  //   if (!actionClassName) return false;
+  // }
 }
