@@ -14,22 +14,31 @@ test.beforeEach(async ({ page }) => {
 test.describe("에디터 액션 테스트", () => {
   const initHtmlList = [
     "1111111111",
-    "<div>2222222222</div>",
-    "<div>3333333333</div>",
-    "<div>4444444444</div>",
-    "<div>5555555555</div>",
-    "<div>6666666666</div>",
+    "2222222222",
+    "3333333333",
+    "4444444444",
+    "5555555555",
+    "6666666666",
   ];
 
   test("한 줄 전체 bold 처리 후 다시 bold를 누르면 bold 처리를 없앤다.", async ({ page }) => {
     const editorBlock = await page.$('div[data-testid="editor-block1"]');
     if (!editorBlock) return;
 
-    await page.evaluate(
-      ({ editorBlock, initHtml = "", startLine = 0 }: SetRangeArgs) => {
-        const range = new Range();
+    await editorBlock.click();
+  
+    for (let i = 0; i < initHtmlList.length; i += 1) {
+      await page.keyboard.type(initHtmlList[i]);
 
-        editorBlock.innerHTML = initHtml;
+      if (i < initHtmlList.length - 1) {
+        await page.keyboard.press("Enter");
+      }
+    }
+
+    const startLine = 1;
+    await page.evaluate(
+      ({ editorBlock, startLine = 0 }: SetRangeArgs) => {
+        const range = new Range();
 
         const len = editorBlock.children[startLine].firstChild?.textContent?.length as number;
         range.setStart(editorBlock.children[startLine].firstChild as Node, 0);
@@ -40,7 +49,7 @@ test.describe("에디터 액션 테스트", () => {
       },
       {
         editorBlock,
-        initHtml: initHtmlList.join(""),
+        startLine,
       },
     );
     
@@ -50,9 +59,9 @@ test.describe("에디터 액션 테스트", () => {
     await boldButton.click();
 
     const expectedValue = replaceHtml(
-      initHtmlList,
-      '<div><span class="font-bold" data-action-attribute="">2222222222</span></div>',
-      1,
+      initHtmlList.map((html) => `<div>${html}</div>`),
+      `<div><span class="font-bold" data-action-attribute="">${initHtmlList[startLine]}</span></div>`,
+      startLine,
     );
 
     expect(await editorBlock.innerHTML()).toBe(expectedValue);
@@ -62,12 +71,13 @@ test.describe("에디터 액션 테스트", () => {
         const range = new Range();
 
         /** @todo range 영역 다시 설정 해야 함 */
-        const startNode = editorBlock.childNodes[startLine];
-        const temp = startNode.childNodes[2].firstChild;
-        if (!startNode || !temp) return;
+        const startNode = editorBlock.children[startLine];
+        const textNode = startNode.children[0].firstChild;
+
+        if (!startNode || !textNode) return;
         
-        range.setStart(temp, 0);
-        range.setEnd(temp, temp.textContent?.length ?? 0);
+        range.setStart(textNode, 0);
+        range.setEnd(textNode, textNode.textContent?.length ?? 0);
   
         window.getSelection()?.removeAllRanges();
         window.getSelection()?.addRange(range);
@@ -82,7 +92,7 @@ test.describe("에디터 액션 테스트", () => {
 
     await boldButton.click();
 
-    expect(await editorBlock.innerHTML()).toBe(initHtmlList.join(''));
+    expect(await editorBlock.innerHTML()).toBe(initHtmlList.map((html) => `<div>${html}</div>`).join(''));
   });
 
   // test("한 줄 일부 bold 처리 테스트", async () => {});
