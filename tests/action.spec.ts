@@ -62,17 +62,19 @@ test.describe("에디터 액션 테스트", () => {
         const range = new Range();
 
         /** @todo range 영역 다시 설정 해야 함 */
-        const startNode = editorBlock.children[startLine].firstChild;
-        const endNode = editorBlock.children[startLine].nextSibling;
+        const startNode = editorBlock.childNodes[startLine];
+        const temp = startNode.childNodes[2].firstChild;
+        if (!startNode || !temp) return;
         
-        range.setStartAfter(startNode as Node);
-        range.setEndBefore(endNode as Node);
+        range.setStart(temp, 0);
+        range.setEnd(temp, temp.textContent?.length ?? 0);
   
         window.getSelection()?.removeAllRanges();
         window.getSelection()?.addRange(range);
       },
       {
         editorBlock,
+        startLine: 1,
       },
     );
 
