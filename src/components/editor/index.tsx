@@ -3,7 +3,6 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import { useState, useRef, useEffect } from "react";
-import TextEditorBlock from "@/components/editor/text-editor-block";
 import { runTextEditorAction } from "@/utils/editor";
 import { v4 as uuidv4 } from "uuid";
 import type { Editor } from "types";
@@ -59,14 +58,44 @@ export default function EditorComponent() {
             </button>
           ))}
         </div>
-        {editorBlocks.map((block) =>
+        {editorBlocks.map((block, idx) =>
           block.type === "text" ? (
-            <TextEditorBlock
+            <div
+              contentEditable
               key={block.id}
-              dataBlockId={block.id}
+              data-block-id={block.id}
+              data-testid={`editor-block${idx + 1}`}
               ref={(ref) => {
                 if (!ref || textEditorBlockRefs.current.get(block.id)) return;
                 textEditorBlockRefs.current.set(block.id, ref);
+
+                // eslint-disable-next-line consistent-return
+                return ref;
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  const selection = window.getSelection();
+                  const range = selection?.getRangeAt(0);
+                  const startContainer = range?.startContainer;
+                  if (!selection || !range || !startContainer) return;
+
+                  if (startContainer.parentElement?.getAttribute("contentEditable")) {
+                    e.preventDefault();
+
+                    const editorBlock = textEditorBlockRefs.current.get(block.id);
+                    const div = document.createElement("div");
+                    div.innerHTML = startContainer.textContent ?? "";
+
+                    editorBlock?.firstChild?.replaceWith(div);
+
+                    (editorBlock as HTMLDivElement).innerHTML += "<div><br></div>";
+                    range.setStart(editorBlock?.firstChild?.nextSibling as Node, 0);
+                    range.setEnd(editorBlock?.firstChild?.nextSibling as Node, 0);
+
+                    selection.removeAllRanges();
+                    selection.addRange(range);
+                  }
+                }
               }}
             />
           ) : (
