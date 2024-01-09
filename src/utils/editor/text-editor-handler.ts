@@ -84,7 +84,6 @@ export class TextEditorHandler extends AbstractTextEditorHandler {
           startContainer.parentElement?.remove();
           const newElement = document.createTextNode(startContainer.textContent as string);
           this.range.setStart(this.range.startContainer, 0);
-          this.range.deleteContents();
           this.range.insertNode(newElement);
         }
       }
@@ -149,6 +148,7 @@ export class TextEditorHandler extends AbstractTextEditorHandler {
     );
   }
 
+  /** @desc 이전 선택영역과 완전히 겹치는지 판별하는 함수 */
   public isAccurateMatch() {
     const { startContainer, startOffset, endOffset } = this.range;
     const textLen = endOffset - startOffset;
