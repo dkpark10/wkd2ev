@@ -76,7 +76,7 @@ export class TextEditorHandler extends AbstractTextEditorHandler {
   }
 
   public getProcessedNode(action: Editor.EditorAction) {
-    const { startContainer, startOffset, endOffset } = this.range;
+    const { startContainer, endContainer, startOffset, endOffset } = this.range;
 
     if (this.isAlreadyHaveActionElement()) {
       if (this.isAlreadyHaveSameActionOnlyOne(action)) {
@@ -85,28 +85,47 @@ export class TextEditorHandler extends AbstractTextEditorHandler {
           const newElement = document.createTextNode(startContainer.textContent as string);
           this.range.setStart(this.range.startContainer, 0);
           this.range.insertNode(newElement);
+        } else {
+          this.range.setStart(startContainer, 0);
+          this.range.setEnd(endContainer, endOffset);
+
+          const beginText = startContainer.textContent ?? "";
+          const endText = endContainer.textContent?.slice(0, endOffset) ?? "";
+
+          startContainer.parentElement?.remove();
+
+          const newElement = document.createDocumentFragment();
+          const actionElement = this.createTextActionElement(action);
+          actionElement.textContent = beginText + endText;
+          newElement.appendChild(actionElement);
+
+          this.range.deleteContents();
+
+          this.range.insertNode(newElement);
         }
       }
-    } else {
-      const beforeText = startContainer.textContent?.slice(0, startOffset);
-      const middleText = startContainer.textContent?.slice(startOffset, endOffset);
-      const afterText = startContainer.textContent?.slice(endOffset);
 
-      const beforeElement = document.createTextNode(beforeText ?? "");
-      const middleElement = this.createTextActionElement(action);
-      middleElement.textContent = middleText ?? "";
-
-      const afterElement = document.createTextNode(afterText ?? "");
-
-      const newElement = document.createDocumentFragment();
-      newElement.appendChild(beforeElement);
-      newElement.appendChild(middleElement);
-      newElement.appendChild(afterElement);
-
-      this.setRangeAll();
-      this.range.deleteContents();
-      this.range.insertNode(newElement);
+      return;
     }
+
+    const beforeText = startContainer.textContent?.slice(0, startOffset);
+    const middleText = startContainer.textContent?.slice(startOffset, endOffset);
+    const afterText = startContainer.textContent?.slice(endOffset);
+
+    const beforeElement = document.createTextNode(beforeText ?? "");
+    const middleElement = this.createTextActionElement(action);
+    middleElement.textContent = middleText ?? "";
+
+    const afterElement = document.createTextNode(afterText ?? "");
+
+    const newElement = document.createDocumentFragment();
+    newElement.appendChild(beforeElement);
+    newElement.appendChild(middleElement);
+    newElement.appendChild(afterElement);
+
+    this.setRangeAll();
+    this.range.deleteContents();
+    this.range.insertNode(newElement);
   }
 
   public getActionMiddleNode(middleRangeNode: NodeListOf<ChildNode>, action: Editor.EditorAction) {
@@ -129,6 +148,7 @@ export class TextEditorHandler extends AbstractTextEditorHandler {
     return wrapperElement;
   }
 
+  /** @desc 선택 영역의 부모노드가 span이라면 */
   public isAlreadyHaveActionElement() {
     const { startContainer } = this.range;
     const isTagNameSpan = startContainer.parentElement?.nodeName === this.actionTagName;
@@ -140,6 +160,7 @@ export class TextEditorHandler extends AbstractTextEditorHandler {
     return isTagNameSpan && hasAttributeAction;
   }
 
+  /** @desc 선택 영역의 액션이 동일하다면 */
   public isAlreadyHaveSameActionOnlyOne(action: Editor.EditorAction) {
     const { startContainer } = this.range;
     return (

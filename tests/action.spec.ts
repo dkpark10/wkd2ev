@@ -162,15 +162,49 @@ test.describe("에디터 액션 테스트", () => {
     expect(await editorBlock.innerHTML()).toBe(initHtmlList.map((html) => `<div>${html}</div>`).join(""));
   });
 
-  // test("한 줄 bold 처리된 텍스트를 원상태로 복귀한다.", async () => {});
+  test("한 줄 일부 bold 처리 후 bold처리된 영역의 텍스트 일부와 새로운 텍스트 일부의 영역을 선택해서 bold처리 시 기존 bold처리된 영역과 새로운 영역이 합쳐져 bold 처리 되어야 한다.", async ({
+    page,
+  }, testInfo) => {
+    const editorBlock = await page.$(EDITOR_SELECTOR);
+    if (!editorBlock) return;
 
-  // test("한 줄 bold 처리된 텍스트를 bold처리 되지 않은 텍스트와 겹치게 해서 다시 bold 처리할 때 기존 bold 처리된 텍스트와 합쳐져서 처리된다", async () => {});
+    await editorBlock.click();
 
-  // test("한 줄 bold 처리된 텍스트의 기울기 액션을 추가하여 둘다 적용 되는지 테스트", async () => {});
+    await keyPress(page, initHtmlList);
 
-  // test("한 줄 bold 처리된 텍스트와 그렇지 않은 곳을 선택하여 기울기 액션 적용 시 겹치는 부분은 두 기울기, bold 둘 다 적용되어야 한다.", async () => {});
+    const startLine = 1;
+    const beginIdx = 3;
+    await page.evaluate(
+      ({ editorBlock, startLine = 0, beginIdx = 0 }: SetRangeArgs) => {
+        const range = new Range();
 
-  // test("여러줄 bold 처리 테스트", async () => {});
+        const len = editorBlock.children[startLine].firstChild?.textContent?.length as number;
+        range.setStart(editorBlock.children[startLine].firstChild as Node, beginIdx);
+        range.setEnd(editorBlock.children[startLine].firstChild as Node, len);
 
-  // test("여러줄 bold 처리된 텍스트를 원상태로 복귀한다.", async () => {});
+        window.getSelection()?.removeAllRanges();
+        window.getSelection()?.addRange(range);
+      },
+      {
+        editorBlock,
+        startLine,
+        beginIdx,
+      },
+    );
+
+    await page.screenshot({ path: `./tests/${testInfo.title}/range1.png` });
+
+    const boldButton = page.getByTestId("button-action-bold");
+    await boldButton.click();
+
+    const expectedValue = replaceHtml(
+      initHtmlList.map((html) => `<div>${html}</div>`),
+      `<div>222<span class="font-bold" data-action-attribute="">${initHtmlList[startLine].slice(
+        beginIdx,
+      )}</span></div>`,
+      startLine,
+    );
+
+    expect(await editorBlock.innerHTML()).toBe(expectedValue);
+  });
 });
