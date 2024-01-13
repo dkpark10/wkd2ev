@@ -78,9 +78,9 @@ export class TextEditorHandler extends AbstractTextEditorHandler {
   public getProcessedNode(action: Editor.EditorAction) {
     const { startContainer, endContainer, startOffset, endOffset } = this.origRange;
 
-    if (this.isAlreadyHaveActionElement()) {
-      if (this.isAlreadyHaveSameActionOnlyOne(action)) {
-        if (this.isAccurateMatch()) {
+    if (this.isAlreadyHaveActionElement(startContainer)) {
+      if (this.isAlreadyHaveSameActionOnlyOne(action, startContainer)) {
+        if (this.isAccurateMatch(startContainer)) {
           startContainer.parentElement?.remove();
           const newElement = document.createTextNode(startContainer.textContent as string);
           this.origRange.setStart(this.origRange.startContainer, 0);
@@ -104,7 +104,35 @@ export class TextEditorHandler extends AbstractTextEditorHandler {
           this.origRange.insertNode(newElement);
         }
       }
+      return;
+    }
 
+    if (this.isAlreadyHaveActionElement(endContainer)) {
+      if (this.isAlreadyHaveSameActionOnlyOne(action, endContainer)) {
+        if (this.isAccurateMatch(endContainer)) {
+          endContainer.parentElement?.remove();
+          const newElement = document.createTextNode(endContainer.textContent as string);
+          this.origRange.setStart(this.origRange.endContainer, 0);
+          this.origRange.insertNode(newElement);
+        } else {
+          this.origRange.setStart(startContainer, startOffset);
+          this.origRange.setEnd(endContainer, endOffset);
+
+          const beginText = startContainer.textContent?.slice(startOffset) ?? "";
+          const endText = endContainer.textContent ?? "";
+
+          endContainer.parentElement?.remove();
+
+          const newElement = document.createDocumentFragment();
+          const actionElement = this.createTextActionElement(action);
+          actionElement.textContent = beginText + endText;
+          newElement.appendChild(actionElement);
+
+          this.origRange.deleteContents();
+
+          this.origRange.insertNode(newElement);
+        }
+      }
       return;
     }
 
@@ -149,30 +177,24 @@ export class TextEditorHandler extends AbstractTextEditorHandler {
   }
 
   /** @desc 선택 영역의 부모노드가 span이라면 */
-  public isAlreadyHaveActionElement() {
-    const { startContainer } = this.origRange;
-    const isTagNameSpan = startContainer.parentElement?.nodeName === this.actionTagName;
-    const hasAttributeAction = Object.prototype.hasOwnProperty.call(
-      startContainer.parentElement?.dataset,
-      "actionAttribute",
-    );
+  public isAlreadyHaveActionElement(node: Node) {
+    const isTagNameSpan = node.parentElement?.nodeName === this.actionTagName;
+    const hasAttributeAction = Object.prototype.hasOwnProperty.call(node.parentElement?.dataset, "actionAttribute");
 
     return isTagNameSpan && hasAttributeAction;
   }
 
   /** @desc 선택 영역의 액션이 동일하다면 */
-  public isAlreadyHaveSameActionOnlyOne(action: Editor.EditorAction) {
-    const { startContainer } = this.origRange;
+  public isAlreadyHaveSameActionOnlyOne(action: Editor.EditorAction, node: Node) {
     return (
-      startContainer.parentElement?.classList.length === 1 &&
-      startContainer.parentElement.className === this.classNameByTextAction[action]
+      node.parentElement?.classList.length === 1 && node.parentElement.className === this.classNameByTextAction[action]
     );
   }
 
   /** @desc 이전 선택영역과 완전히 겹치는지 판별하는 함수 */
-  public isAccurateMatch() {
-    const { startContainer, startOffset, endOffset } = this.origRange;
+  public isAccurateMatch(node: Node) {
+    const { startOffset, endOffset } = this.origRange;
     const textLen = endOffset - startOffset;
-    return startContainer.textContent?.length === textLen;
+    return node.textContent?.length === textLen;
   }
 }
