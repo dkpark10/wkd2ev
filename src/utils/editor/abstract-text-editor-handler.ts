@@ -18,7 +18,7 @@ export abstract class AbstractTextEditorHandler {
 
   protected focusOffset: number;
 
-  protected range: Range;
+  protected origRange: Range;
 
   protected selection: Selection;
 
@@ -36,7 +36,7 @@ export abstract class AbstractTextEditorHandler {
   constructor({ contentEditableDom, selection, range }: AbstractTextEditorHandlerProps) {
     this.contentEditableDom = contentEditableDom;
     this.selection = selection;
-    this.range = range;
+    this.origRange = range;
     this.setCaretPosInfo(selection);
   }
 

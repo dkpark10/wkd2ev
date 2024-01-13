@@ -11,7 +11,7 @@ export class TextEditorHandler extends AbstractTextEditorHandler {
   }
 
   public runBold() {
-    const clonedContents = this.range.cloneContents();
+    const clonedContents = this.origRange.cloneContents();
 
     // const firstNode =
     //   clonedContents.childNodes.length > 1 ? this.getProcessedRightNode("bold") : this.getProcessedNode("bold");
@@ -36,12 +36,12 @@ export class TextEditorHandler extends AbstractTextEditorHandler {
 
   /** @desc 영역을 start container, end container 를 포함하여 새로 설정하는 함수 */
   public setRangeAll() {
-    this.range.setStart(this.range.startContainer, 0);
-    this.range.setEndAfter(this.range.endContainer);
+    this.origRange.setStart(this.origRange.startContainer, 0);
+    this.origRange.setEndAfter(this.origRange.endContainer);
   }
 
   public getProcessedRightNode(action: Editor.EditorAction) {
-    const { startContainer: node, startOffset } = this.range;
+    const { startContainer: node, startOffset } = this.origRange;
 
     const beforeText = node.textContent?.slice(0, startOffset);
     const afterText = node.textContent?.slice(startOffset);
@@ -58,7 +58,7 @@ export class TextEditorHandler extends AbstractTextEditorHandler {
   }
 
   public getProcessedLeftNode(action: Editor.EditorAction) {
-    const { endContainer: node, endOffset } = this.range;
+    const { endContainer: node, endOffset } = this.origRange;
 
     const beforeText = node.textContent?.slice(0, endOffset);
     const afterText = node.textContent?.slice(endOffset);
@@ -76,18 +76,18 @@ export class TextEditorHandler extends AbstractTextEditorHandler {
   }
 
   public getProcessedNode(action: Editor.EditorAction) {
-    const { startContainer, endContainer, startOffset, endOffset } = this.range;
+    const { startContainer, endContainer, startOffset, endOffset } = this.origRange;
 
     if (this.isAlreadyHaveActionElement()) {
       if (this.isAlreadyHaveSameActionOnlyOne(action)) {
         if (this.isAccurateMatch()) {
           startContainer.parentElement?.remove();
           const newElement = document.createTextNode(startContainer.textContent as string);
-          this.range.setStart(this.range.startContainer, 0);
-          this.range.insertNode(newElement);
+          this.origRange.setStart(this.origRange.startContainer, 0);
+          this.origRange.insertNode(newElement);
         } else {
-          this.range.setStart(startContainer, 0);
-          this.range.setEnd(endContainer, endOffset);
+          this.origRange.setStart(startContainer, 0);
+          this.origRange.setEnd(endContainer, endOffset);
 
           const beginText = startContainer.textContent ?? "";
           const endText = endContainer.textContent?.slice(0, endOffset) ?? "";
@@ -99,9 +99,9 @@ export class TextEditorHandler extends AbstractTextEditorHandler {
           actionElement.textContent = beginText + endText;
           newElement.appendChild(actionElement);
 
-          this.range.deleteContents();
+          this.origRange.deleteContents();
 
-          this.range.insertNode(newElement);
+          this.origRange.insertNode(newElement);
         }
       }
 
@@ -124,8 +124,8 @@ export class TextEditorHandler extends AbstractTextEditorHandler {
     newElement.appendChild(afterElement);
 
     this.setRangeAll();
-    this.range.deleteContents();
-    this.range.insertNode(newElement);
+    this.origRange.deleteContents();
+    this.origRange.insertNode(newElement);
   }
 
   public getActionMiddleNode(middleRangeNode: NodeListOf<ChildNode>, action: Editor.EditorAction) {
@@ -150,7 +150,7 @@ export class TextEditorHandler extends AbstractTextEditorHandler {
 
   /** @desc 선택 영역의 부모노드가 span이라면 */
   public isAlreadyHaveActionElement() {
-    const { startContainer } = this.range;
+    const { startContainer } = this.origRange;
     const isTagNameSpan = startContainer.parentElement?.nodeName === this.actionTagName;
     const hasAttributeAction = Object.prototype.hasOwnProperty.call(
       startContainer.parentElement?.dataset,
@@ -162,7 +162,7 @@ export class TextEditorHandler extends AbstractTextEditorHandler {
 
   /** @desc 선택 영역의 액션이 동일하다면 */
   public isAlreadyHaveSameActionOnlyOne(action: Editor.EditorAction) {
-    const { startContainer } = this.range;
+    const { startContainer } = this.origRange;
     return (
       startContainer.parentElement?.classList.length === 1 &&
       startContainer.parentElement.className === this.classNameByTextAction[action]
@@ -171,7 +171,7 @@ export class TextEditorHandler extends AbstractTextEditorHandler {
 
   /** @desc 이전 선택영역과 완전히 겹치는지 판별하는 함수 */
   public isAccurateMatch() {
-    const { startContainer, startOffset, endOffset } = this.range;
+    const { startContainer, startOffset, endOffset } = this.origRange;
     const textLen = endOffset - startOffset;
     return startContainer.textContent?.length === textLen;
   }
