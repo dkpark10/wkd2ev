@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { keyPress } from './utils/key-press';
+import { keyPress } from "./utils/key-press";
 
 interface SetRangeArgs {
   editorBlock: SVGElement | HTMLElement;
@@ -24,7 +24,7 @@ test.beforeEach(async ({ page }) => {
 test.describe("에디터 액션 테스트", () => {
   const initHtmlList = ["1111111111", "2222222222", "3333333333", "4444444444", "5555555555", "6666666666"];
 
-  test("한 줄 전체 bold 처리 후 다시 bold를 누르면 bold를 없앤다.", async ({ page }, testInfo) => {
+  test("한 줄 전체 bold 처리 후 똑같은 영역을 잡고 다시 bold를 누르면 bold를 없앤다.", async ({ page }, testInfo) => {
     const editorBlock = await page.$(EDITOR_SELECTOR);
     if (!editorBlock) return;
 
@@ -91,7 +91,9 @@ test.describe("에디터 액션 테스트", () => {
     expect(await editorBlock.innerHTML()).toBe(initHtmlList.map((html) => `<div>${html}</div>`).join(""));
   });
 
-  test("한 줄 일부 bold 처리 후 똑같은 영역을 다시 bold를 없앤다.", async ({ page }, testInfo) => {
+  test("한 줄 일부영역을 bold 처리 후 똑같은 영역을 잡고 다시 bold를 누르면 bold를 없앤다.", async ({
+    page,
+  }, testInfo) => {
     const editorBlock = await page.$(EDITOR_SELECTOR);
     if (!editorBlock) return;
 
@@ -162,7 +164,7 @@ test.describe("에디터 액션 테스트", () => {
     expect(await editorBlock.innerHTML()).toBe(initHtmlList.map((html) => `<div>${html}</div>`).join(""));
   });
 
-  test("한 줄 일부 bold 처리 후 bold처리된 영역의 텍스트 일부와 새로운 텍스트 일부의 영역을 선택해서 bold처리 시 기존 bold처리된 영역과 새로운 영역이 합쳐져 bold 처리 되어야 한다.", async ({
+  test("한 줄 일부영역 bold 처리 후 시작 컨테이너를 텍스트 노드로 설정 bold 처리된 영역을 끝 컨테이너로 설정하여 bold 처리하면 두 영역이 bold처리 되어야 한다.", async ({
     page,
   }, testInfo) => {
     const editorBlock = await page.$(EDITOR_SELECTOR);
@@ -179,8 +181,11 @@ test.describe("에디터 액션 테스트", () => {
         const range = new Range();
 
         const len = editorBlock.children[startLine].firstChild?.textContent?.length as number;
-        range.setStart(editorBlock.children[startLine].firstChild as Node, beginIdx);
-        range.setEnd(editorBlock.children[startLine].firstChild as Node, len);
+        const startNode = editorBlock.children[startLine].firstChild;
+        const endNode = editorBlock.children[startLine].firstChild;
+
+        range.setStart(startNode as Node, beginIdx);
+        range.setEnd(endNode as Node, len);
 
         window.getSelection()?.removeAllRanges();
         window.getSelection()?.addRange(range);
@@ -197,7 +202,7 @@ test.describe("에디터 액션 테스트", () => {
     const boldButton = page.getByTestId("button-action-bold");
     await boldButton.click();
 
-    const expectedValue = replaceHtml(
+    let expectedValue = replaceHtml(
       initHtmlList.map((html) => `<div>${html}</div>`),
       `<div>222<span class="font-bold" data-action-attribute="">${initHtmlList[startLine].slice(
         beginIdx,
@@ -205,6 +210,41 @@ test.describe("에디터 액션 테스트", () => {
       startLine,
     );
 
+    expect(await editorBlock.innerHTML()).toBe(expectedValue);
+
+    await page.evaluate(
+      ({ editorBlock, startLine = 0 }: SetRangeArgs) => {
+        const range = new Range();
+
+        const startNode = editorBlock.children[startLine].firstChild?.nextSibling;
+        const endNode = editorBlock.children[startLine];
+        const textNode = endNode.children[0].firstChild;
+
+        if (!startNode || !textNode || !endNode) return;
+
+        range.setStart(startNode as Node, 1);
+        range.setEnd(textNode, 2);
+
+        window.getSelection()?.removeAllRanges();
+        window.getSelection()?.addRange(range);
+      },
+      {
+        editorBlock,
+        startLine,
+      },
+    );
+
+    await page.screenshot({ path: `./tests/${testInfo.title}/range2.png` });
+
+    await boldButton.click();
+
+    expectedValue = replaceHtml(
+      initHtmlList.map((html) => `<div>${html}</div>`),
+      `<div>2<span class="font-bold" data-action-attribute="">${initHtmlList[startLine].slice(1)}</span></div>`,
+      startLine,
+    );
+
+    await page.screenshot({ path: `./tests/${testInfo.title}/result.png` });
     expect(await editorBlock.innerHTML()).toBe(expectedValue);
   });
 });
