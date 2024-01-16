@@ -11,6 +11,9 @@ dependencies:
   '@tanstack/react-query':
     specifier: ^4.26.1
     version: 4.33.0(react-dom@18.2.0)(react@18.2.0)
+  '@toss/impression-area':
+    specifier: ^1.3.1
+    version: 1.3.1(react@18.2.0)
   jotai:
     specifier: ^2.4.2
     version: 2.4.2(@types/react@18.0.28)(react@18.2.0)
@@ -457,7 +460,6 @@ packages:
     engines: {node: '>=6.9.0'}
     dependencies:
       regenerator-runtime: 0.14.0
-    dev: true
 
   /@babel/template@7.22.15:
     resolution: {integrity: sha512-QPErUVm4uyJa60rkI73qneDacvdvzxshT3kksGqlGWYdOTIUOwJ7RDUL8sGqslY1uXWSL6xMFKEXDS3ox2uF0w==}
@@ -1152,6 +1154,45 @@ packages:
     resolution: {integrity: sha512-XCuKFP5PS55gnMVu3dty8KPatLqUoy/ZYzDzAGCQ8JNFCkLXzmI7vNHCR+XpbZaMWQK/vQubr7PkYq8g470J/A==}
     engines: {node: '>= 10'}
     dev: true
+
+  /@toss/impression-area@1.3.1(react@18.2.0):
+    resolution: {integrity: sha512-D9FSzWV635/64U90ODnhhQSSs5ITN+OSknpJrvQYLh5KOsOrgWZ6tkPvPToHZazc5dj8x/Y2gQWNvVB/BsQU1g==}
+    peerDependencies:
+      react: '*'
+    dependencies:
+      '@toss/react': 1.6.1(react@18.2.0)
+      '@toss/utils': 1.4.6
+      '@types/react': 18.0.28
+      lodash.debounce: 4.0.8
+      react: 18.2.0
+    dev: false
+
+  /@toss/react@1.6.1(react@18.2.0):
+    resolution: {integrity: sha512-XothLThF2xgOQR3YZF22GCaXk6ywWA7VGuxaPHZRZ2MCDGXVhsDgPvjYrjYkMIFLjYF4zN3PgE8kelAmGsPzwA==}
+    peerDependencies:
+      react: ^16.0.0 || ^17.0.0 || ^18
+    dependencies:
+      '@babel/runtime': 7.22.15
+      '@toss/storage': 1.3.1
+      '@toss/utils': 1.4.6
+      classnames: 2.5.1
+      lodash.debounce: 4.0.8
+      lodash.throttle: 4.1.1
+      react: 18.2.0
+    dev: false
+
+  /@toss/storage@1.3.1:
+    resolution: {integrity: sha512-NLRB5s5PAmAzofsnRr5xKwdpFQeDSBFyuyHjF/rzZsgMlsFb94mzweYKmFrPx6oCM3Boh/TUYn6A8yxAcncBeA==}
+    dependencies:
+      '@babel/runtime': 7.22.15
+    dev: false
+
+  /@toss/utils@1.4.6:
+    resolution: {integrity: sha512-MXLAL44Q6HU3fZ8v0DxgMiVqLLwSxegqPd7OsOsV5/tSJL5Ti6zFZRDMidIi73wp7IE3VAa4YswSEiuXbEwHZA==}
+    dependencies:
+      '@babel/runtime': 7.22.15
+      date-fns: 2.30.0
+    dev: false
 
   /@tsconfig/node10@1.0.9:
     resolution: {integrity: sha512-jNsYVVxU8v5g43Erja32laIDHXeoNvFEpX33OK4d6hljo3jDhCBDhx5dhCCTMWUojscpAagGiRkBKxpdl9fxqA==}
@@ -2161,6 +2202,10 @@ packages:
     resolution: {integrity: sha512-0TNiGstbQmCFwt4akjjBg5pLRTSyj/PkWQ1ZoO2zntmg9yLqSRxwEa4iCfQLGjqhiqBfOJa7W/E8wfGrTDmlZQ==}
     dev: true
 
+  /classnames@2.5.1:
+    resolution: {integrity: sha512-saHYOzhIQs6wy2sVxTM6bUDsQO4F50V9RQ22qBpEdCW+I+/Wmke2HOl6lS6dTpdxVhb88/I6+Hs+438c3lfUow==}
+    dev: false
+
   /clean-stack@2.2.0:
     resolution: {integrity: sha512-4diC9HaTE+KRAMWhDhrGOECgWZxoevMc5TlkObMqNSsVU62PYzXZ/SMTjzyGAFF1YusgxGcSWTEXBhp0CPwQ1A==}
     engines: {node: '>=6'}
@@ -2450,6 +2495,13 @@ packages:
       whatwg-mimetype: 3.0.0
       whatwg-url: 11.0.0
     dev: true
+
+  /date-fns@2.30.0:
+    resolution: {integrity: sha512-fnULvOpxnC5/Vg3NCiWelDsLiUc9bRwAPs/+LfTLNvetFCtCTN+yQz15C/fs4AwX1R9K5GLtLfn8QW+dWisaAw==}
+    engines: {node: '>=0.11'}
+    dependencies:
+      '@babel/runtime': 7.22.15
+    dev: false
 
   /dayjs@1.11.9:
     resolution: {integrity: sha512-QvzAURSbQ0pKdIye2txOzNaHmxtUBXerpY0FJsFXUMKbIZeFm5ht1LS/jFsrncjnmtv8HsG0W2g6c0zUjZWmpA==}
@@ -4838,6 +4890,10 @@ packages:
       p-locate: 5.0.0
     dev: true
 
+  /lodash.debounce@4.0.8:
+    resolution: {integrity: sha512-FT1yDzDYEoYWhnSGnpE/4Kj1fLZkDFyqRb7fNt6FdYOSxlUWAtp42Eh6Wb0rGIv/m9Bgo7x4GhQbm5Ys4SG5ow==}
+    dev: false
+
   /lodash.merge@4.6.2:
     resolution: {integrity: sha512-0KpjqXRVvrYyCsX1swR/XTK0va6VQkQM6MNo7PqW77ByjAhoARA8EfrP1N4+KlKj8YS0ZUCtRT/YUuhyYDujIQ==}
     dev: true
@@ -4845,6 +4901,10 @@ packages:
   /lodash.once@4.1.1:
     resolution: {integrity: sha512-Sb487aTOCr9drQVL8pIxOzVhafOjZN9UU54hiN8PU3uAiSV7lx1yYNpbNmex2PK6dSJoNTSJUUswT651yww3Mg==}
     dev: true
+
+  /lodash.throttle@4.1.1:
+    resolution: {integrity: sha512-wIkUCfVKpVsWo3JSZlc+8MB5it+2AN5W8J7YVMST30UrvcQNZ1Okbj+rbVniijTWE6FGYy4XJq/rHkas8qJMLQ==}
+    dev: false
 
   /lodash@4.17.21:
     resolution: {integrity: sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==}
@@ -5627,7 +5687,6 @@ packages:
 
   /regenerator-runtime@0.14.0:
     resolution: {integrity: sha512-srw17NI0TUWHuGa5CFGGmhfNIeja30WMBfbslPNhf6JrqQlLN5gcrvig1oqPxiVaXb0oW0XRKtH6Nngs5lKCIA==}
-    dev: true
 
   /regexp.prototype.flags@1.5.0:
     resolution: {integrity: sha512-0SutC3pNudRKgquxGoRGIz946MZVHqbNfPjBdxeOhBrdgDKlRoXmYLQN9xRbrR09ZXWeGAdPuif7egofn6v5LA==}

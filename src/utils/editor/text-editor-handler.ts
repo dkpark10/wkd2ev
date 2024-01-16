@@ -78,60 +78,63 @@ export class TextEditorHandler extends AbstractTextEditorHandler {
   public getProcessedNode(action: Editor.EditorAction) {
     const { startContainer, endContainer, startOffset, endOffset } = this.origRange;
 
-    if (this.isAlreadyHaveActionElement(startContainer)) {
-      if (this.isAlreadyHaveSameActionOnlyOne(action, startContainer)) {
-        if (this.isAccurateMatch(startContainer)) {
+    /** @desc 시작, 끝 컨테이너가 액션 노드 자식일 때 */
+    if (this.isAlreadyHaveActionElement(startContainer) && this.isAlreadyHaveActionElement(endContainer)) {
+      if (
+        this.isAlreadyHaveSameActionOnlyOne(action, startContainer) &&
+        this.isAlreadyHaveSameActionOnlyOne(action, endContainer)
+      ) {
+        if (this.isAccurateMatch()) {
           startContainer.parentElement?.remove();
           const newElement = document.createTextNode(startContainer.textContent as string);
           this.origRange.setStart(this.origRange.startContainer, 0);
           this.origRange.insertNode(newElement);
-        } else {
-          this.origRange.setStart(startContainer, 0);
-          this.origRange.setEnd(endContainer, endOffset);
-
-          const beginText = startContainer.textContent ?? "";
-          const endText = endContainer.textContent?.slice(0, endOffset) ?? "";
-
-          startContainer.parentElement?.remove();
-
-          const newElement = document.createDocumentFragment();
-          const actionElement = this.createTextActionElement(action);
-          actionElement.textContent = beginText + endText;
-          newElement.appendChild(actionElement);
-
-          this.origRange.deleteContents();
-
-          this.origRange.insertNode(newElement);
         }
+      }
+
+      return;
+    }
+
+    if (this.isAlreadyHaveActionElement(startContainer)) {
+      if (this.isAlreadyHaveSameActionOnlyOne(action, startContainer)) {
+        this.origRange.setStart(startContainer, 0);
+        this.origRange.setEnd(endContainer, endOffset);
+
+        const beginText = startContainer.textContent ?? "";
+        const endText = endContainer.textContent?.slice(0, endOffset) ?? "";
+
+        startContainer.parentElement?.remove();
+
+        const newElement = document.createDocumentFragment();
+        const actionElement = this.createTextActionElement(action);
+        actionElement.textContent = beginText + endText;
+        newElement.appendChild(actionElement);
+
+        this.origRange.deleteContents();
+
+        this.origRange.insertNode(newElement);
       }
       return;
     }
 
     if (this.isAlreadyHaveActionElement(endContainer)) {
       if (this.isAlreadyHaveSameActionOnlyOne(action, endContainer)) {
-        if (this.isAccurateMatch(endContainer)) {
-          endContainer.parentElement?.remove();
-          const newElement = document.createTextNode(endContainer.textContent as string);
-          this.origRange.setStart(this.origRange.endContainer, 0);
-          this.origRange.insertNode(newElement);
-        } else {
-          this.origRange.setStart(startContainer, startOffset);
-          this.origRange.setEnd(endContainer, endOffset);
+        this.origRange.setStart(startContainer, startOffset);
+        this.origRange.setEnd(endContainer, endOffset);
 
-          const beginText = startContainer.textContent?.slice(startOffset) ?? "";
-          const endText = endContainer.textContent ?? "";
+        const beginText = startContainer.textContent?.slice(startOffset) ?? "";
+        const endText = endContainer.textContent ?? "";
 
-          endContainer.parentElement?.remove();
+        endContainer.parentElement?.remove();
 
-          const newElement = document.createDocumentFragment();
-          const actionElement = this.createTextActionElement(action);
-          actionElement.textContent = beginText + endText;
-          newElement.appendChild(actionElement);
+        const newElement = document.createDocumentFragment();
+        const actionElement = this.createTextActionElement(action);
+        actionElement.textContent = beginText + endText;
+        newElement.appendChild(actionElement);
 
-          this.origRange.deleteContents();
+        this.origRange.deleteContents();
 
-          this.origRange.insertNode(newElement);
-        }
+        this.origRange.insertNode(newElement);
       }
       return;
     }
@@ -192,9 +195,8 @@ export class TextEditorHandler extends AbstractTextEditorHandler {
   }
 
   /** @desc 이전 선택영역과 완전히 겹치는지 판별하는 함수 */
-  public isAccurateMatch(node: Node) {
-    const { startOffset, endOffset } = this.origRange;
-    const textLen = endOffset - startOffset;
-    return node.textContent?.length === textLen;
+  public isAccurateMatch() {
+    const { startContainer, endContainer, commonAncestorContainer } = this.origRange;
+    return startContainer.isSameNode(commonAncestorContainer) && endContainer.isSameNode(endContainer);
   }
 }
