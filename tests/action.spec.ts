@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { keyPress, countTextNodes } from "./utils";
+import { keyPress, replaceHtml, countTextNodes } from "./utils";
 
 interface SetRangeArgs {
   editorBlock: SVGElement | HTMLElement;
@@ -10,12 +10,6 @@ interface SetRangeArgs {
 }
 
 const EDITOR_SELECTOR = 'div[data-testid="editor-block1"]';
-
-const replaceHtml = (initHtmlList: Array<string>, value: string, idx: number) => {
-  return initHtmlList.reduce((acc, content, i) => {
-    return i === idx ? acc + value : acc + content;
-  }, "");
-};
 
 test.beforeEach(async ({ page }) => {
   await page.goto("/");

@@ -9,8 +9,8 @@
     "build:bundle": "cross-env ANALYZE=true next build",
     "start": "next start -p 8080",
     "lint": "next lint",
-    "test": "npx playwright test",
-    "test:ui": "npx playwright test --ui"
+    "test": "cross-env TEST_ENV=true npx playwright test",
+    "test:ui": "cross-env TEST_ENV=true npx playwright test --ui"
   },
   "dependencies": {
     "@next/font": "13.1.6",
