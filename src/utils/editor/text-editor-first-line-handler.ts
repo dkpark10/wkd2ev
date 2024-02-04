@@ -30,6 +30,6 @@ export class TextEditorFirstLineHandler extends AbstractTextEditorHandler {
   }
 
   public runBold() {
-    console.log(this.range);
+    console.log(this.origRange);
   }
 }

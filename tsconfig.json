@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "target": "es2015",
     "lib": [
       "dom",
       "dom.iterable",
@@ -38,7 +38,7 @@
     "@types",
     "graffiti.js",
     ".next/types/**/*.ts"
-  ],
+, "tests/utils/count-text-nodes.ts"  ],
   "exclude": [
     "node_modules",
     "cypress",

@@ -85,10 +85,12 @@ export class TextEditorHandler extends AbstractTextEditorHandler {
         this.isAlreadyHaveSameActionOnlyOne(action, endContainer)
       ) {
         if (this.isAccurateMatch()) {
+          const div = this.findDiv();
           startContainer.parentElement?.remove();
           const newElement = document.createTextNode(startContainer.textContent as string);
           this.origRange.setStart(this.origRange.startContainer, 0);
           this.origRange.insertNode(newElement);
+          div.normalize();
         }
       }
 
@@ -198,5 +200,17 @@ export class TextEditorHandler extends AbstractTextEditorHandler {
   public isAccurateMatch() {
     const { startContainer, endContainer, commonAncestorContainer } = this.origRange;
     return startContainer.isSameNode(commonAncestorContainer) && endContainer.isSameNode(endContainer);
+  }
+
+  /** @desc contenteditable 영역에서 엔터를 띄운 div 조상을 찾는 함수 */
+  public findDiv() {
+    const { startContainer } = this.origRange;
+    let target = startContainer.parentElement;
+
+    while (target?.tagName !== "DIV") {
+      target = target?.parentElement ?? target;
+    }
+
+    return target;
   }
 }

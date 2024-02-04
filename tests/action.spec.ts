@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { keyPress } from "./utils/key-press";
+import { keyPress, countTextNodes } from "./utils";
 
 interface SetRangeArgs {
   editorBlock: SVGElement | HTMLElement;
