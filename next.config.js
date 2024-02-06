@@ -17,6 +17,9 @@ const nextConfig = {
   publicRuntimeConfig: {
     version,
   },
+  sassOptions: {
+    includePaths: [path.join(__dirname, "styles")],
+  },
 };
 
 module.exports = isRunBundleAnalyze ? require("@next/bundle-analyzer")()(nextConfig) : nextConfig;

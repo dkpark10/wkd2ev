@@ -15,7 +15,7 @@ export class TextEditorHandler extends AbstractTextEditorHandler {
 
     // const firstNode =
     //   clonedContents.childNodes.length > 1 ? this.getProcessedRightNode("bold") : this.getProcessedNode("bold");
-    this.getProcessedNode("bold");
+    this.runActionNode("bold");
 
     // const middleNode = this.getActionMiddleNode(clonedContents.childNodes, "bold");
     // const lastNode = this.getProcessedLeftNode("bold");
@@ -75,7 +75,7 @@ export class TextEditorHandler extends AbstractTextEditorHandler {
   //   return newElement;
   // }
 
-  public getProcessedNode(action: Editor.EditorAction) {
+  public runActionNode(action: Editor.EditorAction) {
     const { startContainer, endContainer, startOffset, endOffset } = this.origRange;
 
     /** @desc 시작, 끝 컨테이너가 액션 노드 자식일 때 */
