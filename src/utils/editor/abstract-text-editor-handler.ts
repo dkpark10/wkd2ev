@@ -24,7 +24,7 @@ export abstract class AbstractTextEditorHandler {
 
   /** @description className은 tailwind */
   protected classNameByTextAction: Editor.ClassNameByEditorAction = {
-    bold: "font-bold",
+    bold: "bold",
     cancelLine: "todo temp",
     inclination: "todo temp",
   };

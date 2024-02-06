@@ -6,6 +6,7 @@ import { useState, useRef, useEffect } from "react";
 import { runTextEditorAction } from "@/utils/editor";
 import { v4 as uuidv4 } from "uuid";
 import type { Editor } from "types";
+import styles from "@/styles/editor.module.scss";
 
 const buttonContents = ["bold", "inclination"] as const;
 
@@ -43,9 +44,9 @@ export default function EditorComponent() {
   }, []);
 
   return (
-    <div className="absolute top-1/2 left-1/2 translate-y-[-50%] translate-x-[-50%]">
-      <div className="border border-red-900 h-[50vh] w-[75vw]" onClick={onEditorBoundClick}>
-        <div className="border border-stone-900 flex justify-between">
+    <div className={styles["editor-container"]}>
+      <div className={styles["editor-inner"]} onClick={onEditorBoundClick}>
+        <div className={styles["button-container"]}>
           {buttonContents.map((content) => (
             <button
               data-testid={`button-action-${content}`}

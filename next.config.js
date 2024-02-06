@@ -1,5 +1,6 @@
 const { version } = require('./package.json');
 const isRunBundleAnalyze = process.env.ANALYZE === "true";
+const path = require('path');
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
