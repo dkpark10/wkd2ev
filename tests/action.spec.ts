@@ -82,6 +82,7 @@ test.describe("에디터 액션 테스트", () => {
 
     await boldButton.click();
 
+    await page.screenshot({ path: `./tests/${testInfo.title}/result.png` });
     expect(await editorBlock.innerHTML()).toBe(initHtmlList.map((html) => `<div>${html}</div>`).join(""));
   });
 
@@ -155,6 +156,7 @@ test.describe("에디터 액션 테스트", () => {
 
     await boldButton.click();
 
+    await page.screenshot({ path: `./tests/${testInfo.title}/result.png` });
     expect(await editorBlock.innerHTML()).toBe(initHtmlList.map((html) => `<div>${html}</div>`).join(""));
   });
 
