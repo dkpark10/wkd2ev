@@ -1,61 +1,62 @@
 {
-  "env": {
-    "browser": true,
-    "es6": true,
-    "node": true
-  },
-  "parser": "@typescript-eslint/parser",
-  "parserOptions": {
-    "ecmaFeatures": {
-      "jsx": true
+    "env": {
+        "browser": true,
+        "es6": true,
+        "node": true
     },
-    "ecmaVersion": "latest",
-    "sourceType": "module",
-    "project": "./tsconfig.json"
-  },
-  "extends": [
-    "next",
-    "next/core-web-vitals",
-    "prettier",
-    "airbnb",
-    "airbnb-typescript",
-    "airbnb/hooks",
-    "plugin:react/recommended",
-    "plugin:storybook/recommended",
-    "plugin:@typescript-eslint/recommended",
-    "plugin:@typescript-eslint/recommended-requiring-type-checking",
-    "plugin:prettier/recommended"
-  ],
-  "plugins": [
-    "react",
-    "@typescript-eslint",
-    "import"
-  ],
-  "rules": {
-    "import/extensions": [
-      "error",
-      {
-        "tsx": "never",
-        "ts": "never",
-        "js": "never",
-        "jsx": "never",
-        "json": "never"
-      }
+    "parser": "@typescript-eslint/parser",
+    "parserOptions": {
+        "ecmaFeatures": {
+            "jsx": true
+        },
+        "ecmaVersion": "latest",
+        "sourceType": "module",
+        "project": "./tsconfig.json"
+    },
+    "extends": [
+        "next",
+        "next/core-web-vitals",
+        "standard-with-typescript",
+        "prettier",
+        "airbnb",
+        "airbnb-typescript",
+        "airbnb/hooks",
+        "plugin:react/recommended",
+        "plugin:storybook/recommended",
+        "plugin:@typescript-eslint/recommended",
+        "plugin:@typescript-eslint/recommended-requiring-type-checking",
+        "plugin:prettier/recommended"
     ],
-    "@typescript-eslint/no-floating-promises": "off",
-    "import/no-extraneous-dependencies": [
-      "off",
-      {
-        "packageDir": [
-          "@tanstack/react-query-devtools"
-        ]
-      }
+    "plugins": [
+        "react",
+        "@typescript-eslint",
+        "import"
     ],
-    "react/react-in-jsx-scope": "off",
-    "import/prefer-default-export": "off",
-    "@typescript-eslint/no-unsafe-call": "off",
-    "@typescript-eslint/no-unsafe-member-access": "off",
-    "@typescript-eslint/no-unsafe-assignment": "off",
-    "@typescript-eslint/no-misused-promises": "off"
-  }
+    "rules": {
+        "import/extensions": [
+            "error",
+            {
+                "tsx": "never",
+                "ts": "never",
+                "js": "never",
+                "jsx": "never",
+                "json": "never"
+            }
+        ],
+        "@typescript-eslint/no-floating-promises": "off",
+        "import/no-extraneous-dependencies": [
+            "off",
+            {
+                "packageDir": [
+                    "@tanstack/react-query-devtools"
+                ]
+            }
+        ],
+        "react/react-in-jsx-scope": "off",
+        "import/prefer-default-export": "off",
+        "@typescript-eslint/no-unsafe-call": "off",
+        "@typescript-eslint/no-unsafe-member-access": "off",
+        "@typescript-eslint/no-unsafe-assignment": "off",
+        "@typescript-eslint/no-misused-promises": "off"
+    }
 }
