@@ -1,12 +1,33 @@
 {
-  "name": "blog",
+  "name": "fire-log",
+  "version": "0.0.0",
   "private": true,
+  "description": "fire-log",
+  "keywords": [
+    "gatsby"
+  ],
   "scripts": {
-    "prepare": "husky install",
-    "build": "turbo build",
-    "dev": "turbo dev"
+    "dev": "gatsby develop",
+    "start": "gatsby develop",
+    "build": "gatsby build",
+    "serve": "gatsby serve",
+    "clean": "gatsby clean"
   },
-  "devDependencies": {
-    "turbo": "^1.10.14"
+  "dependencies": {
+    "@mdx-js/react": "^3.0.1",
+    "@vanilla-extract/css": "^1.14.1",
+    "@vanilla-extract/webpack-plugin": "^2.3.6",
+    "gatsby": "^5.13.3",
+    "gatsby-plugin-image": "^3.13.1",
+    "gatsby-plugin-manifest": "^5.13.1",
+    "gatsby-plugin-mdx": "^5.13.1",
+    "gatsby-plugin-sharp": "^5.13.1",
+    "gatsby-plugin-sitemap": "^6.13.1",
+    "gatsby-plugin-vanilla-extract": "^4.0.2",
+    "gatsby-source-filesystem": "^5.13.1",
+    "gatsby-transformer-remark": "^6.13.1",
+    "gatsby-transformer-sharp": "^5.13.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
   }
 }
