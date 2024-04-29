@@ -1,13 +1,11 @@
 import * as React from "react";
-import { headerStyle } from "../styles/styles.css";
 import { Link } from "gatsby";
 import { graphql } from "gatsby";
 
 export default function Home({ data }) {
-  console.log(data);
   return (
     <React.Fragment>
-      <header className={headerStyle} />
+      <header />
       <div>123</div>
       <Link to="/post/1">게시글 1</Link>
       <footer></footer>

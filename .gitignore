@@ -44,5 +44,5 @@ next-env.d.ts
 /playwright/.cache/
 
 .turbo
-/apps/gatsby/.cache/*
-/apps/gatsby/node_modules/*
+/.cache/*
+.cache/*
