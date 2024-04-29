@@ -1,10 +1,8 @@
 import * as React from "react";
 import { graphql } from "gatsby";
 
-export default function BlogPostTemplate({
-  data, // this prop will be injected by the GraphQL query below.
-}) {
-  const { markdownRemark } = data; // data.markdownRemark holds your post data
+export default function BlogPostTemplate({ data }) {
+  const { markdownRemark } = data;
   const { frontmatter, html } = markdownRemark;
   return (
     <div>
