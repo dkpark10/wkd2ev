@@ -171,8 +171,8 @@ a:focus {
 }
 
 .global-wrapper {
-  min-width: var(--maxWidth-wrapper);
-  padding: var(--spacing-5) var(--spacing-4);
+  width: var(--maxWidth-4xl);
+  padding: var(--spacing-5) var(--spacing-3);
 }
 
 .global-wrapper header {
