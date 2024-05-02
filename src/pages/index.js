@@ -27,13 +27,7 @@ export default function Home({ data, location }) {
 
   return (
     <Layout location={location} title={siteTitle}>
-      <header>
-        <Link to="/">
-          <h3>{data.site.siteMetadata.title}</h3>
-        </Link>
-      </header>
-      <hr />
-      <ol style={{ listStyle: `none` }}>
+      <ol className="post-list">
         {posts.map((post) => (
           <li key={post.fields.slug}>
             <article className="post-list-item" itemScope itemType="http://schema.org/Article">
@@ -42,7 +36,6 @@ export default function Home({ data, location }) {
                   <span itemProp="headline">{post.frontmatter.title || post.fields.slug}</span>
                 </Link>
               </h2>
-              <small>{post.frontmatter.date}</small>
               <section>
                 <p
                   dangerouslySetInnerHTML={{
@@ -51,6 +44,7 @@ export default function Home({ data, location }) {
                   itemProp="description"
                 />
               </section>
+              <small>{post.frontmatter.date}</small>
             </article>
           </li>
         ))}
@@ -80,7 +74,7 @@ export const pageQuery = graphql`
           slug
         }
         frontmatter {
-          date(formatString: "MMMM DD, YYYY")
+          date(formatString: "YYYY-MM-DD")
           title
           description
         }
