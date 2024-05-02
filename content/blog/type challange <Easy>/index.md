@@ -4,8 +4,8 @@ date: "2022-11-13"
 description: "타입 챌린지 easy 풀이"
 ---
 
-## Pick
-
+## Pick 
+  
 ```typescript
 interface Todo {
   title: string
@@ -20,3 +20,4 @@ const todo: TodoPreview = {
     completed: false,
 }
 ```
+

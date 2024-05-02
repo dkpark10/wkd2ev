@@ -170,6 +170,10 @@ a:focus {
   }
 }
 
+section {
+  white-space: pre;
+}
+
 .global-wrapper {
   width: var(--maxWidth-4xl);
   padding: var(--spacing-5) var(--spacing-3);

@@ -26,7 +26,6 @@ const BlogPostTemplate = ({
           dangerouslySetInnerHTML={{ __html: post.html }}
           itemProp="articleBody"
         />
-        <hr />
       </article>
       <nav className="blog-post-nav">
         <ul
