@@ -22,36 +22,38 @@ import Seo from "../components/seo"
  * @param {string|null} data.allMarkdownRemark.nodes.frontmatter.description
  */
 export default function Home({ data, location }) {
-  const siteTitle = data.site.siteMetadata?.title || `Title`
-  const posts = data.allMarkdownRemark.nodes
+  const siteTitle = data.site.siteMetadata?.title || `Title`;
+  const posts = data.allMarkdownRemark.nodes;
 
   return (
     <Layout location={location} title={siteTitle}>
+      <header>
+        <Link to="/">
+          <h3>{data.site.siteMetadata.title}</h3>
+        </Link>
+      </header>
+      <hr />
       <ol style={{ listStyle: `none` }}>
-        {posts.map((post) => {
-          const title = post.frontmatter.title || post.fields.slug;
-
-          return (
-            <li key={post.fields.slug}>
-              <article className="post-list-item" itemScope itemType="http://schema.org/Article">
-                <h2>
-                  <Link to={post.fields.slug} itemProp="url">
-                    <span itemProp="headline">{title}</span>
-                  </Link>
-                </h2>
-                <small>{post.frontmatter.date}</small>
-                <section>
-                  <p
-                    dangerouslySetInnerHTML={{
-                      __html: post.frontmatter.description || post.excerpt,
-                    }}
-                    itemProp="description"
-                  />
-                </section>
-              </article>
-            </li>
-          );
-        })}
+        {posts.map((post) => (
+          <li key={post.fields.slug}>
+            <article className="post-list-item" itemScope itemType="http://schema.org/Article">
+              <h2>
+                <Link to={post.fields.slug} itemProp="url">
+                  <span itemProp="headline">{post.frontmatter.title || post.fields.slug}</span>
+                </Link>
+              </h2>
+              <small>{post.frontmatter.date}</small>
+              <section>
+                <p
+                  dangerouslySetInnerHTML={{
+                    __html: post.frontmatter.description || post.excerpt,
+                  }}
+                  itemProp="description"
+                />
+              </section>
+            </article>
+          </li>
+        ))}
       </ol>
     </Layout>
   );
@@ -62,7 +64,7 @@ export default function Home({ data, location }) {
  *
  * See: https://www.gatsbyjs.com/docs/reference/built-in-components/gatsby-head/
  */
-export const Head = () => <Seo title="All posts" />
+export const Head = () => <Seo title="All posts" />;
 
 export const pageQuery = graphql`
   {
@@ -85,4 +87,4 @@ export const pageQuery = graphql`
       }
     }
   }
-`
+`;
