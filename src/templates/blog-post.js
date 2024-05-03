@@ -26,7 +26,7 @@ const BlogPostTemplate = ({
           itemProp="articleBody"
         />
       </article>
-      <p>최종 수정일: {post.frontmatter.date}</p>
+      <p className="updated-time">최종 수정일: {post.frontmatter.date}</p>
       <nav className="blog-post-nav">
         <ul
           style={{

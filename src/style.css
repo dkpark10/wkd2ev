@@ -56,6 +56,7 @@
   --color-heading: #1a202c;
   --color-heading-black: black;
   --color-accent: #5a6670;
+  --footer-height: 4.42rem;
 }
 
 *,
@@ -223,4 +224,24 @@ hr {
 .post-list-item section {
   padding-top: var(--spacing-2);
   font-size: var(--fontSize-2);
+}
+
+.updated-time {
+  padding: var(--spacing-5) 0;
+  color: #7e8085;
+  font-size: var(--fontSize-1);
+}
+
+.blog-post-nav {
+  font-size: var(--fontSize-2);
+}
+
+.blog-post-nav a:visited, a:hover, a:focus, a:active {
+  text-decoration: none;
+  color: var(--color-text);
+  font-weight: var(--fontWeight-bold);
+}
+
+footer {
+  height: var(--footer-height);
 }
