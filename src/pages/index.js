@@ -4,6 +4,7 @@ import { Link, graphql } from "gatsby"
 // import Bio from "../components/bio"
 import Layout from "../components/layout"
 import Seo from "../components/seo"
+import { DarkModeContext } from "../context/dark-mode";
 
 /**
  * @param {Object} props
@@ -22,34 +23,51 @@ import Seo from "../components/seo"
  * @param {string|null} data.allMarkdownRemark.nodes.frontmatter.description
  */
 export default function Home({ data, location }) {
+  const [isDarkMode, setIsDarkMode] = React.useState(false);
+
   const siteTitle = data.site.siteMetadata?.title || `Title`;
   const posts = data.allMarkdownRemark.nodes;
 
   return (
-    <Layout location={location} title={siteTitle}>
-      <ol className="post-list">
-        {posts.map((post) => (
-          <li key={post.fields.slug}>
-            <article className="post-list-item" itemScope itemType="http://schema.org/Article">
-              <h2>
-                <Link to={post.fields.slug} itemProp="url">
-                  <span itemProp="headline">{post.frontmatter.title || post.fields.slug}</span>
-                </Link>
-              </h2>
-              <section>
-                <p
-                  dangerouslySetInnerHTML={{
-                    __html: post.frontmatter.description || post.excerpt,
-                  }}
-                  itemProp="description"
-                />
-              </section>
-              <small>{post.frontmatter.date}</small>
-            </article>
-          </li>
-        ))}
-      </ol>
-    </Layout>
+    <DarkModeProvider isDarkMode={isDarkMode} setIsDarkMode={setIsDarkMode}>
+      <Layout location={location} title={siteTitle}>
+        <ol className="post-list">
+          {posts.map((post) => (
+            <li key={post.fields.slug}>
+              <article className="post-list-item" itemScope itemType="http://schema.org/Article">
+                <h2>
+                  <Link to={post.fields.slug} itemProp="url">
+                    <span itemProp="headline">{post.frontmatter.title || post.fields.slug}</span>
+                  </Link>
+                </h2>
+                <section>
+                  <p
+                    dangerouslySetInnerHTML={{
+                      __html: post.frontmatter.description || post.excerpt,
+                    }}
+                    itemProp="description"
+                  />
+                </section>
+                <small>{post.frontmatter.date}</small>
+              </article>
+            </li>
+          ))}
+        </ol>
+      </Layout>
+    </DarkModeProvider>
+  );
+}
+
+function DarkModeProvider({ children, isDarkMode, setIsDarkMode }) {
+  return (
+    <DarkModeContext.Provider
+      value={{
+        isDarkMode,
+        setIsDarkMode,
+      }}
+    >
+      {children}
+    </DarkModeContext.Provider>
   );
 }
 
