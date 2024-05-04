@@ -11,6 +11,7 @@ module.exports = {
   siteMetadata: {
     title: `wkd2ev`,
   },
+  pathPrefix: "/wkd2ev",
   plugins: [
     `gatsby-plugin-image`,
     `gatsby-plugin-sass`,
