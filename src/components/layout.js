@@ -7,6 +7,11 @@ import { DarkModeContext } from "../context/dark-mode";
 
 deckDeckGoHighlightElement();
 
+/**
+ * @param {Object} props
+ * @param {object} props.children
+ * @param {string} props.title
+ */
 export default function Layout({ children, title }) {
   const { isDarkMode, setIsDarkMode } = useSafeContext(DarkModeContext);
   return (
