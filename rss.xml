@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[Gatsby Starter Blog RSS Feed]]></title><description><![CDATA[Gatsby Starter Blog RSS Feed]]></description><link>http://github.com/dylang/node-rss</link><generator>GatsbyJS</generator><lastBuildDate>Sat, 04 May 2024 13:16:30 GMT</lastBuildDate><item><title><![CDATA[타입 세이프하게 api를 호출해보기]]></title><link>null/타입 세이프하게 api를 호출해보자/</link><guid isPermaLink="false">null/타입 세이프하게 api를 호출해보자/</guid><pubDate>Thu, 14 Mar 2024 00:00:00 GMT</pubDate><content:encoded></content:encoded></item><item><title><![CDATA[type challange <Easy>]]></title><description><![CDATA[타입 챌린지 easy를 풀어봅시다...
+https://github.com/type-challenges/type-challenges?tab=readme-ov-file Pick 타입스크립트에서 기본적으로 제공해주는 유틸리티 타입인 Pick…]]></description><link>null/type challange &lt;Easy&gt;/</link><guid isPermaLink="false">null/type challange &lt;Easy&gt;/</guid><pubDate>Sun, 13 Nov 2022 00:00:00 GMT</pubDate><content:encoded>&lt;p&gt;타입 챌린지 easy를 풀어봅시다...
+&lt;a href=&quot;https://github.com/type-challenges/type-challenges?tab=readme-ov-file&quot;&gt;https://github.com/type-challenges/type-challenges?tab=readme-ov-file&lt;/a&gt;&lt;/p&gt;
+&lt;h2&gt;Pick&lt;/h2&gt;
+&lt;deckgo-highlight-code language=&quot;typescript&quot;  &gt;
+          &lt;code slot=&quot;code&quot;&gt;// Q
+interface Todo {
+  title: string
+  description: string
+  completed: boolean
+}
+ 
+type TodoPreview = MyPick&amp;lt;Todo, &amp;#39;title&amp;#39; | &amp;#39;completed&amp;#39;&amp;gt;
+ 
+const todo: TodoPreview = {
+    title: &amp;#39;Clean room&amp;#39;,
+    completed: false,
+}
+
+// A
+type MyPick&amp;lt;T, K extends keyof T&amp;gt; = {
+  [key in K]: T[key];
+}&lt;/code&gt;
+        &lt;/deckgo-highlight-code&gt;
+&lt;p&gt;타입스크립트에서 기본적으로 제공해주는 유틸리티 타입인 Pick이다.
+제너릭의 두번째 인자로 뽑고싶은 속성만 추출한다.
+K extends keyof T 는 K가 T 제너릭 타입이 가지고 있는 속성들의 서브타입임을 명시해준다.&lt;/p&gt;
+&lt;h2&gt;Readonly&lt;/h2&gt;
+&lt;deckgo-highlight-code language=&quot;typescript&quot;  &gt;
+          &lt;code slot=&quot;code&quot;&gt;// Q
+interface Todo {
+  title: string
+  description: string
+}
+ 
+const todo: MyReadonly&amp;lt;Todo&amp;gt; = {
+  title: &amp;quot;Hey&amp;quot;,
+  description: &amp;quot;foobar&amp;quot;
+}
+ 
+todo.title = &amp;quot;Hello&amp;quot; // Error: cannot reassign a readonly property
+todo.description = &amp;quot;barFoo&amp;quot; // Error: cannot reassign a readonly property
+
+// A
+type MyReadonly&amp;lt;T&amp;gt; = {
+  readonly [key in keyof T]: T[key];
+}&lt;/code&gt;
+        &lt;/deckgo-highlight-code&gt;
+&lt;p&gt;모든 속성을 읽기 속성으로 만들어야 한다.&lt;/p&gt;
+&lt;h2&gt;FirstofArray&lt;/h2&gt;
+&lt;deckgo-highlight-code language=&quot;typescript&quot;  &gt;
+          &lt;code slot=&quot;code&quot;&gt;// Q
+type arr1 = [&amp;#39;a&amp;#39;, &amp;#39;b&amp;#39;, &amp;#39;c&amp;#39;]
+type arr2 = [3, 2, 1]
+ 
+type head1 = First&amp;lt;arr1&amp;gt; // expected to be &amp;#39;a&amp;#39;
+type head2 = First&amp;lt;arr2&amp;gt; // expected to be 3
+type head3 = First&amp;lt;[]&amp;gt; // expected to be never
+
+// A
+type First&amp;lt;T extends any[]&amp;gt; = T extends [] ? never : T[0];&lt;/code&gt;
+        &lt;/deckgo-highlight-code&gt;
+&lt;p&gt;원소[0] 을 반환하면 될 것 같지만 빈 배열일 경우에도 생각해야 한다.&lt;/p&gt;
+&lt;p&gt;조건부 연산을 사용하여 제너릭 T가 빈배열의 서브타입일 경우 never를 반환하고
+아니라면 0번째 인덱스를 반환해준다.&lt;/p&gt;
+&lt;h2&gt;Length of Tuple&lt;/h2&gt;
+&lt;deckgo-highlight-code language=&quot;typescript&quot;  &gt;
+          &lt;code slot=&quot;code&quot;&gt;type tesla = [&amp;#39;tesla&amp;#39;, &amp;#39;model 3&amp;#39;, &amp;#39;model X&amp;#39;, &amp;#39;model Y&amp;#39;]
+type spaceX = [&amp;#39;FALCON 9&amp;#39;, &amp;#39;FALCON HEAVY&amp;#39;, &amp;#39;DRAGON&amp;#39;, &amp;#39;STARSHIP&amp;#39;, &amp;#39;HUMAN SPACEFLIGHT&amp;#39;]
+ 
+type teslaLength = Length&amp;lt;tesla&amp;gt;  // expected 4
+type spaceXLength = Length&amp;lt;spaceX&amp;gt; // expected 5
+
+type Length&amp;lt;T extends any[]&amp;gt; = T[&amp;quot;length&amp;quot;];&lt;/code&gt;
+        &lt;/deckgo-highlight-code&gt;
+&lt;p&gt;length 프로퍼티를 이용하여 반환하면 된다. 다만 as const로 타입 단언이 선언되었을 경우
+다음과 같이 작성해줘야 한다.&lt;/p&gt;
+&lt;deckgo-highlight-code language=&quot;typescript&quot;  &gt;
+          &lt;code slot=&quot;code&quot;&gt;const tesla = [&amp;#39;tesla&amp;#39;, &amp;#39;model 3&amp;#39;, &amp;#39;model X&amp;#39;, &amp;#39;model Y&amp;#39;] as const;
+type TeslaLen = Length&amp;lt;typeof tesla&amp;gt;; &amp;lt;---- ????
+
+type Length&amp;lt;T extends readonly any[]&amp;gt; = T[&amp;quot;length&amp;quot;];&lt;/code&gt;
+        &lt;/deckgo-highlight-code&gt;
+&lt;h2&gt;Exclude&lt;/h2&gt;
+&lt;deckgo-highlight-code language=&quot;typescript&quot;  &gt;
+          &lt;code slot=&quot;code&quot;&gt;// Q
+type Result = MyExclude&amp;lt;&amp;#39;a&amp;#39; | &amp;#39;b&amp;#39; | &amp;#39;c&amp;#39;, &amp;#39;a&amp;#39;&amp;gt; // &amp;#39;b&amp;#39; | &amp;#39;c&amp;#39;
+
+// A
+type MyExclude&amp;lt;T, U&amp;gt; = T extends U ? never : T;&lt;/code&gt;
+        &lt;/deckgo-highlight-code&gt;
+&lt;p&gt;첫 제너릭 속성에는 유니온 타입을 두번쨰 제너릭 인자로 제외하고 싶은 타입을 넣어
+제외시키는 타입이다.&lt;/p&gt;
+&lt;p&gt;T가 U의 서브타입이라면 never를 반환&lt;/p&gt;
+&lt;p&gt;&apos;a&apos; | &apos;b&apos; | &apos;c&apos; 중 &apos;a&apos;는 두번째 제너릭으로 들어온 타입 &apos;a&apos;의 서브타입이므로 never를 반환하고 아님 T를 반환한다.&lt;/p&gt;
+&lt;h2&gt;Awaited&lt;/h2&gt;
+&lt;deckgo-highlight-code language=&quot;typescript&quot;  &gt;
+          &lt;code slot=&quot;code&quot;&gt;// Q
+type X = Promise&amp;lt;string&amp;gt;
+type Y = Promise&amp;lt;{ field: number }&amp;gt;
+
+// A
+type MyAwaited&amp;lt;T&amp;gt; = T extends Promise&amp;lt;infer R&amp;gt; ? R : never;&lt;/code&gt;
+        &lt;/deckgo-highlight-code&gt;
+&lt;p&gt;프로미스의 타입을 뽑아내는 문제이다.
+infer 키워드를 사용하여 타입을 추출할 수 있다.&lt;/p&gt;
+&lt;p&gt;하지만 다음과 같이 프로미스가 프로미스를 반환한다면 프로미스가 프로미스를 반환하고
+재귀적으로 프로미스를 반환해줄 경우 재귀적으로 타입을 작성해준다.&lt;/p&gt;
+&lt;deckgo-highlight-code language=&quot;typescript&quot;  &gt;
+          &lt;code slot=&quot;code&quot;&gt;type Z = MyAwaited&amp;lt;Promise&amp;lt;string | number&amp;gt;&amp;gt;
+type Z1 = MyAwaited&amp;lt;Promise&amp;lt;Promise&amp;lt;string | boolean&amp;gt;&amp;gt;&amp;gt;
+
+type MyAwaited&amp;lt;T extends Promise&amp;lt;unknown&amp;gt;&amp;gt; = T extends Promise&amp;lt;infer R&amp;gt; 
+  ? R extends Promise&amp;lt;unknown&amp;gt;		// R이 프로미스의의 서브타입이라면
+    ? MyAwaited&amp;lt;R&amp;gt;			// 재귀적으로 R을 던짐으로 호출
+    : R		// R이 프로미스의 서브타입이 아니라면 R을 반환
+  : never; // 모든 케이스에 대응하지 않은 경우 never 반환&lt;/code&gt;
+        &lt;/deckgo-highlight-code&gt;
+&lt;h2&gt;IF&lt;/h2&gt;
+&lt;deckgo-highlight-code language=&quot;typescript&quot;  &gt;
+          &lt;code slot=&quot;code&quot;&gt;type A = If&amp;lt;true, &amp;#39;a&amp;#39;, &amp;#39;b&amp;#39;&amp;gt;  // expected to be &amp;#39;a&amp;#39;
+type B = If&amp;lt;false, &amp;#39;a&amp;#39;, &amp;#39;b&amp;#39;&amp;gt; // expected to be &amp;#39;b&amp;#39;
+
+type If&amp;lt;C extends boolean, T, F&amp;gt; = C extends true ? T : F;&lt;/code&gt;
+        &lt;/deckgo-highlight-code&gt;
+&lt;h2&gt;Concat&lt;/h2&gt;
+&lt;deckgo-highlight-code language=&quot;typescript&quot;  &gt;
+          &lt;code slot=&quot;code&quot;&gt;// Q
+type Result1 = MyConcat&amp;lt;[], []&amp;gt;
+type Result2 = MyConcat&amp;lt;[], [1]&amp;gt;
+type Result3 = MyConcat&amp;lt;[1, 2], [3, 4]&amp;gt;
+type Result4 = MyConcat&amp;lt;[&amp;#39;1&amp;#39;, 2, &amp;#39;3&amp;#39;], [false, boolean, &amp;#39;4&amp;#39;]&amp;gt;
+
+// A
+type MyConcat&amp;lt;T extends any[], U extends any[]&amp;gt; = [...T, ...U];&lt;/code&gt;
+        &lt;/deckgo-highlight-code&gt;
+&lt;p&gt;스프레드 연산자로 합쳐주면 된다.&lt;/p&gt;
+&lt;h2&gt;Equal&lt;/h2&gt;
+&lt;p&gt;해당 타입은 문제에 없지만 후에 나올 Include 타입 문제에 쓰이기 때문에 한번 알아본다.
+타입이 동등한지를 비교하는 타입이다.&lt;/p&gt;
+&lt;deckgo-highlight-code language=&quot;typescript&quot;  &gt;
+          &lt;code slot=&quot;code&quot;&gt;interface Person {
+  name: string;
+  age: number;
+}
+ 
+interface Person2 {
+  name: string;
+  age: number;
+}
+ 
+interface OtherType {
+  name:string;
+  money: number;
+}
+ 
+type Result1 = Equals&amp;lt;Person, Person&amp;gt;;  // expected true
+type Result2 = Equals&amp;lt;Person, Person2&amp;gt;;  // expected true
+type Result3 = Equals&amp;lt;Person2, OtherType&amp;gt;;  // expected false
+
+type Equals&amp;lt;X, Y&amp;gt; = 
+  (&amp;lt;T&amp;gt;() =&amp;gt; T extends X ? &amp;quot;A&amp;quot; : &amp;quot;B&amp;quot;) extends (&amp;lt;T&amp;gt;() =&amp;gt; T extends Y ? &amp;quot;A&amp;quot; : &amp;quot;B&amp;quot;)
+  ? true
+  : false;&lt;/code&gt;
+        &lt;/deckgo-highlight-code&gt;
+&lt;p&gt;꽤나 신기한 타입이다.
+제너릭 T를 받아 해당 타입이 Equals타입의 두 제너릭 타입의 서브 타입인지를 비교하고 또 서로 비교하는 과정을
+통해 true, false를 반환한다.&lt;/p&gt;
+&lt;h2&gt;Include&lt;/h2&gt;
+&lt;p&gt;배열 원소에 타입이 포함되어 있는지를 묻는 문제이다.&lt;/p&gt;
+&lt;deckgo-highlight-code language=&quot;typescript&quot;  &gt;
+          &lt;code slot=&quot;code&quot;&gt;// Q
+type isPillarMen = Includes&amp;lt;[&amp;#39;Kars&amp;#39;, &amp;#39;Esidisi&amp;#39;, &amp;#39;Wamuu&amp;#39;, &amp;#39;Santana&amp;#39;], &amp;#39;Dio&amp;#39;&amp;gt; // expected to be `false`
+
+// A
+type Equal&amp;lt;X, Y&amp;gt; =
+  (&amp;lt;T&amp;gt;() =&amp;gt; T extends X ? &amp;quot;A&amp;quot; : &amp;quot;B&amp;quot;) extends (&amp;lt;T&amp;gt;() =&amp;gt; T extends Y ? &amp;quot;A&amp;quot; : &amp;quot;B&amp;quot;)
+  ? true
+  : false;
+ 
+type Includes&amp;lt;T extends readonly any[], U&amp;gt; = T extends [infer First, ...infer Rest] // 제너릭 T 타입은 infer로 타입을 추출 처음 원소와 나머지 원소로 분리한다.
+  ? Equal&amp;lt;First, U&amp;gt; extends true	// Equal 타입으로 첫번째 원소와 U를 비교를 하고 true의 서브타입인지 판별한다.
+    ? true				// 조건이 맞다면 true를 반환
+    : Includes&amp;lt;Rest, U&amp;gt;			// 1에서 판별한 조건이 아니라면 재귀적으로 나머지 배열 원소의 타입들을 넣어주어 재귀적으로 호출한다.
+  : false;				// 모든 케이스에 대응 안하는 경우 false를 반환&lt;/code&gt;
+        &lt;/deckgo-highlight-code&gt;
+&lt;h2&gt;Push&lt;/h2&gt;
+&lt;deckgo-highlight-code language=&quot;typescript&quot;  &gt;
+          &lt;code slot=&quot;code&quot;&gt;// Q
+type Result = Push&amp;lt;[1, 2], &amp;#39;3&amp;#39;&amp;gt; // [1, 2, &amp;#39;3&amp;#39;]
+
+// A
+type Push&amp;lt;T extends any[], U&amp;gt; = [...T, U];
+&lt;/code&gt;
+        &lt;/deckgo-highlight-code&gt;
+&lt;h2&gt;Unshift&lt;/h2&gt;
+&lt;deckgo-highlight-code language=&quot;typescript&quot;  &gt;
+          &lt;code slot=&quot;code&quot;&gt;// Q
+type Result = Unshift&amp;lt;[1, 2], 0&amp;gt; // [0, 1, 2,]
+
+// A
+type Unshift&amp;lt;T extends any[], U&amp;gt; = [U, ...T];&lt;/code&gt;
+        &lt;/deckgo-highlight-code&gt;
+&lt;h2&gt;Parameters&lt;/h2&gt;
+&lt;p&gt;함수의 파라미터를 추출하는 문제다.&lt;/p&gt;
+&lt;deckgo-highlight-code language=&quot;typescript&quot;  &gt;
+          &lt;code slot=&quot;code&quot;&gt;// Q
+const foo = (arg1: string, arg2: number): void =&amp;gt; {}
+ 
+type FunctionParamsType = MyParameters&amp;lt;typeof foo&amp;gt; // [arg1: string, arg2: number]
+
+// A
+type MyParameters&amp;lt;T extends (...args: any[]) =&amp;gt; any&amp;gt; = 
+  T extends (...args: infer R) =&amp;gt; any
+  ? R
+  : never;&lt;/code&gt;
+        &lt;/deckgo-highlight-code&gt;
+&lt;p&gt;함수의 파라미터 타입을 infer로 추론한다.
+제너릭으로 받은 T타입이 함수 형태가 아니라면 never를 반환한다.&lt;/p&gt;</content:encoded></item></channel></rss>
