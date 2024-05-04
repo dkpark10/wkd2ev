@@ -7,7 +7,7 @@ description: "easy라 재밌는 것 같습니다.."
 타입 챌린지 easy를 풀어봅시다...
 [https://github.com/type-challenges/type-challenges?tab=readme-ov-file](https://github.com/type-challenges/type-challenges?tab=readme-ov-file)
 
-## Pick 
+### Pick 
   
 ```typescript
 // Q
@@ -34,7 +34,7 @@ type MyPick<T, K extends keyof T> = {
 제너릭의 두번째 인자로 뽑고싶은 속성만 추출한다.
 K extends keyof T 는 K가 T 제너릭 타입이 가지고 있는 속성들의 서브타입임을 명시해준다.
 
-## Readonly
+### Readonly
 
 ```typescript
 // Q
@@ -59,7 +59,7 @@ type MyReadonly<T> = {
 
 모든 속성을 읽기 속성으로 만들어야 한다.
 
-## FirstofArray
+### FirstofArray
 
 ```typescript
 // Q
@@ -80,7 +80,7 @@ type First<T extends any[]> = T extends [] ? never : T[0];
 아니라면 0번째 인덱스를 반환해준다.
 
 
-## Length of Tuple
+### Length of Tuple
 
 ```typescript
 type tesla = ['tesla', 'model 3', 'model X', 'model Y']
@@ -103,7 +103,7 @@ type Length<T extends readonly any[]> = T["length"];
 ```
 
 
-## Exclude 
+### Exclude 
 
 ```typescript
 // Q
@@ -122,7 +122,7 @@ T가 U의 서브타입이라면 never를 반환
 
  
 
-## Awaited 
+### Awaited 
 
 ```typescript
 // Q
@@ -150,7 +150,7 @@ type MyAwaited<T extends Promise<unknown>> = T extends Promise<infer R>
   : never; // 모든 케이스에 대응하지 않은 경우 never 반환
 ```
 
-## IF
+### IF
 
 ```typescript
 type A = If<true, 'a', 'b'>  // expected to be 'a'
@@ -160,7 +160,7 @@ type If<C extends boolean, T, F> = C extends true ? T : F;
 ```
 
  
-## Concat
+### Concat
 
 ```typescript
 // Q
@@ -176,7 +176,7 @@ type MyConcat<T extends any[], U extends any[]> = [...T, ...U];
 스프레드 연산자로 합쳐주면 된다.
 
  
-## Equal
+### Equal
 
 해당 타입은 문제에 없지만 후에 나올 Include 타입 문제에 쓰이기 때문에 한번 알아본다.
 타입이 동등한지를 비교하는 타입이다.
@@ -213,7 +213,7 @@ type Equals<X, Y> =
  
 
  
-## Include
+### Include
 
 배열 원소에 타입이 포함되어 있는지를 묻는 문제이다.
 
@@ -235,7 +235,7 @@ type Includes<T extends readonly any[], U> = T extends [infer First, ...infer Re
 ```
 
 
-## Push
+### Push
 
 ```typescript
 // Q
@@ -248,7 +248,7 @@ type Push<T extends any[], U> = [...T, U];
 
  
 
-## Unshift
+### Unshift
 
 ```typescript
 // Q
@@ -259,7 +259,7 @@ type Unshift<T extends any[], U> = [U, ...T];
 ```
  
 
-## Parameters 
+### Parameters 
 
 함수의 파라미터를 추출하는 문제다.
 

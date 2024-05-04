@@ -31,12 +31,12 @@ export default function Layout({ children, title }) {
                   alt="https://github.com/dkpark10 주소"
                 />
               </a>
-              <input
+              {/* <input
                 type="checkbox"
                 onChange={() => {
                   setIsDarkMode(!isDarkMode);
                 }}
-              ></input>
+              ></input> */}
             </div>
           </header>
           <hr />
