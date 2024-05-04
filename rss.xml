@@ -1,7 +1,288 @@
-<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[Gatsby Starter Blog RSS Feed]]></title><description><![CDATA[Gatsby Starter Blog RSS Feed]]></description><link>http://github.com/dylang/node-rss</link><generator>GatsbyJS</generator><lastBuildDate>Sat, 04 May 2024 13:16:30 GMT</lastBuildDate><item><title><![CDATA[타입 세이프하게 api를 호출해보기]]></title><link>null/타입 세이프하게 api를 호출해보자/</link><guid isPermaLink="false">null/타입 세이프하게 api를 호출해보자/</guid><pubDate>Thu, 14 Mar 2024 00:00:00 GMT</pubDate><content:encoded></content:encoded></item><item><title><![CDATA[type challange <Easy>]]></title><description><![CDATA[타입 챌린지 easy를 풀어봅시다...
+<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[Gatsby Starter Blog RSS Feed]]></title><description><![CDATA[Gatsby Starter Blog RSS Feed]]></description><link>http://github.com/dylang/node-rss</link><generator>GatsbyJS</generator><lastBuildDate>Sat, 04 May 2024 18:09:21 GMT</lastBuildDate><item><title><![CDATA[타입 세이프하게 api를 호출해보기]]></title><description><![CDATA[최근 사내에서 서비스 개발 시 type safe하게 api를 호출할 수 있어 좋았던 경험이 있다.
+이를 좀 더 개선하여 간략하게 개발할 수 있도록 작성해 보았다. URL 구조 URL 구조는 다음과 같이 분리할 수 있다. 내용 설명 https…]]></description><link>null/타입 세이프하게 api를 호출해보자/</link><guid isPermaLink="false">null/타입 세이프하게 api를 호출해보자/</guid><pubDate>Sat, 04 May 2024 00:00:00 GMT</pubDate><content:encoded>&lt;p&gt;최근 사내에서 서비스 개발 시 type safe하게 api를 호출할 수 있어 좋았던 경험이 있다.
+이를 좀 더 개선하여 간략하게 개발할 수 있도록 작성해 보았다.&lt;/p&gt;
+&lt;h3&gt;URL 구조&lt;/h3&gt;
+&lt;deckgo-highlight-code   &gt;
+          &lt;code slot=&quot;code&quot;&gt;https://example.com/content/1?start=0&amp;amp;end=10&lt;/code&gt;
+        &lt;/deckgo-highlight-code&gt;
+&lt;p&gt;URL 구조는 다음과 같이 분리할 수 있다.&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;내용&lt;/th&gt;
+&lt;th&gt;설명&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;https&lt;/td&gt;
+&lt;td&gt;프로토콜&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;example.com&lt;/td&gt;
+&lt;td&gt;도메인&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;content/1&lt;/td&gt;
+&lt;td&gt;경로&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;?start=0&amp;#x26;end=10&lt;/td&gt;
+&lt;td&gt;쿼리스트링&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;아무래도 회사마다 개발자마다 다르겠지만 기본적으로
+baseUrl은 프로토콜과 도메인 까지는 기본 설정으로 주입하고 사용될 것이다.&lt;/p&gt;
+&lt;deckgo-highlight-code language=&quot;typescript&quot;  &gt;
+          &lt;code slot=&quot;code&quot;&gt;import axios from &amp;#39;axios&amp;#39;;
+import got from &amp;#39;got&amp;#39;;
+
+const axiosInstance = axios.create({
+  baseURL: &amp;#39;https://example.com&amp;#39;
+});
+
+const gotClient = got.extend({
+  url: &amp;#39;https://example.com&amp;#39;,
+});&lt;/code&gt;
+        &lt;/deckgo-highlight-code&gt;
+&lt;p&gt;예를 들어 호출해야 하는 api 주소가 아래와 같다고 해보자.
+해당 api는 유저가 입력한 키워드의 보여줄 게시글들을 반환하는데 키워드가 있고
+정렬 타입이 있으며 pagination 이 적용되어 있다.&lt;/p&gt;
+&lt;deckgo-highlight-code   &gt;
+          &lt;code slot=&quot;code&quot;&gt;https://example.com/search/?keyword=맛집&amp;amp;order=desc&amp;amp;start=0&amp;amp;end=10&lt;/code&gt;
+        &lt;/deckgo-highlight-code&gt;
+&lt;p&gt;이를 호출한다면 다음과 같을 것이다.&lt;/p&gt;
+&lt;deckgo-highlight-code language=&quot;typescript&quot;  &gt;
+          &lt;code slot=&quot;code&quot;&gt;await axios.get(
+    `https://example.com/search/?keyword=${keyword}&amp;amp;order=${order}&amp;amp;start=${start}&amp;amp;end=${end}`
+  );&lt;/code&gt;
+        &lt;/deckgo-highlight-code&gt;
+&lt;p&gt;그렇지만 api엔드포인트의 수정사항이 들어왔을 때 해당 api를 사용하는 쪽에 일괄 수정이 필요할 것이다.
+사실 이렇게 호출하는 방법이 좋지 않은 것을 알고 있을 것이다.&lt;/p&gt;
+&lt;p&gt;변경에 취약하기에 한번 함수로 감싸주는 것만으로 원할한 해결이 가능하다. 함수로 감싼다면 수정해야할
+관리 포인트를 하나로 집중할 수 있으니까&lt;/p&gt;
+&lt;deckgo-highlight-code language=&quot;typescript&quot;  &gt;
+          &lt;code slot=&quot;code&quot;&gt;async function getKeywordContents(
+  keyword: string, order: &amp;#39;desc&amp;#39; | &amp;#39;asec&amp;#39;, start: number, end: number) {
+
+  return await axios.get(
+    `https://example.com/search/?keyword=${keyword}&amp;amp;order=${order}&amp;amp;start=${start}&amp;amp;end=${end}`
+  );
+}&lt;/code&gt;
+        &lt;/deckgo-highlight-code&gt;
+&lt;p&gt;사실 api 호출 코드는 처음 프로젝트를 작성할 때 말고는 수정사항이 빈번한 영역이라고 보기는 힘들다.
+다만 처음 작성할 때 수정사항에 대응 하여 좀 더 수월하게 개발 할 수 있다면 더 좋을 것이다.&lt;/p&gt;
+&lt;h3&gt;적용&lt;/h3&gt;
+&lt;p&gt;&lt;em&gt;endpoint.ts&lt;/em&gt;&lt;/p&gt;
+&lt;deckgo-highlight-code language=&quot;typescript&quot;  &gt;
+          &lt;code slot=&quot;code&quot;&gt;type UpperMethod =
+  | &amp;#39;GET&amp;#39;
+  | &amp;#39;POST&amp;#39;
+  | &amp;#39;PUT&amp;#39;
+  | &amp;#39;PATCH&amp;#39;
+  | &amp;#39;DELETE&amp;#39;
+  | &amp;#39;HEAD&amp;#39;
+  | &amp;#39;OPTIONS&amp;#39;;
+
+type LowerMethod = Lowercase&amp;lt;UpperMethod&amp;gt;;
+
+type Method = UpperMethod | LowerMethod;
+
+type EndPoint = &amp;#39;search&amp;#39;;
+
+type QueryParams&amp;lt;E extends EndPoint&amp;gt; = {
+  [Key in EndPoint]: E extends &amp;#39;search&amp;#39;
+    ? {
+        keyword: string;
+        start: number;
+        end: number;
+      }
+    : {
+        [key: string]: any;
+      };
+};&lt;/code&gt;
+        &lt;/deckgo-highlight-code&gt;
+&lt;p&gt;&lt;em&gt;index.ts&lt;/em&gt;&lt;/p&gt;
+&lt;deckgo-highlight-code language=&quot;typescript&quot;  &gt;
+          &lt;code slot=&quot;code&quot;&gt;import { Client, type Response } from &amp;#39;./client&amp;#39;;
+import type { Method, QueryParams, EndPoint } from &amp;#39;./endpoint&amp;#39;;
+
+class ApiClient&amp;lt;
+  Url extends EndPoint,
+  Data extends any = any,
+  Body extends Record&amp;lt;string, any&amp;gt; = any,
+&amp;gt; extends Client {
+  private url: URL;
+
+  private body: Body;
+
+  private method: Method = &amp;#39;get&amp;#39;;
+  
+  private headers: Record&amp;lt;string, any&amp;gt; = {};
+
+  constructor() {
+    super();
+  }
+
+  public setUrl(url: Url) {
+    try {
+      this.url = new URL(`${this.baseURL}/${url}`);
+      return this;
+    } catch (error) {
+      console.error(&amp;#39;URL error&amp;#39;, error);
+    }
+  }
+
+  public setMethod&amp;lt;M extends Method = &amp;#39;get&amp;#39;&amp;gt;(method: M) {
+    this.method = method;
+    return this;
+  }
+
+  public setQuery&amp;lt;K extends keyof QueryParams&amp;lt;Url&amp;gt;[Url]&amp;gt;(
+    key: K,
+    value: QueryParams&amp;lt;Url&amp;gt;[Url][typeof key]
+  ) {
+    if (!this.url) throw new Error(&amp;#39;url이 설정되어 있지 않습니다.&amp;#39;);
+
+    this.url.searchParams.set(String(key), String(value));
+    return this;
+  }
+
+  public setBody(body: Body) {
+    this.body = body;
+    return this;
+  }
+
+  public async retrieve(): Promise&amp;lt;Response&amp;lt;Data&amp;gt;&amp;gt; {
+    const reqData = this.transform&amp;lt;Body&amp;gt;({
+      url: this.url,
+      method: this.method,
+      body: this.body,
+      headers: this.headers,
+    });
+    return await this.instance&amp;lt;Data&amp;gt;(reqData).then((res) =&amp;gt; this.response(res));
+  }
+}&lt;/code&gt;
+        &lt;/deckgo-highlight-code&gt;
+&lt;p&gt;&lt;em&gt;client.ts&lt;/em&gt;&lt;/p&gt;
+&lt;deckgo-highlight-code language=&quot;typescript&quot;  &gt;
+          &lt;code slot=&quot;code&quot;&gt;import axios, {
+  AxiosResponse,
+  type AxiosInstance,
+  AxiosRequestConfig,
+} from &amp;#39;axios&amp;#39;;
+import type { Method } from &amp;#39;../types&amp;#39;;
+
+const baseURL = &amp;#39;https://example.com&amp;#39;;
+
+const axiosInstance: AxiosInstance = axios.create({
+  baseURL,
+});
+
+export interface Request&amp;lt;Body&amp;gt; {
+  url: URL;
+  method: Method;
+  body?: Body;
+  headers?: Record&amp;lt;string, any&amp;gt;;
+}
+
+export interface Response&amp;lt;D&amp;gt; {
+  status: number;
+  data: D;
+}
+
+export abstract class Client {
+  protected baseURL = baseURL;
+
+  protected instance: AxiosInstance;
+
+  constructor() {
+    this.instance = axiosInstance;
+  }
+
+  protected response&amp;lt;Data&amp;gt;(response: AxiosResponse&amp;lt;Data&amp;gt;): Response&amp;lt;Data&amp;gt; {
+    const { status, data } = response;
+    return { status, data };
+  }
+
+  protected transform&amp;lt;Body&amp;gt;({ url, method, body }: Request&amp;lt;Body&amp;gt;): AxiosRequestConfig {
+    return {
+      url: url.href,
+      method,
+      data: body,
+    };
+  }
+}&lt;/code&gt;
+        &lt;/deckgo-highlight-code&gt;
+&lt;p&gt;굳이 이렇게 까지 작성해야 하나 싶지만 처음 신경써서 작성한다면 클러이언트 호출 시 type safe하게 호출하여
+DX가 좋았다. 사용하는 쪽에서 자동완성으로 편하게 호출할 수 있다.&lt;/p&gt;
+&lt;p&gt;&lt;span
+      class=&quot;gatsby-resp-image-wrapper&quot;
+      style=&quot;position: relative; display: block; margin-left: auto; margin-right: auto; max-width: 630px; &quot;
+    &gt;
+      &lt;a
+    class=&quot;gatsby-resp-image-link&quot;
+    href=&quot;/wkd2ev/static/1a436d700c252066023b716654965123/65654/type-safe.png&quot;
+    style=&quot;display: block&quot;
+    target=&quot;_blank&quot;
+    rel=&quot;noopener&quot;
+  &gt;
+    &lt;span
+    class=&quot;gatsby-resp-image-background-image&quot;
+    style=&quot;padding-bottom: 20.253164556962027%; position: relative; bottom: 0; left: 0; background-image: url(&apos;data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAECAYAAACOXx+WAAAACXBIWXMAABYlAAAWJQFJUiTwAAAA7UlEQVR42kWP207CQBRF+RDFmtAyvcwwLUyZttAqptYokSjUy4P//xnLIwnxYWWfnMvOPhNtNtjsgYW9w5WipsX6AVsN+OGL5/GH0/jB4fhNfxrJuy22aOjqDUXVEWWeJF2j0vLMRC8axuOeYf9I+/ZCOz6h6x7tdihZXlqHW1VkRo5yJ31PqktcUWIKz0wtiYR57FCxGEZJweuhkRSS7N5j+5owzslcRSpGc+uZhoabyBCIBjNNIPW5F2pu5+ZMlElC45kkusKtG7byil41hJEMVEm96vjs3xl3B2aJ5UpppkqMYvOvl1q4lvkfvyOagICSk9ewAAAAAElFTkSuQmCC&apos;); background-size: cover; display: block;&quot;
+  &gt;&lt;/span&gt;
+  &lt;img
+        class=&quot;gatsby-resp-image-image&quot;
+        alt=&quot;type-safe한 api 호출&quot;
+        title=&quot;&quot;
+        src=&quot;/wkd2ev/static/1a436d700c252066023b716654965123/f058b/type-safe.png&quot;
+        srcset=&quot;/wkd2ev/static/1a436d700c252066023b716654965123/c26ae/type-safe.png 158w,
+/wkd2ev/static/1a436d700c252066023b716654965123/6bdcf/type-safe.png 315w,
+/wkd2ev/static/1a436d700c252066023b716654965123/f058b/type-safe.png 630w,
+/wkd2ev/static/1a436d700c252066023b716654965123/65654/type-safe.png 872w&quot;
+        sizes=&quot;(max-width: 630px) 100vw, 630px&quot;
+        style=&quot;width:100%;height:100%;margin:0;vertical-align:middle;position:absolute;top:0;left:0;&quot;
+        loading=&quot;lazy&quot;
+        decoding=&quot;async&quot;
+      /&gt;
+  &lt;/a&gt;
+    &lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;타입을 잘못 지정할 경우 에러를 뱉을 수 있다.&lt;/p&gt;
+&lt;p&gt;&lt;span
+      class=&quot;gatsby-resp-image-wrapper&quot;
+      style=&quot;position: relative; display: block; margin-left: auto; margin-right: auto; max-width: 630px; &quot;
+    &gt;
+      &lt;a
+    class=&quot;gatsby-resp-image-link&quot;
+    href=&quot;/wkd2ev/static/edee780ad281cfaa43ccbc7d226f05e7/58213/type-unsafe.png&quot;
+    style=&quot;display: block&quot;
+    target=&quot;_blank&quot;
+    rel=&quot;noopener&quot;
+  &gt;
+    &lt;span
+    class=&quot;gatsby-resp-image-background-image&quot;
+    style=&quot;padding-bottom: 27.848101265822784%; position: relative; bottom: 0; left: 0; background-image: url(&apos;data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAGCAYAAADDl76dAAAACXBIWXMAABYlAAAWJQFJUiTwAAABMklEQVR42oWQ2VLCQBBF+RKrRFmEEJaQIGSZrIQEQtg3XxD9/184DkFKyxcfTnVX99S5XVNqt3zUjo0pUhb7M3G2Q4R5UU2REM92TCSW3AfxCi+cEyUbNscPudtiu1OS+YE0PyKCjNJhm2NFEV6cs5yeGHtzpukeX8xw3YzF7ozjZ4X4JtlhezNmyzeMYYQlhb4M0l9D1K5N6fI5YbEN6I9CQifFGyV4vRBb9Rh0fUxXioMcRwZdCScbOj2XemOIoloFzZYpsWjLeen9krBeRxhZjHPKEOOYjm5SbepUXyT1PpWaVnDva3Jebxjf9afXDO8qDFhtBN3EYrgQtAcDXEND1/o8PCqUywqPT38o/6bJc6VzE+pS6AeO/GxBwzCpNw2qMlFRDBrFhX358H+uV96FX27wyurVMZRXAAAAAElFTkSuQmCC&apos;); background-size: cover; display: block;&quot;
+  &gt;&lt;/span&gt;
+  &lt;img
+        class=&quot;gatsby-resp-image-image&quot;
+        alt=&quot;type-unsafe한 api 호출&quot;
+        title=&quot;&quot;
+        src=&quot;/wkd2ev/static/edee780ad281cfaa43ccbc7d226f05e7/f058b/type-unsafe.png&quot;
+        srcset=&quot;/wkd2ev/static/edee780ad281cfaa43ccbc7d226f05e7/c26ae/type-unsafe.png 158w,
+/wkd2ev/static/edee780ad281cfaa43ccbc7d226f05e7/6bdcf/type-unsafe.png 315w,
+/wkd2ev/static/edee780ad281cfaa43ccbc7d226f05e7/f058b/type-unsafe.png 630w,
+/wkd2ev/static/edee780ad281cfaa43ccbc7d226f05e7/58213/type-unsafe.png 902w&quot;
+        sizes=&quot;(max-width: 630px) 100vw, 630px&quot;
+        style=&quot;width:100%;height:100%;margin:0;vertical-align:middle;position:absolute;top:0;left:0;&quot;
+        loading=&quot;lazy&quot;
+        decoding=&quot;async&quot;
+      /&gt;
+  &lt;/a&gt;
+    &lt;/span&gt;&lt;/p&gt;</content:encoded></item><item><title><![CDATA[type challange <Easy>]]></title><description><![CDATA[타입 챌린지 easy를 풀어봅시다...
 https://github.com/type-challenges/type-challenges?tab=readme-ov-file Pick 타입스크립트에서 기본적으로 제공해주는 유틸리티 타입인 Pick…]]></description><link>null/type challange &lt;Easy&gt;/</link><guid isPermaLink="false">null/type challange &lt;Easy&gt;/</guid><pubDate>Sun, 13 Nov 2022 00:00:00 GMT</pubDate><content:encoded>&lt;p&gt;타입 챌린지 easy를 풀어봅시다...
 &lt;a href=&quot;https://github.com/type-challenges/type-challenges?tab=readme-ov-file&quot;&gt;https://github.com/type-challenges/type-challenges?tab=readme-ov-file&lt;/a&gt;&lt;/p&gt;
-&lt;h2&gt;Pick&lt;/h2&gt;
+&lt;h3&gt;Pick&lt;/h3&gt;
 &lt;deckgo-highlight-code language=&quot;typescript&quot;  &gt;
           &lt;code slot=&quot;code&quot;&gt;// Q
 interface Todo {
@@ -25,7 +306,7 @@ type MyPick&amp;lt;T, K extends keyof T&amp;gt; = {
 &lt;p&gt;타입스크립트에서 기본적으로 제공해주는 유틸리티 타입인 Pick이다.
 제너릭의 두번째 인자로 뽑고싶은 속성만 추출한다.
 K extends keyof T 는 K가 T 제너릭 타입이 가지고 있는 속성들의 서브타입임을 명시해준다.&lt;/p&gt;
-&lt;h2&gt;Readonly&lt;/h2&gt;
+&lt;h3&gt;Readonly&lt;/h3&gt;
 &lt;deckgo-highlight-code language=&quot;typescript&quot;  &gt;
           &lt;code slot=&quot;code&quot;&gt;// Q
 interface Todo {
@@ -47,7 +328,7 @@ type MyReadonly&amp;lt;T&amp;gt; = {
 }&lt;/code&gt;
         &lt;/deckgo-highlight-code&gt;
 &lt;p&gt;모든 속성을 읽기 속성으로 만들어야 한다.&lt;/p&gt;
-&lt;h2&gt;FirstofArray&lt;/h2&gt;
+&lt;h3&gt;FirstofArray&lt;/h3&gt;
 &lt;deckgo-highlight-code language=&quot;typescript&quot;  &gt;
           &lt;code slot=&quot;code&quot;&gt;// Q
 type arr1 = [&amp;#39;a&amp;#39;, &amp;#39;b&amp;#39;, &amp;#39;c&amp;#39;]
@@ -63,7 +344,7 @@ type First&amp;lt;T extends any[]&amp;gt; = T extends [] ? never : T[0];&lt;/cod
 &lt;p&gt;원소[0] 을 반환하면 될 것 같지만 빈 배열일 경우에도 생각해야 한다.&lt;/p&gt;
 &lt;p&gt;조건부 연산을 사용하여 제너릭 T가 빈배열의 서브타입일 경우 never를 반환하고
 아니라면 0번째 인덱스를 반환해준다.&lt;/p&gt;
-&lt;h2&gt;Length of Tuple&lt;/h2&gt;
+&lt;h3&gt;Length of Tuple&lt;/h3&gt;
 &lt;deckgo-highlight-code language=&quot;typescript&quot;  &gt;
           &lt;code slot=&quot;code&quot;&gt;type tesla = [&amp;#39;tesla&amp;#39;, &amp;#39;model 3&amp;#39;, &amp;#39;model X&amp;#39;, &amp;#39;model Y&amp;#39;]
 type spaceX = [&amp;#39;FALCON 9&amp;#39;, &amp;#39;FALCON HEAVY&amp;#39;, &amp;#39;DRAGON&amp;#39;, &amp;#39;STARSHIP&amp;#39;, &amp;#39;HUMAN SPACEFLIGHT&amp;#39;]
@@ -81,7 +362,7 @@ type TeslaLen = Length&amp;lt;typeof tesla&amp;gt;; &amp;lt;---- ????
 
 type Length&amp;lt;T extends readonly any[]&amp;gt; = T[&amp;quot;length&amp;quot;];&lt;/code&gt;
         &lt;/deckgo-highlight-code&gt;
-&lt;h2&gt;Exclude&lt;/h2&gt;
+&lt;h3&gt;Exclude&lt;/h3&gt;
 &lt;deckgo-highlight-code language=&quot;typescript&quot;  &gt;
           &lt;code slot=&quot;code&quot;&gt;// Q
 type Result = MyExclude&amp;lt;&amp;#39;a&amp;#39; | &amp;#39;b&amp;#39; | &amp;#39;c&amp;#39;, &amp;#39;a&amp;#39;&amp;gt; // &amp;#39;b&amp;#39; | &amp;#39;c&amp;#39;
@@ -93,7 +374,7 @@ type MyExclude&amp;lt;T, U&amp;gt; = T extends U ? never : T;&lt;/code&gt;
 제외시키는 타입이다.&lt;/p&gt;
 &lt;p&gt;T가 U의 서브타입이라면 never를 반환&lt;/p&gt;
 &lt;p&gt;&apos;a&apos; | &apos;b&apos; | &apos;c&apos; 중 &apos;a&apos;는 두번째 제너릭으로 들어온 타입 &apos;a&apos;의 서브타입이므로 never를 반환하고 아님 T를 반환한다.&lt;/p&gt;
-&lt;h2&gt;Awaited&lt;/h2&gt;
+&lt;h3&gt;Awaited&lt;/h3&gt;
 &lt;deckgo-highlight-code language=&quot;typescript&quot;  &gt;
           &lt;code slot=&quot;code&quot;&gt;// Q
 type X = Promise&amp;lt;string&amp;gt;
@@ -116,14 +397,14 @@ type MyAwaited&amp;lt;T extends Promise&amp;lt;unknown&amp;gt;&amp;gt; = T exten
     : R		// R이 프로미스의 서브타입이 아니라면 R을 반환
   : never; // 모든 케이스에 대응하지 않은 경우 never 반환&lt;/code&gt;
         &lt;/deckgo-highlight-code&gt;
-&lt;h2&gt;IF&lt;/h2&gt;
+&lt;h3&gt;IF&lt;/h3&gt;
 &lt;deckgo-highlight-code language=&quot;typescript&quot;  &gt;
           &lt;code slot=&quot;code&quot;&gt;type A = If&amp;lt;true, &amp;#39;a&amp;#39;, &amp;#39;b&amp;#39;&amp;gt;  // expected to be &amp;#39;a&amp;#39;
 type B = If&amp;lt;false, &amp;#39;a&amp;#39;, &amp;#39;b&amp;#39;&amp;gt; // expected to be &amp;#39;b&amp;#39;
 
 type If&amp;lt;C extends boolean, T, F&amp;gt; = C extends true ? T : F;&lt;/code&gt;
         &lt;/deckgo-highlight-code&gt;
-&lt;h2&gt;Concat&lt;/h2&gt;
+&lt;h3&gt;Concat&lt;/h3&gt;
 &lt;deckgo-highlight-code language=&quot;typescript&quot;  &gt;
           &lt;code slot=&quot;code&quot;&gt;// Q
 type Result1 = MyConcat&amp;lt;[], []&amp;gt;
@@ -135,7 +416,7 @@ type Result4 = MyConcat&amp;lt;[&amp;#39;1&amp;#39;, 2, &amp;#39;3&amp;#39;], [f
 type MyConcat&amp;lt;T extends any[], U extends any[]&amp;gt; = [...T, ...U];&lt;/code&gt;
         &lt;/deckgo-highlight-code&gt;
 &lt;p&gt;스프레드 연산자로 합쳐주면 된다.&lt;/p&gt;
-&lt;h2&gt;Equal&lt;/h2&gt;
+&lt;h3&gt;Equal&lt;/h3&gt;
 &lt;p&gt;해당 타입은 문제에 없지만 후에 나올 Include 타입 문제에 쓰이기 때문에 한번 알아본다.
 타입이 동등한지를 비교하는 타입이다.&lt;/p&gt;
 &lt;deckgo-highlight-code language=&quot;typescript&quot;  &gt;
@@ -166,7 +447,7 @@ type Equals&amp;lt;X, Y&amp;gt; =
 &lt;p&gt;꽤나 신기한 타입이다.
 제너릭 T를 받아 해당 타입이 Equals타입의 두 제너릭 타입의 서브 타입인지를 비교하고 또 서로 비교하는 과정을
 통해 true, false를 반환한다.&lt;/p&gt;
-&lt;h2&gt;Include&lt;/h2&gt;
+&lt;h3&gt;Include&lt;/h3&gt;
 &lt;p&gt;배열 원소에 타입이 포함되어 있는지를 묻는 문제이다.&lt;/p&gt;
 &lt;deckgo-highlight-code language=&quot;typescript&quot;  &gt;
           &lt;code slot=&quot;code&quot;&gt;// Q
@@ -184,7 +465,7 @@ type Includes&amp;lt;T extends readonly any[], U&amp;gt; = T extends [infer Firs
     : Includes&amp;lt;Rest, U&amp;gt;			// 1에서 판별한 조건이 아니라면 재귀적으로 나머지 배열 원소의 타입들을 넣어주어 재귀적으로 호출한다.
   : false;				// 모든 케이스에 대응 안하는 경우 false를 반환&lt;/code&gt;
         &lt;/deckgo-highlight-code&gt;
-&lt;h2&gt;Push&lt;/h2&gt;
+&lt;h3&gt;Push&lt;/h3&gt;
 &lt;deckgo-highlight-code language=&quot;typescript&quot;  &gt;
           &lt;code slot=&quot;code&quot;&gt;// Q
 type Result = Push&amp;lt;[1, 2], &amp;#39;3&amp;#39;&amp;gt; // [1, 2, &amp;#39;3&amp;#39;]
@@ -193,7 +474,7 @@ type Result = Push&amp;lt;[1, 2], &amp;#39;3&amp;#39;&amp;gt; // [1, 2, &amp;#39
 type Push&amp;lt;T extends any[], U&amp;gt; = [...T, U];
 &lt;/code&gt;
         &lt;/deckgo-highlight-code&gt;
-&lt;h2&gt;Unshift&lt;/h2&gt;
+&lt;h3&gt;Unshift&lt;/h3&gt;
 &lt;deckgo-highlight-code language=&quot;typescript&quot;  &gt;
           &lt;code slot=&quot;code&quot;&gt;// Q
 type Result = Unshift&amp;lt;[1, 2], 0&amp;gt; // [0, 1, 2,]
@@ -201,7 +482,7 @@ type Result = Unshift&amp;lt;[1, 2], 0&amp;gt; // [0, 1, 2,]
 // A
 type Unshift&amp;lt;T extends any[], U&amp;gt; = [U, ...T];&lt;/code&gt;
         &lt;/deckgo-highlight-code&gt;
-&lt;h2&gt;Parameters&lt;/h2&gt;
+&lt;h3&gt;Parameters&lt;/h3&gt;
 &lt;p&gt;함수의 파라미터를 추출하는 문제다.&lt;/p&gt;
 &lt;deckgo-highlight-code language=&quot;typescript&quot;  &gt;
           &lt;code slot=&quot;code&quot;&gt;// Q
