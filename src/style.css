@@ -191,10 +191,6 @@ header .sub {
   gap: 10px;
 }
 
-section {
-  white-space: pre;
-}
-
 .global-wrapper {
   width: var(--maxWidth-4xl);
   padding: var(--spacing-5) var(--spacing-3);
@@ -203,6 +199,10 @@ section {
 .global-wrapper header {
   font-weight: var(--fontWeight-bold);
   margin-bottom: var(--spacing-8);
+}
+
+section p {
+  padding: var(--spacing-3) 0;
 }
 
 .global-wrapper h3 {
