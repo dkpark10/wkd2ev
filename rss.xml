@@ -1,4 +1,249 @@
-<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[Gatsby Starter Blog RSS Feed]]></title><description><![CDATA[Gatsby Starter Blog RSS Feed]]></description><link>http://github.com/dylang/node-rss</link><generator>GatsbyJS</generator><lastBuildDate>Sat, 04 May 2024 18:09:21 GMT</lastBuildDate><item><title><![CDATA[타입 세이프하게 api를 호출해보기]]></title><description><![CDATA[최근 사내에서 서비스 개발 시 type safe하게 api를 호출할 수 있어 좋았던 경험이 있다.
+<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[Gatsby Starter Blog RSS Feed]]></title><description><![CDATA[Gatsby Starter Blog RSS Feed]]></description><link>http://github.com/dylang/node-rss</link><generator>GatsbyJS</generator><lastBuildDate>Mon, 20 May 2024 00:36:21 GMT</lastBuildDate><item><title><![CDATA[zustands는 어떻게 root provider 없이 상태관리를 할 수 있을까?(1)]]></title><description><![CDATA[redux, recoil과는 다르게 zustand는 어떻게 root provider 없이 상태관리를 하는지
+궁금했다. 아래는 리덕스 공식문서 튜토리얼에서 가져온 예제이다.
+https://ko.redux.js.org/tutorials…]]></description><link>null/zustands는 어떻게 root provider 없이 상태관리를 할 수 있을까?/</link><guid isPermaLink="false">null/zustands는 어떻게 root provider 없이 상태관리를 할 수 있을까?/</guid><pubDate>Sun, 19 May 2024 00:00:00 GMT</pubDate><content:encoded>&lt;p&gt;redux, recoil과는 다르게 zustand는 어떻게 root provider 없이 상태관리를 하는지
+궁금했다.&lt;/p&gt;
+&lt;p&gt;아래는 리덕스 공식문서 튜토리얼에서 가져온 예제이다.
+&lt;a href=&quot;https://ko.redux.js.org/tutorials/fundamentals/part-5-ui-react/#passing-the-store-with-provider&quot;&gt;https://ko.redux.js.org/tutorials/fundamentals/part-5-ui-react/#passing-the-store-with-provider&lt;/a&gt;&lt;/p&gt;
+&lt;deckgo-highlight-code language=&quot;javascript&quot;  &gt;
+          &lt;code slot=&quot;code&quot;&gt;import React from &amp;#39;react&amp;#39;
+import ReactDOM from &amp;#39;react-dom&amp;#39;
+import { Provider } from &amp;#39;react-redux&amp;#39;
+
+import App from &amp;#39;./App&amp;#39;
+import store from &amp;#39;./store&amp;#39;
+
+ReactDOM.render(
+  // Render a `&amp;lt;Provider&amp;gt;` around the entire `&amp;lt;App&amp;gt;`,
+  // and pass the Redux store to as a prop
+  &amp;lt;React.StrictMode&amp;gt;
+    &amp;lt;Provider store={store}&amp;gt; &amp;lt;-------------------------- provider
+      &amp;lt;App /&amp;gt;
+    &amp;lt;/Provider&amp;gt;
+  &amp;lt;/React.StrictMode&amp;gt;,
+  document.getElementById(&amp;#39;root&amp;#39;)
+)&lt;/code&gt;
+        &lt;/deckgo-highlight-code&gt;
+&lt;p&gt;아래는 recoil 예제이다.
+&lt;a href=&quot;https://recoiljs.org/ko/docs/introduction/getting-started&quot;&gt;https://recoiljs.org/ko/docs/introduction/getting-started&lt;/a&gt;&lt;/p&gt;
+&lt;deckgo-highlight-code language=&quot;javascript&quot;  &gt;
+          &lt;code slot=&quot;code&quot;&gt;import React from &amp;#39;react&amp;#39;;
+import {
+  RecoilRoot,
+  atom,
+  selector,
+  useRecoilState,
+  useRecoilValue,
+} from &amp;#39;recoil&amp;#39;;
+
+function App() {
+  return (
+    &amp;lt;RecoilRoot&amp;gt;      &amp;lt;-------------------------- provider
+      &amp;lt;CharacterCounter /&amp;gt;
+    &amp;lt;/RecoilRoot&amp;gt;
+  );
+}&lt;/code&gt;
+        &lt;/deckgo-highlight-code&gt;
+&lt;p&gt;이렇듯 전역상태 라이브러리는 앱의 최상단에 위치하여 상태를 관리한다.
+&lt;a href=&quot;https://www.slash.page/ko/libraries/react/use-overlay/src/useOverlay.i18n&quot;&gt;https://www.slash.page/ko/libraries/react/use-overlay/src/useOverlay.i18n&lt;/a&gt;
+toss에서 만든 modal을 선언적으로 관리하기 위한 훅도 최상단에서 모달을 관리한다. 아래는 useOverlay의 root provider 코드이다.&lt;/p&gt;
+&lt;deckgo-highlight-code language=&quot;javascript&quot;  &gt;
+          &lt;code slot=&quot;code&quot;&gt;/** @tossdocs-ignore */
+import React, { createContext, PropsWithChildren, ReactNode, useCallback, useMemo, useState } from &amp;#39;react&amp;#39;;
+
+export const OverlayContext = createContext&amp;lt;{
+  mount(id: string, element: ReactNode): void;
+  unmount(id: string): void;
+} | null&amp;gt;(null);
+if (process.env.NODE_ENV !== &amp;#39;production&amp;#39;) {
+  OverlayContext.displayName = &amp;#39;OverlayContext&amp;#39;;
+}
+
+export function OverlayProvider({ children }: PropsWithChildren) {
+  const [overlayById, setOverlayById] = useState&amp;lt;Map&amp;lt;string, ReactNode&amp;gt;&amp;gt;(new Map()); // &amp;lt;------- 여기서 모달 관리
+
+  const mount = useCallback((id: string, element: ReactNode) =&amp;gt; {
+    setOverlayById(overlayById =&amp;gt; {
+      const cloned = new Map(overlayById);
+      cloned.set(id, element);
+      return cloned;
+    });
+  }, []);
+
+  const unmount = useCallback((id: string) =&amp;gt; {
+    setOverlayById(overlayById =&amp;gt; {
+      const cloned = new Map(overlayById);
+      cloned.delete(id);
+      return cloned;
+    });
+  }, []);
+
+  const context = useMemo(() =&amp;gt; ({ mount, unmount }), [mount, unmount]);
+
+  return (
+    &amp;lt;OverlayContext.Provider value={context}&amp;gt;
+      {children}
+      {[...overlayById.entries()].map(([id, element]) =&amp;gt; (
+        &amp;lt;React.Fragment key={id}&amp;gt;{element}&amp;lt;/React.Fragment&amp;gt;
+      ))}
+    &amp;lt;/OverlayContext.Provider&amp;gt;
+  );
+}&lt;/code&gt;
+        &lt;/deckgo-highlight-code&gt;
+&lt;p&gt;이렇듯 전역으로 상태를 관리 하기 위해서는 최상단 루트 컴포넌트에 상태를 선언하고 이를 children으로 받아서 관리해주고 있다.
+그러나 zustand는 root provider 없이 바로 컴포넌트에서 바로 사용할 수 있다. 이는 어떻게 가능한 것인가.&lt;/p&gt;
+&lt;h2&gt;zustand 코드 파헤쳐 보기&lt;/h2&gt;
+&lt;p&gt;핵심 로직은 생각보다 간단했다. 코드라인도 길지 않았다. 먼저 사용법은 다음과 같다.&lt;/p&gt;
+&lt;deckgo-highlight-code language=&quot;javascript&quot;  &gt;
+          &lt;code slot=&quot;code&quot;&gt;import { create } from &amp;#39;zustand&amp;#39;
+
+const useStore = create((set) =&amp;gt; ({
+  count: 1,
+  inc: () =&amp;gt; set((state) =&amp;gt; ({ count: state.count + 1 })),
+}))&lt;/code&gt;
+        &lt;/deckgo-highlight-code&gt;
+&lt;p&gt;아래는 zustand의 타입과 불필요한 코드를 제거한 가져온 핵심 코드들이다.&lt;/p&gt;
+&lt;deckgo-highlight-code language=&quot;javascript&quot;  &gt;
+          &lt;code slot=&quot;code&quot;&gt;import useSyncExternalStoreExports from &amp;#39;use-sync-external-store/shim/with-selector&amp;#39;
+const { useSyncExternalStoreWithSelector } = useSyncExternalStoreExports
+
+const createStore = (createState) =&amp;gt; {
+  let state
+  const listeners = new Set()
+
+  const setState = (partial, replace) =&amp;gt; {
+    // TODO: Remove type assertion once https://github.com/microsoft/TypeScript/issues/37663 is resolved
+    // https://github.com/microsoft/TypeScript/issues/37663#issuecomment-759728342
+    const nextState =
+      typeof partial === &amp;#39;function&amp;#39;
+        ? partial(state)
+        : partial
+    if (!Object.is(nextState, state)) {
+      const previousState = state
+      state =
+        replace ?? (typeof nextState !== &amp;#39;object&amp;#39; || nextState === null)
+          ? nextState
+          : Object.assign({}, state, nextState)
+      listeners.forEach((listener) =&amp;gt; listener(state, previousState))
+    }
+  }
+
+  const getState = () =&amp;gt; state
+
+  const getInitialState = () =&amp;gt; initialState
+
+  const subscribe = (listener) =&amp;gt; {
+    listeners.add(listener)
+    // Unsubscribe
+    return () =&amp;gt; listeners.delete(listener)
+  }
+
+  const destroy = () =&amp;gt; {
+    listeners.clear()
+  }
+
+  const api = { setState, getState, getInitialState, subscribe, destroy }
+  const initialState = (state = createState(setState, getState, api))
+  return api;
+}
+
+export function useStore(
+  api,
+  selector,
+  equalityFn?,
+) {
+  const slice = useSyncExternalStoreWithSelector(
+    api.subscribe,
+    api.getState,
+    api.getServerState || api.getInitialState,
+    selector,
+    equalityFn,
+  )
+  return slice
+}
+
+const createImpl = (createState) =&amp;gt; {
+  const api =
+    typeof createState === &amp;#39;function&amp;#39; ? createStore(createState) : createState
+
+  const useBoundStore = (selector, equalityFn) =&amp;gt;
+    useStore(api, selector, equalityFn)
+
+  Object.assign(useBoundStore, api)
+
+  return useBoundStore
+}
+
+export const create = ((createState) =&amp;gt; createState ? createImpl(createState) : createImpl);&lt;/code&gt;
+        &lt;/deckgo-highlight-code&gt;
+&lt;p&gt;정말이지 이게 끝이다. 물론 기타 타입코드와 여러가지가 다른 코드가 존재하지만 핵심은 이것이다.
+먼저 createStore의 코드를 살펴보자.&lt;/p&gt;
+&lt;p&gt;zustand는 observer pattern을 사용한다. 프론트엔드에서 빠질 수 없는 패턴이랴
+여기서 listener 함수를 받는데 아래 listener함수가 어디서 왔는지 서술하겠다.&lt;/p&gt;
+&lt;deckgo-highlight-code language=&quot;javascript&quot;  &gt;
+          &lt;code slot=&quot;code&quot;&gt;const setState = (partial, replace) =&amp;gt; {
+  const nextState = 생략;
+  listeners.forEach((listener) =&amp;gt; listener(state, previousState))
+}
+
+const getState = () =&amp;gt; state
+
+const getInitialState = () =&amp;gt; initialState
+
+const subscribe = (listener) =&amp;gt; {
+  listeners.add(listener)
+  // Unsubscribe
+  return () =&amp;gt; listeners.delete(listener)
+  }&lt;/code&gt;
+        &lt;/deckgo-highlight-code&gt;
+&lt;p&gt;처음 컴포넌트가 마운트 되었을 때 subscribe 함수가 호출된다. 그 이후에 상태를 업데이트 할 때 마다 리스너들을 순회하여
+리스너 함수를 호출한다. 이렇게 api 객체를 만들어 useSyncExternalStoreWithSelector의 파라미터로 넘긴다.&lt;/p&gt;
+&lt;h2&gt;useSyncExternalStore&lt;/h2&gt;
+&lt;p&gt;react 18이 릴리즈 되면서 나온 훅이다. 해당 게시글에서 useSyncExternalStore를 깊게 설명할 것은 아니고
+어쨌든 해당 훅은 외부 스토어와의 tearing 현상을 막기 위해 리액트 내부와 싱크를 맞추는 훅이다.&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://www.youtube.com/watch?v=KEDUqA9JeIo&quot;&gt;https://www.youtube.com/watch?v=KEDUqA9JeIo&lt;/a&gt;
+위 영상에서 useSyncExternalStore를 사용하여 커스텀 상태관리를 만들고 있다.&lt;/p&gt;
+&lt;p&gt;useSyncExternalStore은 첫번째 인자로 subscribe 함수를 받고 있다. 두번쨰 파라미터로는 해당 상태의 스냅샷을 받는 함수를 받고있다.
+여기서 두번쨰 파라미터로 상태 객체를 전달하는게 아닌 함수 형태로 () =&gt; state 전달해야 하는데 이는 클로져의 특성을 활용하여
+매번 변경되는 state를 반환하기 위함이다. 여기서 중요한 것은 저 listener 함수이다.
+listener 함수는 대체 어디서 넣어주는 것일까?&lt;/p&gt;
+&lt;p&gt;subscribe 함수에 console.log(listener.name) 를 출력해보면 다음과 같은 함수 이름이 나타난다.&lt;/p&gt;
+&lt;deckgo-highlight-code   &gt;
+          &lt;code slot=&quot;code&quot;&gt;handleStoreChange&lt;/code&gt;
+        &lt;/deckgo-highlight-code&gt;
+&lt;h3&gt;handleStoreChange&lt;/h3&gt;
+&lt;p&gt;&lt;a href=&quot;https://github.com/facebook/react/blob/f74c5ccf9469d3389ce3a1ee3b54988049e235f7/packages/use-sync-external-store/src/useSyncExternalStoreShimClient.js#L110&quot;&gt;https://github.com/facebook/react/blob/f74c5ccf9469d3389ce3a1ee3b54988049e235f7/packages/use-sync-external-store/src/useSyncExternalStoreShimClient.js#L110&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;handleStoreChange 해당 함수는 여기서 주입하고 있었다.
+zustand는 react에서 제공하는 useState, useReducer 없이도 useSyncExternalStore 훅을 통하여
+subscribe 함수 의존성을 받아서 리액트에서 상태를 관리해주고 있었디.&lt;/p&gt;
+&lt;deckgo-highlight-code language=&quot;javascript&quot;  &gt;
+          &lt;code slot=&quot;code&quot;&gt;const [{inst}, forceUpdate] = useState({inst: {value, getSnapshot}});
+
+useEffect(() =&amp;gt; {
+    // Check for changes right before subscribing. Subsequent changes will be
+    // detected in the subscription handler.
+    if (checkIfSnapshotChanged(inst)) {
+      // Force a re-render.
+      forceUpdate({inst});
+    }
+    const handleStoreChange = () =&amp;gt; {
+      // TODO: Because there is no cross-renderer API for batching updates, it&amp;#39;s
+      // up to the consumer of this library to wrap their subscription event
+      // with unstable_batchedUpdates. Should we try to detect when this isn&amp;#39;t
+      // the case and print a warning in development?
+
+      // The store changed. Check if the snapshot changed since the last time we
+      // read from the store.
+      if (checkIfSnapshotChanged(inst)) {
+        // Force a re-render.
+        forceUpdate({inst}); &amp;lt;----------------------------------- 상태 업데이트 코드
+      }
+    };
+    // Subscribe to the store and return a clean-up function.
+    return subscribe(handleStoreChange);
+  }, [subscribe]);&lt;/code&gt;
+        &lt;/deckgo-highlight-code&gt;
+&lt;p&gt;다음 포스트는 필자도 useSyncExternalStore 훅을 통해 커스텀 상태 관리를 구현하는 법을 게시 해보겠다.
+또한 useSyncExternalStore 훅 이전 zustand3 버전에서는 어떻게 상태 관리를 하는지 알아보겠다.&lt;/p&gt;</content:encoded></item><item><title><![CDATA[타입 세이프하게 api를 호출해보기]]></title><description><![CDATA[최근 사내에서 서비스 개발 시 type safe하게 api를 호출할 수 있어 좋았던 경험이 있다.
 이를 좀 더 개선하여 간략하게 개발할 수 있도록 작성해 보았다. URL 구조 URL 구조는 다음과 같이 분리할 수 있다. 내용 설명 https…]]></description><link>null/타입 세이프하게 api를 호출해보자/</link><guid isPermaLink="false">null/타입 세이프하게 api를 호출해보자/</guid><pubDate>Sat, 04 May 2024 00:00:00 GMT</pubDate><content:encoded>&lt;p&gt;최근 사내에서 서비스 개발 시 type safe하게 api를 호출할 수 있어 좋았던 경험이 있다.
 이를 좀 더 개선하여 간략하게 개발할 수 있도록 작성해 보았다.&lt;/p&gt;
 &lt;h3&gt;URL 구조&lt;/h3&gt;
