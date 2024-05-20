@@ -93,8 +93,8 @@ type Method = UpperMethod | LowerMethod;
 
 type EndPoint = 'search';
 
-type QueryParams<E extends EndPoint> = {
-  [Key in EndPoint]: E extends 'search'
+type QueryParams = {
+  [Key in EndPoint]: Key extends 'search'
     ? {
         keyword: string;
         start: number;
@@ -110,9 +110,9 @@ type QueryParams<E extends EndPoint> = {
 
 ```typescript
 import { Client, type Response } from './client';
-import type { Method, QueryParams, EndPoint } from './endpoint';
+import type { Method, QueryParams, EndPoint } from '../endpoint';
 
-class ApiClient<
+export default class ApiClient<
   Url extends EndPoint,
   Data extends any = any,
   Body extends Record<string, any> = any,
@@ -143,9 +143,9 @@ class ApiClient<
     return this;
   }
 
-  public setQuery<K extends keyof QueryParams<Url>[Url]>(
+  public setQuery<K extends keyof QueryParams[Url]>(
     key: K,
-    value: QueryParams<Url>[Url][typeof key]
+    value: QueryParams[Url][typeof key]
   ) {
     if (!this.url) throw new Error('url이 설정되어 있지 않습니다.');
 

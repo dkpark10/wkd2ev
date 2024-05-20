@@ -275,5 +275,10 @@ useEffect(() => {
   }, [subscribe]);
 ```
 
+
+## 직접 구현해보기
+
+이제 직접 커스텀 상태관리를 구현해보자. useSyncExternalStore를 사용한다면 아주 간단한 상태관리를 구현할 수 있을 것이다.
+
 다음 포스트는 필자도 useSyncExternalStore 훅을 통해 커스텀 상태 관리를 구현하는 법을 게시 해보겠다.
 또한 useSyncExternalStore훅 이전 zustand3 버전에서는 어떻게 상태 관리를 하는지 알아보겠다.
