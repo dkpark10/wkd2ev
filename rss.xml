@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[Gatsby Starter Blog RSS Feed]]></title><description><![CDATA[Gatsby Starter Blog RSS Feed]]></description><link>http://github.com/dylang/node-rss</link><generator>GatsbyJS</generator><lastBuildDate>Mon, 20 May 2024 00:41:28 GMT</lastBuildDate><item><title><![CDATA[zustands는 어떻게 root provider 없이 상태관리를 할 수 있을까(1)]]></title><description><![CDATA[redux, recoil과는 다르게 zustand는 어떻게 root provider 없이 상태관리를 하는지
+<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[Gatsby Starter Blog RSS Feed]]></title><description><![CDATA[Gatsby Starter Blog RSS Feed]]></description><link>http://github.com/dylang/node-rss</link><generator>GatsbyJS</generator><lastBuildDate>Mon, 20 May 2024 12:16:04 GMT</lastBuildDate><item><title><![CDATA[zustands는 어떻게 root provider 없이 상태관리를 할 수 있을까(1)]]></title><description><![CDATA[redux, recoil과는 다르게 zustand는 어떻게 root provider 없이 상태관리를 하는지
 궁금했다. 아래는 리덕스 공식문서 튜토리얼에서 가져온 예제이다.
 https://ko.redux.js.org/tutorials…]]></description><link>null/zustands는 어떻게 root provider 없이 상태관리를 할 수 있을까(1)/</link><guid isPermaLink="false">null/zustands는 어떻게 root provider 없이 상태관리를 할 수 있을까(1)/</guid><pubDate>Sun, 19 May 2024 00:00:00 GMT</pubDate><content:encoded>&lt;p&gt;redux, recoil과는 다르게 zustand는 어떻게 root provider 없이 상태관리를 하는지
 궁금했다.&lt;/p&gt;
@@ -177,8 +177,8 @@ export const create = ((createState) =&amp;gt; createState ? createImpl(createSt
         &lt;/deckgo-highlight-code&gt;
 &lt;p&gt;정말이지 이게 끝이다. 물론 기타 타입코드와 여러가지가 다른 코드가 존재하지만 핵심은 이것이다.
 먼저 createStore의 코드를 살펴보자.&lt;/p&gt;
-&lt;p&gt;zustand는 observer pattern을 사용한다. 프론트엔드에서 빠질 수 없는 패턴이랴
-여기서 listener 함수를 받는데 아래 listener함수가 어디서 왔는지 서술하겠다.&lt;/p&gt;
+&lt;p&gt;zustand는 &lt;strong&gt;Observer Pattern&lt;/strong&gt;을 사용한다. 프론트엔드에서 빠질 수 없는 패턴이랴
+여기서 listener 함수를 받는데 아래 &lt;em&gt;listener&lt;/em&gt; 함수가 어디서 왔는지 서술하겠다.&lt;/p&gt;
 &lt;deckgo-highlight-code language=&quot;javascript&quot;  &gt;
           &lt;code slot=&quot;code&quot;&gt;const setState = (partial, replace) =&amp;gt; {
   const nextState = 생략;
@@ -195,27 +195,28 @@ const subscribe = (listener) =&amp;gt; {
   return () =&amp;gt; listeners.delete(listener)
   }&lt;/code&gt;
         &lt;/deckgo-highlight-code&gt;
-&lt;p&gt;처음 컴포넌트가 마운트 되었을 때 subscribe 함수가 호출된다. 그 이후에 상태를 업데이트 할 때 마다 리스너들을 순회하여
-리스너 함수를 호출한다. 이렇게 api 객체를 만들어 useSyncExternalStoreWithSelector의 파라미터로 넘긴다.&lt;/p&gt;
+&lt;p&gt;처음 컴포넌트가 마운트 되었을 때 subscribe 함수가 호출된다. 그 이후에 상태를 업데이트 할 때 해당 파라미터가 콜백인지 아닌지
+확인하고 다음 값을 갱신한 후에 리스너들을 순회하여 리스너 함수를 호출한다.
+이렇게 api 객체를 만들어 &lt;strong&gt;useSyncExternalStoreWithSelector&lt;/strong&gt; 의 파라미터로 넘긴다.&lt;/p&gt;
 &lt;h2&gt;useSyncExternalStore&lt;/h2&gt;
-&lt;p&gt;react 18이 릴리즈 되면서 나온 훅이다. 해당 게시글에서 useSyncExternalStore를 깊게 설명할 것은 아니고
-어쨌든 해당 훅은 외부 스토어와의 tearing 현상을 막기 위해 리액트 내부와 싱크를 맞추는 훅이다.&lt;/p&gt;
+&lt;p&gt;react 18이 릴리즈 되면서 나온 훅이다. 해당 게시글에서 &lt;strong&gt;useSyncExternalStore&lt;/strong&gt; 를 자세히 설명할 것은 아니고
+해당 훅은 외부 스토어의 tearing 현상을 막기 위해 리액트 내부와 싱크를 맞추는 훅이다.&lt;/p&gt;
 &lt;p&gt;&lt;a href=&quot;https://www.youtube.com/watch?v=KEDUqA9JeIo&quot;&gt;https://www.youtube.com/watch?v=KEDUqA9JeIo&lt;/a&gt;
 위 영상에서 useSyncExternalStore를 사용하여 커스텀 상태관리를 만들고 있다.&lt;/p&gt;
-&lt;p&gt;useSyncExternalStore은 첫번째 인자로 subscribe 함수를 받고 있다. 두번쨰 파라미터로는 해당 상태의 스냅샷을 받는 함수를 받고있다.
+&lt;p&gt;&lt;strong&gt;useSyncExternalStore&lt;/strong&gt; 은 첫번째 인자로 subscribe 함수를 받고 있다. 두번쨰 파라미터로는 해당 상태의 스냅샷을 받는 함수를 받고있다.
 여기서 두번쨰 파라미터로 상태 객체를 전달하는게 아닌 함수 형태로 () =&gt; state 전달해야 하는데 이는 클로져의 특성을 활용하여
 매번 변경되는 state를 반환하기 위함이다. 여기서 중요한 것은 저 listener 함수이다.
 listener 함수는 대체 어디서 넣어주는 것일까?&lt;/p&gt;
 &lt;p&gt;subscribe 함수에 console.log(listener.name) 를 출력해보면 다음과 같은 함수 이름이 나타난다.&lt;/p&gt;
-&lt;deckgo-highlight-code   &gt;
-          &lt;code slot=&quot;code&quot;&gt;handleStoreChange&lt;/code&gt;
-        &lt;/deckgo-highlight-code&gt;
+&lt;blockquote&gt;
+&lt;p&gt;handleStoreChange&lt;/p&gt;
+&lt;/blockquote&gt;
 &lt;h3&gt;handleStoreChange&lt;/h3&gt;
 &lt;p&gt;&lt;a href=&quot;https://github.com/facebook/react/blob/f74c5ccf9469d3389ce3a1ee3b54988049e235f7/packages/use-sync-external-store/src/useSyncExternalStoreShimClient.js#L110&quot;&gt;https://github.com/facebook/react/blob/f74c5ccf9469d3389ce3a1ee3b54988049e235f7/packages/use-sync-external-store/src/useSyncExternalStoreShimClient.js#L110&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;handleStoreChange 해당 함수는 여기서 주입하고 있었다.
-zustand는 react에서 제공하는 useState, useReducer 없이도 useSyncExternalStore 훅을 통하여
+&lt;p&gt;&lt;strong&gt;handleStoreChange&lt;/strong&gt; 해당 함수는 여기서 주입하고 있었다.
+zustand는 react에서 제공하는 useState, useReducer 없이도 &lt;strong&gt;useSyncExternalStore&lt;/strong&gt; 훅을 통하여
 subscribe 함수 의존성을 받아서 리액트에서 상태를 관리해주고 있었디.&lt;/p&gt;
-&lt;p&gt;아래는 useSyncExternalStoreShimClient의 일부를 가져온 것이다.&lt;/p&gt;
+&lt;p&gt;아래는 &lt;strong&gt;useSyncExternalStoreShimClient&lt;/strong&gt; 의 일부를 가져온 것이다.&lt;/p&gt;
 &lt;deckgo-highlight-code language=&quot;javascript&quot;  &gt;
           &lt;code slot=&quot;code&quot;&gt;const [{inst}, forceUpdate] = useState({inst: {value, getSnapshot}});
 
@@ -243,8 +244,140 @@ useEffect(() =&amp;gt; {
     return subscribe(handleStoreChange);
   }, [subscribe]);&lt;/code&gt;
         &lt;/deckgo-highlight-code&gt;
-&lt;p&gt;다음 포스트는 필자도 useSyncExternalStore 훅을 통해 커스텀 상태 관리를 구현하는 법을 게시 해보겠다.
-또한 useSyncExternalStore훅 이전 zustand3 버전에서는 어떻게 상태 관리를 하는지 알아보겠다.&lt;/p&gt;</content:encoded></item><item><title><![CDATA[타입 세이프하게 api를 호출해보기]]></title><description><![CDATA[최근 사내에서 서비스 개발 시 type safe하게 api를 호출할 수 있어 좋았던 경험이 있다.
+&lt;h2&gt;직접 구현해보기&lt;/h2&gt;
+&lt;p&gt;이제 zustand를 참고하여 직접 커스텀 상태관리를 구현해보자. &lt;strong&gt;useSyncExternalStore&lt;/strong&gt; 를 사용한다면 아주 간단한 상태관리를 구현할 수 있을 것이다.
+상태 관리는 리액트에 위임하고 개발자는 그저 subscribe 함수와 상태 업데이트 시 리스너들을 호출해주면 될 것이다.&lt;/p&gt;
+&lt;p&gt;최종적으로 createStore 함수로 초기 상태값을 받고 반환받은 값을 컴포넌트의 훅형태로 쓸 수 있도록 할 것이다.&lt;/p&gt;
+&lt;deckgo-highlight-code language=&quot;javascript&quot;  &gt;
+          &lt;code slot=&quot;code&quot;&gt;import { useCallback, useSyncExternalStore } from &amp;#39;react&amp;#39;;
+
+const createStore = (initialState) =&amp;gt; {
+  let state = initialState;
+
+  const getState = () =&amp;gt; state;
+
+  const listeners = new Set();
+
+  const setState = (fn) =&amp;gt; {
+    state = fn(state);
+    listeners.forEach((listener) =&amp;gt; listener());
+  };
+
+  const subscribe = (listener) =&amp;gt; {
+    listeners.add(listener);
+    return () =&amp;gt; listeners.delete(listener);
+  };
+
+  return { getState, setState, subscribe };
+};
+
+
+const useStore = (store, selector) =&amp;gt; {
+  const slice = useSyncExternalStore(
+    store.subscribe,
+    useCallback(() =&amp;gt; selector(store.getState()), [store, selector])
+  );
+
+  return [slice, store.setState];
+};&lt;/code&gt;
+        &lt;/deckgo-highlight-code&gt;
+&lt;p&gt;정말이지 간단하게 만들었다. zustand 로직보다는 간단하지만 결국 핵심 패턴은 옵저버 패턴을 이용한 &lt;strong&gt;useSyncExternalStore&lt;/strong&gt; 훅 사용에 있다.
+여기서 &lt;strong&gt;useSyncExternalStore&lt;/strong&gt; 두번쨰 인자로 상태의 스냅샷을 사용하는 쪽에서 selector로 select할 수 있도록 했다.
+store와 selector를 의존성으로 받아 불필요한 리렌더링이 발생하지 않도록 &lt;strong&gt;useCallback&lt;/strong&gt; 으로 감싸주었다.&lt;/p&gt;
+&lt;p&gt;잘 되는지 테스트를 작성해보자.&lt;/p&gt;
+&lt;deckgo-highlight-code language=&quot;javascript&quot;  &gt;
+          &lt;code slot=&quot;code&quot;&gt;test(&amp;#39;형제간 상태 공유&amp;#39;, () =&amp;gt; {
+  const store = createStore({ count: 0 });
+
+  function Brother1() {
+    const [count, setState] = useStore(store, (state) =&amp;gt; state.count);
+
+    return (
+      &amp;lt;React.Fragment&amp;gt;
+        &amp;lt;button
+          onClick={() =&amp;gt; {
+            setState((prev) =&amp;gt; ({ count: prev.count + 1 }));
+          }}
+        &amp;gt;
+          inc
+        &amp;lt;/button&amp;gt;
+        &amp;lt;button
+          onClick={() =&amp;gt; {
+            setState((prev) =&amp;gt; ({ count: prev.count - 1 }));
+          }}
+        &amp;gt;
+          dec
+        &amp;lt;/button&amp;gt;
+        &amp;lt;h1 data-testid=&amp;quot;brother1&amp;quot;&amp;gt;value: {count}&amp;lt;/h1&amp;gt;
+      &amp;lt;/React.Fragment&amp;gt;
+    );
+  }
+
+  function Brother2() {
+    const [count] = useStore(store, (state) =&amp;gt; state.count);
+
+    return (
+      &amp;lt;React.Fragment&amp;gt;
+        &amp;lt;h1 data-testid=&amp;quot;brother2&amp;quot;&amp;gt;value: {count}&amp;lt;/h1&amp;gt;
+      &amp;lt;/React.Fragment&amp;gt;
+    );
+  }
+
+  function Parent() {
+    return (
+      &amp;lt;React.Fragment&amp;gt;
+        &amp;lt;Brother1 /&amp;gt;
+        &amp;lt;Brother2 /&amp;gt;
+      &amp;lt;/React.Fragment&amp;gt;
+    );
+  }
+
+  const { getByText, getByTestId } = render(&amp;lt;Parent /&amp;gt;);
+  fireEvent.click(getByText(&amp;#39;inc&amp;#39;));
+  expect(getByTestId(&amp;#39;brother1&amp;#39;).textContent).toBe(&amp;#39;value: 1&amp;#39;);
+  expect(getByTestId(&amp;#39;brother2&amp;#39;).textContent).toBe(&amp;#39;value: 1&amp;#39;);
+
+  fireEvent.click(getByText(&amp;#39;dec&amp;#39;));
+  expect(getByTestId(&amp;#39;brother1&amp;#39;).textContent).toBe(&amp;#39;value: 0&amp;#39;);
+  expect(getByTestId(&amp;#39;brother2&amp;#39;).textContent).toBe(&amp;#39;value: 0&amp;#39;);
+});&lt;/code&gt;
+        &lt;/deckgo-highlight-code&gt;
+&lt;p&gt;&lt;span
+      class=&quot;gatsby-resp-image-wrapper&quot;
+      style=&quot;position: relative; display: block; margin-left: auto; margin-right: auto; max-width: 630px; &quot;
+    &gt;
+      &lt;a
+    class=&quot;gatsby-resp-image-link&quot;
+    href=&quot;/wkd2ev/static/3383e58e5e3d805a548253deba24ec49/874d1/test.png&quot;
+    style=&quot;display: block&quot;
+    target=&quot;_blank&quot;
+    rel=&quot;noopener&quot;
+  &gt;
+    &lt;span
+    class=&quot;gatsby-resp-image-background-image&quot;
+    style=&quot;padding-bottom: 18.354430379746837%; position: relative; bottom: 0; left: 0; background-image: url(&apos;data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAECAYAAACOXx+WAAAACXBIWXMAABYlAAAWJQFJUiTwAAAAqElEQVR42m2QXQ6CMBCEexwKFVCEApWi/BkFJfHV+59j3CXVEPXhy842m9nZinF+wtgRdXOHPd1QVheoyCBOauhyQJp3yJiiX0id9gINz89+EMZecWxnNOcHGfSIthV8GvZVDhWWCAi14t3/M1sMNW1L8gbZNEF3I5kVkGTIrFPIr0S8kJGMC8CIVLfYEzWl5FM4YUhwjXcWm/jw0aHTS6Wev4Xfo9X8C3O6gY6GW619AAAAAElFTkSuQmCC&apos;); background-size: cover; display: block;&quot;
+  &gt;&lt;/span&gt;
+  &lt;img
+        class=&quot;gatsby-resp-image-image&quot;
+        alt=&quot;test&quot;
+        title=&quot;&quot;
+        src=&quot;/wkd2ev/static/3383e58e5e3d805a548253deba24ec49/f058b/test.png&quot;
+        srcset=&quot;/wkd2ev/static/3383e58e5e3d805a548253deba24ec49/c26ae/test.png 158w,
+/wkd2ev/static/3383e58e5e3d805a548253deba24ec49/6bdcf/test.png 315w,
+/wkd2ev/static/3383e58e5e3d805a548253deba24ec49/f058b/test.png 630w,
+/wkd2ev/static/3383e58e5e3d805a548253deba24ec49/40601/test.png 945w,
+/wkd2ev/static/3383e58e5e3d805a548253deba24ec49/78612/test.png 1260w,
+/wkd2ev/static/3383e58e5e3d805a548253deba24ec49/874d1/test.png 1310w&quot;
+        sizes=&quot;(max-width: 630px) 100vw, 630px&quot;
+        style=&quot;width:100%;height:100%;margin:0;vertical-align:middle;position:absolute;top:0;left:0;&quot;
+        loading=&quot;lazy&quot;
+        decoding=&quot;async&quot;
+      /&gt;
+  &lt;/a&gt;
+    &lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;잘 통과된다.&lt;/p&gt;
+&lt;p&gt;다음 포스트는 필자도 &lt;strong&gt;useSyncExternalStore&lt;/strong&gt; 훅을 통해 커스텀 상태 관리를 구현하는 법을 게시 해보겠다.
+또한 &lt;strong&gt;useSyncExternalStore&lt;/strong&gt; 훅 이전 zustand3 버전에서는 어떻게 상태 관리를 하는지 알아보겠다.&lt;/p&gt;</content:encoded></item><item><title><![CDATA[타입 세이프하게 api를 호출해보기]]></title><description><![CDATA[최근 사내에서 서비스 개발 시 type safe하게 api를 호출할 수 있어 좋았던 경험이 있다.
 이를 좀 더 개선하여 간략하게 개발할 수 있도록 작성해 보았다. URL 구조 URL 구조는 다음과 같이 분리할 수 있다. 내용 설명 https…]]></description><link>null/타입 세이프하게 api를 호출해보자/</link><guid isPermaLink="false">null/타입 세이프하게 api를 호출해보자/</guid><pubDate>Sat, 04 May 2024 00:00:00 GMT</pubDate><content:encoded>&lt;p&gt;최근 사내에서 서비스 개발 시 type safe하게 api를 호출할 수 있어 좋았던 경험이 있다.
 이를 좀 더 개선하여 간략하게 개발할 수 있도록 작성해 보았다.&lt;/p&gt;
 &lt;h3&gt;URL 구조&lt;/h3&gt;
@@ -337,8 +470,8 @@ type Method = UpperMethod | LowerMethod;
 
 type EndPoint = &amp;#39;search&amp;#39;;
 
-type QueryParams&amp;lt;E extends EndPoint&amp;gt; = {
-  [Key in EndPoint]: E extends &amp;#39;search&amp;#39;
+type QueryParams = {
+  [Key in EndPoint]: Key extends &amp;#39;search&amp;#39;
     ? {
         keyword: string;
         start: number;
@@ -352,9 +485,9 @@ type QueryParams&amp;lt;E extends EndPoint&amp;gt; = {
 &lt;p&gt;&lt;em&gt;index.ts&lt;/em&gt;&lt;/p&gt;
 &lt;deckgo-highlight-code language=&quot;typescript&quot;  &gt;
           &lt;code slot=&quot;code&quot;&gt;import { Client, type Response } from &amp;#39;./client&amp;#39;;
-import type { Method, QueryParams, EndPoint } from &amp;#39;./endpoint&amp;#39;;
+import type { Method, QueryParams, EndPoint } from &amp;#39;../endpoint&amp;#39;;
 
-class ApiClient&amp;lt;
+export default class ApiClient&amp;lt;
   Url extends EndPoint,
   Data extends any = any,
   Body extends Record&amp;lt;string, any&amp;gt; = any,
@@ -385,9 +518,9 @@ class ApiClient&amp;lt;
     return this;
   }
 
-  public setQuery&amp;lt;K extends keyof QueryParams&amp;lt;Url&amp;gt;[Url]&amp;gt;(
+  public setQuery&amp;lt;K extends keyof QueryParams[Url]&amp;gt;(
     key: K,
-    value: QueryParams&amp;lt;Url&amp;gt;[Url][typeof key]
+    value: QueryParams[Url][typeof key]
   ) {
     if (!this.url) throw new Error(&amp;#39;url이 설정되어 있지 않습니다.&amp;#39;);
 

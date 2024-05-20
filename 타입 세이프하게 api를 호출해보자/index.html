@@ -91,8 +91,8 @@ type Method = UpperMethod | LowerMethod;
 
 type EndPoint = &#39;search&#39;;
 
-type QueryParams&lt;E extends EndPoint&gt; = {
-  [Key in EndPoint]: E extends &#39;search&#39;
+type QueryParams = {
+  [Key in EndPoint]: Key extends &#39;search&#39;
     ? {
         keyword: string;
         start: number;
@@ -106,9 +106,9 @@ type QueryParams&lt;E extends EndPoint&gt; = {
 <p><em>index.ts</em></p>
 <deckgo-highlight-code language="typescript"  >
           <code slot="code">import { Client, type Response } from &#39;./client&#39;;
-import type { Method, QueryParams, EndPoint } from &#39;./endpoint&#39;;
+import type { Method, QueryParams, EndPoint } from &#39;../endpoint&#39;;
 
-class ApiClient&lt;
+export default class ApiClient&lt;
   Url extends EndPoint,
   Data extends any = any,
   Body extends Record&lt;string, any&gt; = any,
@@ -139,9 +139,9 @@ class ApiClient&lt;
     return this;
   }
 
-  public setQuery&lt;K extends keyof QueryParams&lt;Url&gt;[Url]&gt;(
+  public setQuery&lt;K extends keyof QueryParams[Url]&gt;(
     key: K,
-    value: QueryParams&lt;Url&gt;[Url][typeof key]
+    value: QueryParams[Url][typeof key]
   ) {
     if (!this.url) throw new Error(&#39;url이 설정되어 있지 않습니다.&#39;);
 
