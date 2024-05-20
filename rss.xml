@@ -1,6 +1,6 @@
-<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[Gatsby Starter Blog RSS Feed]]></title><description><![CDATA[Gatsby Starter Blog RSS Feed]]></description><link>http://github.com/dylang/node-rss</link><generator>GatsbyJS</generator><lastBuildDate>Mon, 20 May 2024 00:36:21 GMT</lastBuildDate><item><title><![CDATA[zustands는 어떻게 root provider 없이 상태관리를 할 수 있을까?(1)]]></title><description><![CDATA[redux, recoil과는 다르게 zustand는 어떻게 root provider 없이 상태관리를 하는지
+<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[Gatsby Starter Blog RSS Feed]]></title><description><![CDATA[Gatsby Starter Blog RSS Feed]]></description><link>http://github.com/dylang/node-rss</link><generator>GatsbyJS</generator><lastBuildDate>Mon, 20 May 2024 00:41:28 GMT</lastBuildDate><item><title><![CDATA[zustands는 어떻게 root provider 없이 상태관리를 할 수 있을까(1)]]></title><description><![CDATA[redux, recoil과는 다르게 zustand는 어떻게 root provider 없이 상태관리를 하는지
 궁금했다. 아래는 리덕스 공식문서 튜토리얼에서 가져온 예제이다.
-https://ko.redux.js.org/tutorials…]]></description><link>null/zustands는 어떻게 root provider 없이 상태관리를 할 수 있을까?/</link><guid isPermaLink="false">null/zustands는 어떻게 root provider 없이 상태관리를 할 수 있을까?/</guid><pubDate>Sun, 19 May 2024 00:00:00 GMT</pubDate><content:encoded>&lt;p&gt;redux, recoil과는 다르게 zustand는 어떻게 root provider 없이 상태관리를 하는지
+https://ko.redux.js.org/tutorials…]]></description><link>null/zustands는 어떻게 root provider 없이 상태관리를 할 수 있을까(1)/</link><guid isPermaLink="false">null/zustands는 어떻게 root provider 없이 상태관리를 할 수 있을까(1)/</guid><pubDate>Sun, 19 May 2024 00:00:00 GMT</pubDate><content:encoded>&lt;p&gt;redux, recoil과는 다르게 zustand는 어떻게 root provider 없이 상태관리를 하는지
 궁금했다.&lt;/p&gt;
 &lt;p&gt;아래는 리덕스 공식문서 튜토리얼에서 가져온 예제이다.
 &lt;a href=&quot;https://ko.redux.js.org/tutorials/fundamentals/part-5-ui-react/#passing-the-store-with-provider&quot;&gt;https://ko.redux.js.org/tutorials/fundamentals/part-5-ui-react/#passing-the-store-with-provider&lt;/a&gt;&lt;/p&gt;
@@ -215,6 +215,7 @@ listener 함수는 대체 어디서 넣어주는 것일까?&lt;/p&gt;
 &lt;p&gt;handleStoreChange 해당 함수는 여기서 주입하고 있었다.
 zustand는 react에서 제공하는 useState, useReducer 없이도 useSyncExternalStore 훅을 통하여
 subscribe 함수 의존성을 받아서 리액트에서 상태를 관리해주고 있었디.&lt;/p&gt;
+&lt;p&gt;아래는 useSyncExternalStoreShimClient의 일부를 가져온 것이다.&lt;/p&gt;
 &lt;deckgo-highlight-code language=&quot;javascript&quot;  &gt;
           &lt;code slot=&quot;code&quot;&gt;const [{inst}, forceUpdate] = useState({inst: {value, getSnapshot}});
 
@@ -243,7 +244,7 @@ useEffect(() =&amp;gt; {
   }, [subscribe]);&lt;/code&gt;
         &lt;/deckgo-highlight-code&gt;
 &lt;p&gt;다음 포스트는 필자도 useSyncExternalStore 훅을 통해 커스텀 상태 관리를 구현하는 법을 게시 해보겠다.
-또한 useSyncExternalStore 훅 이전 zustand3 버전에서는 어떻게 상태 관리를 하는지 알아보겠다.&lt;/p&gt;</content:encoded></item><item><title><![CDATA[타입 세이프하게 api를 호출해보기]]></title><description><![CDATA[최근 사내에서 서비스 개발 시 type safe하게 api를 호출할 수 있어 좋았던 경험이 있다.
+또한 useSyncExternalStore훅 이전 zustand3 버전에서는 어떻게 상태 관리를 하는지 알아보겠다.&lt;/p&gt;</content:encoded></item><item><title><![CDATA[타입 세이프하게 api를 호출해보기]]></title><description><![CDATA[최근 사내에서 서비스 개발 시 type safe하게 api를 호출할 수 있어 좋았던 경험이 있다.
 이를 좀 더 개선하여 간략하게 개발할 수 있도록 작성해 보았다. URL 구조 URL 구조는 다음과 같이 분리할 수 있다. 내용 설명 https…]]></description><link>null/타입 세이프하게 api를 호출해보자/</link><guid isPermaLink="false">null/타입 세이프하게 api를 호출해보자/</guid><pubDate>Sat, 04 May 2024 00:00:00 GMT</pubDate><content:encoded>&lt;p&gt;최근 사내에서 서비스 개발 시 type safe하게 api를 호출할 수 있어 좋았던 경험이 있다.
 이를 좀 더 개선하여 간략하게 개발할 수 있도록 작성해 보았다.&lt;/p&gt;
 &lt;h3&gt;URL 구조&lt;/h3&gt;
