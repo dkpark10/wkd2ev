@@ -240,6 +240,7 @@ hr {
   text-decoration: none;
   color: var(--color-text);
   font-weight: var(--fontWeight-bold);
+  padding: var(--spacing-6) 0;
 }
 
 footer {
