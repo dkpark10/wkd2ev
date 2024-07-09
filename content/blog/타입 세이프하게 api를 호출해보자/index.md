@@ -75,7 +75,6 @@ async function getKeywordContents(
 
 ### 적용
 
-
 *endpoint.ts*
 ```typescript
 type UpperMethod =
