@@ -1,0 +1,45 @@
+{
+  "compilerOptions": {
+    "target": "es5", // 컴파일 했을 시 생성되는 JS 버전
+    "module": "esnext", // import 문법 어떤걸 사용할지??
+    "moduleResolution": "node",
+    "noResolve": false,
+    "strictNullChecks": true,
+    "noImplicitAny": true, // any 타입 명시 안할 시
+    "removeComments": false, // 컴파일시 주석 제거
+    "sourceMap": false,
+    "noImplicitReturns": true, // 함수내 모든 경로에서 리턴하지 않을경우 에러
+    "allowJs": true, // ts에서 js 파일을 import해서 사용할 지 여부
+    "jsx": "react-jsx",
+    "allowSyntheticDefaultImports": true,
+    "outDir": "./dist", // 컴파일 아웃풋 경로
+    "strictPropertyInitialization": true, // 클래스 생성자에서 타입체크 강하게 여부
+    "typeRoots": [
+      "./src/types",
+      "./node_modules/@types",
+      "types",
+    ],
+    "lib": [
+      "es5",
+      "es6",
+      "dom"
+    ], // async await 등 es6 이상 문법 사용
+    "types": [
+      "node",
+    ],
+    "baseUrl": ".",
+    "paths": {
+      "@src/*": [
+        "src/*",
+      ],
+    },
+  },
+  "exclude": [
+    "node_modules",
+    "./node_modules/**/*"
+  ],
+  "include": [
+    "./src/**/*",
+    "@types"
+  ]
+}
