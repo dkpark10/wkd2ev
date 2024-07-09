@@ -1,7 +1,7 @@
 ---
 title: zustands는 어떻게 root provider 없이 상태관리를 할 수 있을까(2)
-date: "2024-05-19"
-description: "useReducer, 감탄 "
+date: "2024-05-20"
+description: "useReducer"
 ---
 
 zustand4 버전은 **useSyncExternalStore** 로 상태관리를 리액트에 위임했다.

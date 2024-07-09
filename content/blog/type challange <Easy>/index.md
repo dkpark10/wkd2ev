@@ -1,7 +1,7 @@
 ---
 title: type challange <Easy>
 date: "2022-11-13"
-description: "easy라 재밌는 것 같습니다.."
+description: "easy"
 ---
 
 타입 챌린지 easy를 풀어봅시다...

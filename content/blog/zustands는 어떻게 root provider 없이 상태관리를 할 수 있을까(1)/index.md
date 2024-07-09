@@ -1,7 +1,7 @@
 ---
 title: zustands는 어떻게 root provider 없이 상태관리를 할 수 있을까(1)
 date: "2024-05-19"
-description: "useSyncExternalStore, dai-shi 천재같다."
+description: "useSyncExternalStore"
 ---
 
 redux, recoil과는 다르게 zustand는 어떻게 root provider 없이 상태관리를 하는지 
