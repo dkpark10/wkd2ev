@@ -1,0 +1,31 @@
+@media (min-width: 768px) {
+  .global-container {
+    display: flex;
+    justify-content: center;
+    height: 100vh;
+  }
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.global-wrapper {
+  width: var(--maxWidth-4xl);
+  padding: var(--spacing-5) var(--spacing-3);
+}
+
+.global-wrapper header {
+  font-weight: var(--fontWeight-bold);
+  margin-bottom: var(--spacing-8);
+}
+
+hr {
+  margin: var(--spacing-4) 0;
+}
+
+footer {
+  height: var(--footer-height);
+}

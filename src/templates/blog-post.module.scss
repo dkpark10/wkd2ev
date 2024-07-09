@@ -1,0 +1,33 @@
+section p {
+  padding: var(--spacing-3) 0;
+}
+
+.post-list {
+  list-style: none;
+}
+
+.post-list li {
+  padding: var(--spacing-5) 0;
+}
+
+.post-list-item section {
+  padding-top: var(--spacing-2);
+  font-size: var(--fontSize-2);
+}
+
+.updated-time {
+  padding: var(--spacing-5) 0;
+  color: #7e8085;
+  font-size: var(--fontSize-1);
+}
+
+nav {
+  font-size: var(--fontSize-2);
+  padding: var(--spacing-6) 0;
+  color: var(--color-text);
+  font-weight: var(--fontWeight-bold);
+
+  a:visited {
+    text-decoration: none;
+  }
+}

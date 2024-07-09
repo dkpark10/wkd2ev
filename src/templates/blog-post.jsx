@@ -1,9 +1,9 @@
 import * as React from "react"
 import { Link, graphql } from "gatsby"
 
-import Bio from "../components/bio"
 import Layout from "../components/layout"
 import Seo from "../components/seo"
+import * as styles from './blog-post.module.scss';
 
 const BlogPostTemplate = ({
   data: { previous, next, site, markdownRemark: post },
@@ -18,16 +18,16 @@ const BlogPostTemplate = ({
         itemScope
         itemType="http://schema.org/Article"
       >
-        <header>
+        <div>
           <h1 itemProp="headline">{post.frontmatter.title}</h1>
-        </header>
+        </div>
         <section
           dangerouslySetInnerHTML={{ __html: post.html }}
           itemProp="articleBody"
         />
       </article>
-      <p className="updated-time">최종 수정일: {post.frontmatter.date}</p>
-      <nav className="blog-post-nav">
+      <p className={styles['updatedTime']}>최종 수정일: {post.frontmatter.date}</p>
+      <nav className={styles['blogPostNav']}>
         <ul
           style={{
             display: `flex`,

@@ -5,6 +5,7 @@ import { Link, graphql } from "gatsby"
 import Layout from "../components/layout"
 import Seo from "../components/seo"
 import { DarkModeContext } from "../context/dark-mode";
+import * as styles from './index.module.scss';
 
 /**
  * @param {Object} props
@@ -31,10 +32,10 @@ export default function Home({ data, location }) {
   return (
     <DarkModeProvider isDarkMode={isDarkMode} setIsDarkMode={setIsDarkMode}>
       <Layout location={location} title={siteTitle}>
-        <ol className="post-list">
+        <ol className={styles['postList']}>
           {posts.map((post) => (
             <li key={post.fields.slug}>
-              <article className="post-list-item" itemScope itemType="http://schema.org/Article">
+              <article itemScope itemType="http://schema.org/Article">
                 <h2>
                   <Link to={post.fields.slug} itemProp="url">
                     <span itemProp="headline">{post.frontmatter.title || post.fields.slug}</span>
