@@ -1,0 +1,1140 @@
+<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[Gatsby Starter Blog RSS Feed]]></title><description><![CDATA[Gatsby Starter Blog RSS Feed]]></description><link>http://github.com/dylang/node-rss</link><generator>GatsbyJS</generator><lastBuildDate>Fri, 22 Nov 2024 11:39:47 GMT</lastBuildDate><item><title><![CDATA[qa 과정에서 깃헙페이지에 멀티 페이지 배포 워크 플로우 작성해보기]]></title><description><![CDATA[회사마다 다르겠지만 사내에서 신규 기능이나 버그를 수정하고 다시 피드백을 받는 과정은 간략하게 다음과 같다.  ci/cd 에서 빌드 후 eks에 태그를 푸시하는 과정이 반드시 소요된다. 1px…]]></description><link>null/qa 과정에서 깃헙페이지에 멀티 페이지 배포 워크플로우 작성해보기/</link><guid isPermaLink="false">null/qa 과정에서 깃헙페이지에 멀티 페이지 배포 워크플로우 작성해보기/</guid><pubDate>Wed, 20 Nov 2024 00:00:00 GMT</pubDate><content:encoded>&lt;p&gt;회사마다 다르겠지만 사내에서 신규 기능이나 버그를 수정하고 다시 피드백을 받는 과정은 간략하게 다음과 같다.&lt;/p&gt;
+&lt;p&gt;&lt;span
+      class=&quot;gatsby-resp-image-wrapper&quot;
+      style=&quot;position: relative; display: block; margin-left: auto; margin-right: auto; max-width: 630px; &quot;
+    &gt;
+      &lt;a
+    class=&quot;gatsby-resp-image-link&quot;
+    href=&quot;/wkd2ev/static/4870b1cbe8b45b71cdf5f44c1a3f98a9/5bd27/deploy-before.png&quot;
+    style=&quot;display: block&quot;
+    target=&quot;_blank&quot;
+    rel=&quot;noopener&quot;
+  &gt;
+    &lt;span
+    class=&quot;gatsby-resp-image-background-image&quot;
+    style=&quot;padding-bottom: 23.417721518987342%; position: relative; bottom: 0; left: 0; background-image: url(&apos;data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAFCAYAAABFA8wzAAAACXBIWXMAABYlAAAWJQFJUiTwAAAAmElEQVR42m2QCwrEMAhEc/9DtjdImg9t/i5PEHbLCoPJOI4mrvcuYwzFnFPWWvI8j9Ra5b5vaa3J3vtHQw86gjMayw5RCEGFENd1ifdezvOU4ziklCIxRh1gdQbAMxhgllJSD2cXTHPOKqDRsr2AMxtj9M3TY+ZwjrWZyBMQ2CbvbyADOGsGVscDqOE7rIgQc4YYuJvBv/gAyziHpSRXDVoAAAAASUVORK5CYII=&apos;); background-size: cover; display: block;&quot;
+  &gt;&lt;/span&gt;
+  &lt;img
+        class=&quot;gatsby-resp-image-image&quot;
+        alt=&quot;배포과정&quot;
+        title=&quot;&quot;
+        src=&quot;/wkd2ev/static/4870b1cbe8b45b71cdf5f44c1a3f98a9/f058b/deploy-before.png&quot;
+        srcset=&quot;/wkd2ev/static/4870b1cbe8b45b71cdf5f44c1a3f98a9/c26ae/deploy-before.png 158w,
+/wkd2ev/static/4870b1cbe8b45b71cdf5f44c1a3f98a9/6bdcf/deploy-before.png 315w,
+/wkd2ev/static/4870b1cbe8b45b71cdf5f44c1a3f98a9/f058b/deploy-before.png 630w,
+/wkd2ev/static/4870b1cbe8b45b71cdf5f44c1a3f98a9/40601/deploy-before.png 945w,
+/wkd2ev/static/4870b1cbe8b45b71cdf5f44c1a3f98a9/78612/deploy-before.png 1260w,
+/wkd2ev/static/4870b1cbe8b45b71cdf5f44c1a3f98a9/5bd27/deploy-before.png 1432w&quot;
+        sizes=&quot;(max-width: 630px) 100vw, 630px&quot;
+        style=&quot;width:100%;height:100%;margin:0;vertical-align:middle;position:absolute;top:0;left:0;&quot;
+        loading=&quot;lazy&quot;
+        decoding=&quot;async&quot;
+      /&gt;
+  &lt;/a&gt;
+    &lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;ci/cd 에서 빌드 후 eks에 태그를 푸시하는 과정이 반드시 소요된다.&lt;/p&gt;
+&lt;p&gt;1px 수정이나 개발자가 놓친것이 있어 빠르게 확인해야 할 때 또는 ssr이나 서버의 실행이 필요없는 정적 기능일 때
+eks 푸시 과정을 생략하여 깃헙페이지로 정적 배포 빠르게 피드백을 받아 아래와 같이 효율성을 개선하고 싶었다.&lt;/p&gt;
+&lt;p&gt;&lt;span
+      class=&quot;gatsby-resp-image-wrapper&quot;
+      style=&quot;position: relative; display: block; margin-left: auto; margin-right: auto; max-width: 630px; &quot;
+    &gt;
+      &lt;a
+    class=&quot;gatsby-resp-image-link&quot;
+    href=&quot;/wkd2ev/static/2ffc595f4c3c23527d5fd312134231af/6b95e/deploy-after.png&quot;
+    style=&quot;display: block&quot;
+    target=&quot;_blank&quot;
+    rel=&quot;noopener&quot;
+  &gt;
+    &lt;span
+    class=&quot;gatsby-resp-image-background-image&quot;
+    style=&quot;padding-bottom: 19.62025316455696%; position: relative; bottom: 0; left: 0; background-image: url(&apos;data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAECAYAAACOXx+WAAAACXBIWXMAABYlAAAWJQFJUiTwAAAAm0lEQVR42k2Qyw6EIAxF+f8fNLN1MRs3CvgAlTs9TZpMk6alj9Mb0vu+uu9bz/N4HJL6vqvlrFaKRyxmwjF2W2vqvbuPMZTiUWv1QjFItvz7+WieJhXL6bF4HIfH67rcdzsMlAiDXuIyybquyqbmZNgAeZ5Vl8WV4QAABhSVgBBAL2oJ6SjjEoXO8rapM2Tg0/KYCSjL/19AD8d+g5E4Wh6Oy38AAAAASUVORK5CYII=&apos;); background-size: cover; display: block;&quot;
+  &gt;&lt;/span&gt;
+  &lt;img
+        class=&quot;gatsby-resp-image-image&quot;
+        alt=&quot;배포과정&quot;
+        title=&quot;&quot;
+        src=&quot;/wkd2ev/static/2ffc595f4c3c23527d5fd312134231af/f058b/deploy-after.png&quot;
+        srcset=&quot;/wkd2ev/static/2ffc595f4c3c23527d5fd312134231af/c26ae/deploy-after.png 158w,
+/wkd2ev/static/2ffc595f4c3c23527d5fd312134231af/6bdcf/deploy-after.png 315w,
+/wkd2ev/static/2ffc595f4c3c23527d5fd312134231af/f058b/deploy-after.png 630w,
+/wkd2ev/static/2ffc595f4c3c23527d5fd312134231af/40601/deploy-after.png 945w,
+/wkd2ev/static/2ffc595f4c3c23527d5fd312134231af/78612/deploy-after.png 1260w,
+/wkd2ev/static/2ffc595f4c3c23527d5fd312134231af/6b95e/deploy-after.png 1458w&quot;
+        sizes=&quot;(max-width: 630px) 100vw, 630px&quot;
+        style=&quot;width:100%;height:100%;margin:0;vertical-align:middle;position:absolute;top:0;left:0;&quot;
+        loading=&quot;lazy&quot;
+        decoding=&quot;async&quot;
+      /&gt;
+  &lt;/a&gt;
+    &lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;실제로 사내에서 배포되고 있는 브랜치의 폴더 구조이다. pr 별로 구별하여 정적페이지를 확인하도록 했다.&lt;/p&gt;
+&lt;p&gt;&lt;span
+      class=&quot;gatsby-resp-image-wrapper&quot;
+      style=&quot;position: relative; display: block; margin-left: auto; margin-right: auto; max-width: 630px; &quot;
+    &gt;
+      &lt;a
+    class=&quot;gatsby-resp-image-link&quot;
+    href=&quot;/wkd2ev/static/15fc359cba78228f742f2d02ff873951/11a8f/real.png&quot;
+    style=&quot;display: block&quot;
+    target=&quot;_blank&quot;
+    rel=&quot;noopener&quot;
+  &gt;
+    &lt;span
+    class=&quot;gatsby-resp-image-background-image&quot;
+    style=&quot;padding-bottom: 34.810126582278485%; position: relative; bottom: 0; left: 0; background-image: url(&apos;data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAHCAYAAAAIy204AAAACXBIWXMAABYlAAAWJQFJUiTwAAAA6UlEQVR42n2RiY7CMAxE+//fyQr1yt3mgsxOXCpRIbBk5bKfx87w5xrGeUWtBd8s5Yx5WaGNhdIGq9Lcm8u+v8WYMMzhCW0dHrWitfbh3XIpMIzxPsA5D8fVh01Wy7MPxzmz8DCFBmUIfNSvCkupAnQCPKAC916AZ4GcC4aRChXl/lTIQKWtJFuCT4ghXAq9FKZEhTddcB8XXuycVUVM5eL9zvmdc1ZYVoNp0ZhXjUl53FWEZXfveVTYsCgjbXXrot79VNiHbl+KRGWIUJ6gbb/kCbBX/PXLR8tGQMYSTNdux2TZwbZdYv8BWVUgRscHsfMAAAAASUVORK5CYII=&apos;); background-size: cover; display: block;&quot;
+  &gt;&lt;/span&gt;
+  &lt;img
+        class=&quot;gatsby-resp-image-image&quot;
+        alt=&quot;real&quot;
+        title=&quot;&quot;
+        src=&quot;/wkd2ev/static/15fc359cba78228f742f2d02ff873951/f058b/real.png&quot;
+        srcset=&quot;/wkd2ev/static/15fc359cba78228f742f2d02ff873951/c26ae/real.png 158w,
+/wkd2ev/static/15fc359cba78228f742f2d02ff873951/6bdcf/real.png 315w,
+/wkd2ev/static/15fc359cba78228f742f2d02ff873951/f058b/real.png 630w,
+/wkd2ev/static/15fc359cba78228f742f2d02ff873951/40601/real.png 945w,
+/wkd2ev/static/15fc359cba78228f742f2d02ff873951/78612/real.png 1260w,
+/wkd2ev/static/15fc359cba78228f742f2d02ff873951/11a8f/real.png 1272w&quot;
+        sizes=&quot;(max-width: 630px) 100vw, 630px&quot;
+        style=&quot;width:100%;height:100%;margin:0;vertical-align:middle;position:absolute;top:0;left:0;&quot;
+        loading=&quot;lazy&quot;
+        decoding=&quot;async&quot;
+      /&gt;
+  &lt;/a&gt;
+    &lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;하나의 서비스에 여러 개발자가 따로 작업하고 있을 수 있기에 Pr 단위로 멀티 페이지를 배포 스크립트를 작성했다.&lt;/p&gt;
+&lt;p&gt;예제는 spa 라이브러리 react를 이용했다.&lt;/p&gt;
+&lt;h2&gt;링크&lt;/h2&gt;
+&lt;p&gt;&lt;a href=&quot;https://github.com/dkpark10/action-test/tree/master/apps/react&quot;&gt;https://github.com/dkpark10/action-test/tree/master/apps/react&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://github.com/dkpark10/action-test/blob/master/.github/workflows/page-deploy.yaml&quot;&gt;https://github.com/dkpark10/action-test/blob/master/.github/workflows/page-deploy.yaml&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://dkpark10.github.io/action-test/pr-3/&quot;&gt;https://dkpark10.github.io/action-test/pr-3/ 에제 페이지&lt;/a&gt;&lt;/p&gt;
+&lt;h2&gt;배포 스크립트&lt;/h2&gt;
+&lt;deckgo-highlight-code language=&quot;shell&quot;  &gt;
+          &lt;code slot=&quot;code&quot;&gt;name: &amp;#39;deploy-github-page&amp;#39;
+
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+
+  workflow_dispatch:
+
+jobs:
+  deploy-page:
+    concurrency: ci-${{ github.ref }} #https://github.com/JamesIves/github-pages-deploy-action
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 8
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18.x
+          cache: &amp;#39;pnpm&amp;#39;
+
+      - name: Install dependencies
+        run: pnpm i --frozen-lockfile
+
+      - name: Build
+        run: pnpm --filter=github-action-test-react build
+        env:
+          PUBLIC_PATH: /${{ github.event.repository.name }}/pr-${{ github.event.number }}/
+
+      - name: Move Pr Folder
+        run: |
+          mkdir -p pr-${{ github.event.number }}
+          mv page/* pr-${{ github.event.number }}
+          cp -r pr-${{ github.event.number }} page
+
+      - name: Deploy page
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: page
+          clean: false
+
+      - name: Show Page Info
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          message: |
+            &amp;gt; :rocket: Deployed page of ${{ github.event.pull_request.head.sha }}
+              https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/pr/${{ github.event.number }}&lt;/code&gt;
+        &lt;/deckgo-highlight-code&gt;
+&lt;p&gt;작업자의 pr단위로 페이지를 구성하려면 다음과 같은 설정이 필요하다.&lt;/p&gt;
+&lt;deckgo-highlight-code language=&quot;shell&quot;  &gt;
+          &lt;code slot=&quot;code&quot;&gt;- name: Build
+  run: pnpm --filter=github-action-test-react build
+  env:
+    PUBLIC_PATH: /${{ github.event.repository.name }}/pr-${{ github.event.number }}/&lt;/code&gt;
+        &lt;/deckgo-highlight-code&gt;
+&lt;p&gt;빌드 스크립트는 프로젝트 마다 다를 것이므로 여기서 봐야 할것은 PUBLIC_PATH의 환경변수 설정이다.&lt;/p&gt;
+&lt;p&gt;깃헙 페이지 url 세그먼트는 커스텀 도메인을 사용하지 않는다면 아래와 같은 구조를 띄울 것이다.&lt;/p&gt;
+&lt;deckgo-highlight-code language=&quot;shell&quot;  &gt;
+          &lt;code slot=&quot;code&quot;&gt;https://{userId}.github.io/{repository-name}/**&lt;/code&gt;
+        &lt;/deckgo-highlight-code&gt;
+&lt;p&gt;레포지터리 이름의 마지막 path parameter에 작업자들의 pr단위를 github context에서 제공하는 변수로 생성한다.
+여기서 임시로 pr의 넘버링을 붙혔지만 다른 경로로 생성해도 된다.&lt;/p&gt;
+&lt;p&gt;깃헙 페이지 배포 하기위해서는 해당 라이브러리를 사용 할 것이다.
+JamesIves/github-pages-deploy-action@v4&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://github.com/JamesIves/github-pages-deploy-action&quot;&gt;https://github.com/JamesIves/github-pages-deploy-action&lt;/a&gt;&lt;/p&gt;
+&lt;deckgo-highlight-code language=&quot;shell&quot;  &gt;
+          &lt;code slot=&quot;code&quot;&gt;- name: Move Pr Folder
+  run: |
+    mkdir -p pr-${{ github.event.number }}  // 배포될 폴더를 생성
+    mv page/* pr-${{ github.event.number }}   // 빌드 에셋이 들어 있는 page폴더를 이전 생성한 폴더로 이동
+    cp -r pr-${{ github.event.number }} page  // 복사
+
+- name: Deploy page
+  uses: JamesIves/github-pages-deploy-action@v4
+  with:
+    folder: page
+    clean: false&lt;/code&gt;
+        &lt;/deckgo-highlight-code&gt;
+&lt;p&gt;빌드된 에셋이 들어있는 폴더는 page로 설정 배포시 브랜치의 파일들을 보존하기 위해 clean을 비활성화한다.
+이렇게 된다면 깃헙페이지 배포 브랜치에 폴더 구조 설정은 다 끝났다.&lt;/p&gt;
+&lt;h2&gt;SPA 설정&lt;/h2&gt;
+&lt;p&gt;이제 빌드타임에 호출할 에셋들의 prefix 경로와 런타임 때 경로도 설정해야 한다.
+그렇지 않다면 깃헙 페이지는 리소스를 찾지 못해 404를 반환한다.&lt;/p&gt;
+&lt;p&gt;여기서 base에 변수를 설정했으면 vite는 알아서 import.meta.env.BASE_URL 변수도 자동으로 변경해준다.&lt;/p&gt;
+&lt;deckgo-highlight-code language=&quot;javascript&quot;  &gt;
+          &lt;code slot=&quot;code&quot;&gt;// vite.config.js
+import { defineConfig, loadEnv } from &amp;#39;vite&amp;#39;;
+import react from &amp;#39;@vitejs/plugin-react&amp;#39;;
+import path from &amp;#39;path&amp;#39;;
+
+export default ({ mode }) =&amp;gt; {
+  process.env = { ...process.env, ...loadEnv(mode, process.cwd()) };
+
+  return defineConfig({
+    plugins: [react()],
+
+    base: process.env.PUBLIC_PATH, // base 속성에는 앞서 ci/cd에서 설정한 환경 변수의 경로를 넣어준다.
+
+    build: {
+      outDir: path.resolve(__dirname, &amp;#39;../../page&amp;#39;),
+    },
+  });
+};&lt;/code&gt;
+        &lt;/deckgo-highlight-code&gt;
+&lt;p&gt;이제 이를 실제로 확인하기 위해서는 런타임때 라우터 경로를 해당 페이지 구조에 맞게 변경해줘야 한다.
+react-router-dom 의 createBrowserRouter api를 사용해서 라우터를 생성했다.&lt;/p&gt;
+&lt;deckgo-highlight-code language=&quot;javascript&quot;  &gt;
+          &lt;code slot=&quot;code&quot;&gt;const router = createBrowserRouter([
+  {
+    path: import.meta.env.BASE_URL,
+    element: &amp;lt;Root /&amp;gt;,
+    children: [
+      {
+        path: &amp;#39;&amp;#39;,
+        element: &amp;lt;Home /&amp;gt;,
+      },
+      {
+        path: &amp;#39;about&amp;#39;,
+        element: &amp;lt;About /&amp;gt;,
+      },
+      {
+        path: &amp;#39;sample&amp;#39;,
+        element: &amp;lt;Sample /&amp;gt;,
+      },
+    ],
+  },
+]);&lt;/code&gt;
+        &lt;/deckgo-highlight-code&gt;
+&lt;p&gt;서비스가 단일페이지가 아닐경우 링크를 클릭 시 링크의 주소도 prefix를 설정해줘야 하는데. 아래와 같이 커스텀 링크를 만들어서 해결했다.&lt;/p&gt;
+&lt;deckgo-highlight-code language=&quot;javascript&quot;  &gt;
+          &lt;code slot=&quot;code&quot;&gt;import { Link } from &amp;#39;react-router-dom&amp;#39;;
+
+export default function PrefixLink({
+  prefix = import.meta.env.BASE_URL || &amp;#39;&amp;#39;,
+  to,
+  children,
+}) {
+  return &amp;lt;Link to={prefix + to}&amp;gt;{children}&amp;lt;/Link&amp;gt;;
+}&lt;/code&gt;
+        &lt;/deckgo-highlight-code&gt;
+&lt;p&gt;위 예제는 간략하게 작성된 배포 스크립트이다 실제 실무에서는 서버의 api를 받아 호출할 수 없으므로 msw로 브라우저 api를 모킹하여
+배포하여야 한다.&lt;/p&gt;</content:encoded></item><item><title><![CDATA[zustands는 어떻게 root provider 없이 상태관리를 할 수 있을까(1)]]></title><description><![CDATA[redux, recoil과는 다르게 zustand는 어떻게 root provider 없이 상태관리를 하는지
+궁금했다. 아래는 리덕스 공식문서 튜토리얼에서 가져온 예제이다.
+https://ko.redux.js.org/tutorials…]]></description><link>null/zustands는 어떻게 root provider 없이 상태관리를 할 수 있을까(1)/</link><guid isPermaLink="false">null/zustands는 어떻게 root provider 없이 상태관리를 할 수 있을까(1)/</guid><pubDate>Sun, 19 May 2024 00:00:00 GMT</pubDate><content:encoded>&lt;p&gt;redux, recoil과는 다르게 zustand는 어떻게 root provider 없이 상태관리를 하는지
+궁금했다.&lt;/p&gt;
+&lt;p&gt;아래는 리덕스 공식문서 튜토리얼에서 가져온 예제이다.
+&lt;a href=&quot;https://ko.redux.js.org/tutorials/fundamentals/part-5-ui-react/#passing-the-store-with-provider&quot;&gt;https://ko.redux.js.org/tutorials/fundamentals/part-5-ui-react/#passing-the-store-with-provider&lt;/a&gt;&lt;/p&gt;
+&lt;deckgo-highlight-code language=&quot;javascript&quot;  &gt;
+          &lt;code slot=&quot;code&quot;&gt;import React from &amp;#39;react&amp;#39;
+import ReactDOM from &amp;#39;react-dom&amp;#39;
+import { Provider } from &amp;#39;react-redux&amp;#39;
+
+import App from &amp;#39;./App&amp;#39;
+import store from &amp;#39;./store&amp;#39;
+
+ReactDOM.render(
+  // Render a `&amp;lt;Provider&amp;gt;` around the entire `&amp;lt;App&amp;gt;`,
+  // and pass the Redux store to as a prop
+  &amp;lt;React.StrictMode&amp;gt;
+    &amp;lt;Provider store={store}&amp;gt; &amp;lt;-------------------------- provider
+      &amp;lt;App /&amp;gt;
+    &amp;lt;/Provider&amp;gt;
+  &amp;lt;/React.StrictMode&amp;gt;,
+  document.getElementById(&amp;#39;root&amp;#39;)
+)&lt;/code&gt;
+        &lt;/deckgo-highlight-code&gt;
+&lt;p&gt;아래는 recoil 예제이다.
+&lt;a href=&quot;https://recoiljs.org/ko/docs/introduction/getting-started&quot;&gt;https://recoiljs.org/ko/docs/introduction/getting-started&lt;/a&gt;&lt;/p&gt;
+&lt;deckgo-highlight-code language=&quot;javascript&quot;  &gt;
+          &lt;code slot=&quot;code&quot;&gt;import React from &amp;#39;react&amp;#39;;
+import {
+  RecoilRoot,
+  atom,
+  selector,
+  useRecoilState,
+  useRecoilValue,
+} from &amp;#39;recoil&amp;#39;;
+
+function App() {
+  return (
+    &amp;lt;RecoilRoot&amp;gt;      &amp;lt;-------------------------- provider
+      &amp;lt;CharacterCounter /&amp;gt;
+    &amp;lt;/RecoilRoot&amp;gt;
+  );
+}&lt;/code&gt;
+        &lt;/deckgo-highlight-code&gt;
+&lt;p&gt;이렇듯 전역상태 라이브러리는 앱의 최상단에 위치하여 상태를 관리한다.
+&lt;a href=&quot;https://www.slash.page/ko/libraries/react/use-overlay/src/useOverlay.i18n&quot;&gt;https://www.slash.page/ko/libraries/react/use-overlay/src/useOverlay.i18n&lt;/a&gt;
+toss에서 만든 modal을 선언적으로 관리하기 위한 훅도 최상단에서 모달을 관리한다. 아래는 useOverlay의 root provider 코드이다.&lt;/p&gt;
+&lt;deckgo-highlight-code language=&quot;javascript&quot;  &gt;
+          &lt;code slot=&quot;code&quot;&gt;/** @tossdocs-ignore */
+import React, { createContext, PropsWithChildren, ReactNode, useCallback, useMemo, useState } from &amp;#39;react&amp;#39;;
+
+export const OverlayContext = createContext&amp;lt;{
+  mount(id: string, element: ReactNode): void;
+  unmount(id: string): void;
+} | null&amp;gt;(null);
+if (process.env.NODE_ENV !== &amp;#39;production&amp;#39;) {
+  OverlayContext.displayName = &amp;#39;OverlayContext&amp;#39;;
+}
+
+export function OverlayProvider({ children }: PropsWithChildren) {
+  const [overlayById, setOverlayById] = useState&amp;lt;Map&amp;lt;string, ReactNode&amp;gt;&amp;gt;(new Map()); // &amp;lt;------- 여기서 모달 관리
+
+  const mount = useCallback((id: string, element: ReactNode) =&amp;gt; {
+    setOverlayById(overlayById =&amp;gt; {
+      const cloned = new Map(overlayById);
+      cloned.set(id, element);
+      return cloned;
+    });
+  }, []);
+
+  const unmount = useCallback((id: string) =&amp;gt; {
+    setOverlayById(overlayById =&amp;gt; {
+      const cloned = new Map(overlayById);
+      cloned.delete(id);
+      return cloned;
+    });
+  }, []);
+
+  const context = useMemo(() =&amp;gt; ({ mount, unmount }), [mount, unmount]);
+
+  return (
+    &amp;lt;OverlayContext.Provider value={context}&amp;gt;
+      {children}
+      {[...overlayById.entries()].map(([id, element]) =&amp;gt; (
+        &amp;lt;React.Fragment key={id}&amp;gt;{element}&amp;lt;/React.Fragment&amp;gt;
+      ))}
+    &amp;lt;/OverlayContext.Provider&amp;gt;
+  );
+}&lt;/code&gt;
+        &lt;/deckgo-highlight-code&gt;
+&lt;p&gt;이렇듯 전역으로 상태를 관리 하기 위해서는 최상단 루트 컴포넌트에 상태를 선언하고 이를 children으로 받아서 관리해주고 있다.
+그러나 zustand는 root provider 없이 바로 컴포넌트에서 바로 사용할 수 있다. 이는 어떻게 가능한 것인가.&lt;/p&gt;
+&lt;h2&gt;zustand 코드 파헤쳐 보기&lt;/h2&gt;
+&lt;p&gt;핵심 로직은 생각보다 간단했다. 코드라인도 길지 않았다. 먼저 사용법은 다음과 같다.&lt;/p&gt;
+&lt;deckgo-highlight-code language=&quot;javascript&quot;  &gt;
+          &lt;code slot=&quot;code&quot;&gt;import { create } from &amp;#39;zustand&amp;#39;
+
+const useStore = create((set) =&amp;gt; ({
+  count: 1,
+  inc: () =&amp;gt; set((state) =&amp;gt; ({ count: state.count + 1 })),
+}))&lt;/code&gt;
+        &lt;/deckgo-highlight-code&gt;
+&lt;p&gt;아래는 zustand의 타입과 불필요한 코드를 제거한 가져온 핵심 코드들이다.&lt;/p&gt;
+&lt;deckgo-highlight-code language=&quot;javascript&quot;  &gt;
+          &lt;code slot=&quot;code&quot;&gt;import useSyncExternalStoreExports from &amp;#39;use-sync-external-store/shim/with-selector&amp;#39;
+const { useSyncExternalStoreWithSelector } = useSyncExternalStoreExports
+
+const createStore = (createState) =&amp;gt; {
+  let state
+  const listeners = new Set()
+
+  const setState = (partial, replace) =&amp;gt; {
+    // TODO: Remove type assertion once https://github.com/microsoft/TypeScript/issues/37663 is resolved
+    // https://github.com/microsoft/TypeScript/issues/37663#issuecomment-759728342
+    const nextState =
+      typeof partial === &amp;#39;function&amp;#39;
+        ? partial(state)
+        : partial
+    if (!Object.is(nextState, state)) {
+      const previousState = state
+      state =
+        replace ?? (typeof nextState !== &amp;#39;object&amp;#39; || nextState === null)
+          ? nextState
+          : Object.assign({}, state, nextState)
+      listeners.forEach((listener) =&amp;gt; listener(state, previousState))
+    }
+  }
+
+  const getState = () =&amp;gt; state
+
+  const getInitialState = () =&amp;gt; initialState
+
+  const subscribe = (listener) =&amp;gt; {
+    listeners.add(listener)
+    // Unsubscribe
+    return () =&amp;gt; listeners.delete(listener)
+  }
+
+  const destroy = () =&amp;gt; {
+    listeners.clear()
+  }
+
+  const api = { setState, getState, getInitialState, subscribe, destroy }
+  const initialState = (state = createState(setState, getState, api))
+  return api;
+}
+
+export function useStore(
+  api,
+  selector,
+  equalityFn?,
+) {
+  const slice = useSyncExternalStoreWithSelector(
+    api.subscribe,
+    api.getState,
+    api.getServerState || api.getInitialState,
+    selector,
+    equalityFn,
+  )
+  return slice
+}
+
+const createImpl = (createState) =&amp;gt; {
+  const api =
+    typeof createState === &amp;#39;function&amp;#39; ? createStore(createState) : createState
+
+  const useBoundStore = (selector, equalityFn) =&amp;gt;
+    useStore(api, selector, equalityFn)
+
+  Object.assign(useBoundStore, api)
+
+  return useBoundStore
+}
+
+export const create = ((createState) =&amp;gt; createState ? createImpl(createState) : createImpl);&lt;/code&gt;
+        &lt;/deckgo-highlight-code&gt;
+&lt;p&gt;정말이지 이게 끝이다. 물론 기타 타입코드와 여러가지가 다른 코드가 존재하지만 핵심은 이것이다.
+먼저 createStore의 코드를 살펴보자.&lt;/p&gt;
+&lt;p&gt;zustand는 &lt;strong&gt;Observer Pattern&lt;/strong&gt;을 사용한다. 프론트엔드에서 빠질 수 없는 패턴이랴
+여기서 listener 함수를 받는데 아래 &lt;em&gt;listener&lt;/em&gt; 함수가 어디서 왔는지 서술하겠다.&lt;/p&gt;
+&lt;deckgo-highlight-code language=&quot;javascript&quot;  &gt;
+          &lt;code slot=&quot;code&quot;&gt;const setState = (partial, replace) =&amp;gt; {
+  const nextState = 생략;
+  listeners.forEach((listener) =&amp;gt; listener(state, previousState))
+}
+
+const getState = () =&amp;gt; state
+
+const getInitialState = () =&amp;gt; initialState
+
+const subscribe = (listener) =&amp;gt; {
+  listeners.add(listener)
+  // Unsubscribe
+  return () =&amp;gt; listeners.delete(listener)
+  }&lt;/code&gt;
+        &lt;/deckgo-highlight-code&gt;
+&lt;p&gt;처음 컴포넌트가 마운트 되었을 때 subscribe 함수가 호출된다. 그 이후에 상태를 업데이트 할 때 해당 파라미터가 콜백인지 아닌지
+확인하고 다음 값을 갱신한 후에 리스너들을 순회하여 리스너 함수를 호출한다.
+이렇게 api 객체를 만들어 &lt;strong&gt;useSyncExternalStoreWithSelector&lt;/strong&gt; 의 파라미터로 넘긴다.&lt;/p&gt;
+&lt;h2&gt;useSyncExternalStore&lt;/h2&gt;
+&lt;p&gt;react 18이 릴리즈 되면서 나온 훅이다. 해당 게시글에서 &lt;strong&gt;useSyncExternalStore&lt;/strong&gt; 를 자세히 설명할 것은 아니고
+해당 훅은 외부 스토어의 tearing 현상을 막기 위해 리액트 내부와 싱크를 맞추는 훅이다.&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://www.youtube.com/watch?v=KEDUqA9JeIo&quot;&gt;https://www.youtube.com/watch?v=KEDUqA9JeIo&lt;/a&gt;
+위 영상에서 useSyncExternalStore를 사용하여 커스텀 상태관리를 만들고 있다.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;useSyncExternalStore&lt;/strong&gt; 은 첫번째 인자로 subscribe 함수를 받고 있다. 두번쨰 파라미터로는 해당 상태의 스냅샷을 받는 함수를 받고있다.
+여기서 두번쨰 파라미터로 상태 객체를 전달하는게 아닌 함수 형태로 () =&gt; state 전달해야 하는데 이는 클로져의 특성을 활용하여
+매번 변경되는 state를 반환하기 위함이다. 여기서 중요한 것은 저 listener 함수이다.
+listener 함수는 대체 어디서 넣어주는 것일까?&lt;/p&gt;
+&lt;p&gt;subscribe 함수에 console.log(listener.name) 를 출력해보면 다음과 같은 함수 이름이 나타난다.&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;handleStoreChange&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3&gt;handleStoreChange&lt;/h3&gt;
+&lt;p&gt;&lt;a href=&quot;https://github.com/facebook/react/blob/f74c5ccf9469d3389ce3a1ee3b54988049e235f7/packages/use-sync-external-store/src/useSyncExternalStoreShimClient.js#L110&quot;&gt;https://github.com/facebook/react/blob/f74c5ccf9469d3389ce3a1ee3b54988049e235f7/packages/use-sync-external-store/src/useSyncExternalStoreShimClient.js#L110&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;handleStoreChange&lt;/strong&gt; 해당 함수는 여기서 주입하고 있었다.
+zustand는 react에서 제공하는 useState, useReducer 없이도 &lt;strong&gt;useSyncExternalStore&lt;/strong&gt; 훅을 통하여
+subscribe 함수 의존성을 받아서 리액트에서 상태를 관리해주고 있었디.&lt;/p&gt;
+&lt;p&gt;아래는 &lt;strong&gt;useSyncExternalStoreShimClient&lt;/strong&gt; 의 일부를 가져온 것이다.&lt;/p&gt;
+&lt;deckgo-highlight-code language=&quot;javascript&quot;  &gt;
+          &lt;code slot=&quot;code&quot;&gt;const [{inst}, forceUpdate] = useState({inst: {value, getSnapshot}});
+
+useEffect(() =&amp;gt; {
+    // Check for changes right before subscribing. Subsequent changes will be
+    // detected in the subscription handler.
+    if (checkIfSnapshotChanged(inst)) {
+      // Force a re-render.
+      forceUpdate({inst});
+    }
+    const handleStoreChange = () =&amp;gt; {
+      // TODO: Because there is no cross-renderer API for batching updates, it&amp;#39;s
+      // up to the consumer of this library to wrap their subscription event
+      // with unstable_batchedUpdates. Should we try to detect when this isn&amp;#39;t
+      // the case and print a warning in development?
+
+      // The store changed. Check if the snapshot changed since the last time we
+      // read from the store.
+      if (checkIfSnapshotChanged(inst)) {
+        // Force a re-render.
+        forceUpdate({inst}); &amp;lt;----------------------------------- 상태 업데이트 코드
+      }
+    };
+    // Subscribe to the store and return a clean-up function.
+    return subscribe(handleStoreChange);
+  }, [subscribe]);&lt;/code&gt;
+        &lt;/deckgo-highlight-code&gt;
+&lt;h2&gt;직접 구현해보기&lt;/h2&gt;
+&lt;p&gt;이제 zustand를 참고하여 직접 커스텀 상태관리를 구현해보자. &lt;strong&gt;useSyncExternalStore&lt;/strong&gt; 를 사용한다면 아주 간단한 상태관리를 구현할 수 있을 것이다.
+상태 관리는 리액트에 위임하고 개발자는 그저 subscribe 함수와 상태 업데이트 시 리스너들을 호출해주면 될 것이다.&lt;/p&gt;
+&lt;p&gt;최종적으로 createStore 함수로 초기 상태값을 받고 반환받은 값을 컴포넌트의 훅형태로 쓸 수 있도록 할 것이다.&lt;/p&gt;
+&lt;deckgo-highlight-code language=&quot;javascript&quot;  &gt;
+          &lt;code slot=&quot;code&quot;&gt;import { useCallback, useSyncExternalStore } from &amp;#39;react&amp;#39;;
+
+const createStore = (initialState) =&amp;gt; {
+  let state = initialState;
+
+  const getState = () =&amp;gt; state;
+
+  const listeners = new Set();
+
+  const setState = (fn) =&amp;gt; {
+    state = fn(state);
+    listeners.forEach((listener) =&amp;gt; listener());
+  };
+
+  const subscribe = (listener) =&amp;gt; {
+    listeners.add(listener);
+    return () =&amp;gt; listeners.delete(listener);
+  };
+
+  return { getState, setState, subscribe };
+};
+
+
+const useStore = (store, selector) =&amp;gt; {
+  const slice = useSyncExternalStore(
+    store.subscribe,
+    useCallback(() =&amp;gt; selector(store.getState()), [store, selector])
+  );
+
+  return [slice, store.setState];
+};&lt;/code&gt;
+        &lt;/deckgo-highlight-code&gt;
+&lt;p&gt;정말이지 간단하게 만들었다. zustand 로직보다는 간단하지만 결국 핵심 패턴은 옵저버 패턴을 이용한 &lt;strong&gt;useSyncExternalStore&lt;/strong&gt; 훅 사용에 있다.
+여기서 &lt;strong&gt;useSyncExternalStore&lt;/strong&gt; 두번쨰 인자로 상태의 스냅샷을 사용하는 쪽에서 selector로 select할 수 있도록 했다.
+store와 selector를 의존성으로 받아 불필요한 리렌더링이 발생하지 않도록 &lt;strong&gt;useCallback&lt;/strong&gt; 으로 감싸주었다.&lt;/p&gt;
+&lt;p&gt;잘 되는지 테스트를 작성해보자.&lt;/p&gt;
+&lt;deckgo-highlight-code language=&quot;javascript&quot;  &gt;
+          &lt;code slot=&quot;code&quot;&gt;test(&amp;#39;형제간 상태 공유&amp;#39;, () =&amp;gt; {
+  const store = createStore({ count: 0 });
+
+  function Brother1() {
+    const [count, setState] = useStore(store, (state) =&amp;gt; state.count);
+
+    return (
+      &amp;lt;React.Fragment&amp;gt;
+        &amp;lt;button
+          onClick={() =&amp;gt; {
+            setState((prev) =&amp;gt; ({ count: prev.count + 1 }));
+          }}
+        &amp;gt;
+          inc
+        &amp;lt;/button&amp;gt;
+        &amp;lt;button
+          onClick={() =&amp;gt; {
+            setState((prev) =&amp;gt; ({ count: prev.count - 1 }));
+          }}
+        &amp;gt;
+          dec
+        &amp;lt;/button&amp;gt;
+        &amp;lt;h1 data-testid=&amp;quot;brother1&amp;quot;&amp;gt;value: {count}&amp;lt;/h1&amp;gt;
+      &amp;lt;/React.Fragment&amp;gt;
+    );
+  }
+
+  function Brother2() {
+    const [count] = useStore(store, (state) =&amp;gt; state.count);
+
+    return (
+      &amp;lt;React.Fragment&amp;gt;
+        &amp;lt;h1 data-testid=&amp;quot;brother2&amp;quot;&amp;gt;value: {count}&amp;lt;/h1&amp;gt;
+      &amp;lt;/React.Fragment&amp;gt;
+    );
+  }
+
+  function Parent() {
+    return (
+      &amp;lt;React.Fragment&amp;gt;
+        &amp;lt;Brother1 /&amp;gt;
+        &amp;lt;Brother2 /&amp;gt;
+      &amp;lt;/React.Fragment&amp;gt;
+    );
+  }
+
+  const { getByText, getByTestId } = render(&amp;lt;Parent /&amp;gt;);
+  fireEvent.click(getByText(&amp;#39;inc&amp;#39;));
+  expect(getByTestId(&amp;#39;brother1&amp;#39;).textContent).toBe(&amp;#39;value: 1&amp;#39;);
+  expect(getByTestId(&amp;#39;brother2&amp;#39;).textContent).toBe(&amp;#39;value: 1&amp;#39;);
+
+  fireEvent.click(getByText(&amp;#39;dec&amp;#39;));
+  expect(getByTestId(&amp;#39;brother1&amp;#39;).textContent).toBe(&amp;#39;value: 0&amp;#39;);
+  expect(getByTestId(&amp;#39;brother2&amp;#39;).textContent).toBe(&amp;#39;value: 0&amp;#39;);
+});&lt;/code&gt;
+        &lt;/deckgo-highlight-code&gt;
+&lt;p&gt;잘 통과된다.&lt;/p&gt;
+&lt;p&gt;&lt;span
+      class=&quot;gatsby-resp-image-wrapper&quot;
+      style=&quot;position: relative; display: block; margin-left: auto; margin-right: auto; max-width: 630px; &quot;
+    &gt;
+      &lt;a
+    class=&quot;gatsby-resp-image-link&quot;
+    href=&quot;/wkd2ev/static/3383e58e5e3d805a548253deba24ec49/874d1/test.png&quot;
+    style=&quot;display: block&quot;
+    target=&quot;_blank&quot;
+    rel=&quot;noopener&quot;
+  &gt;
+    &lt;span
+    class=&quot;gatsby-resp-image-background-image&quot;
+    style=&quot;padding-bottom: 18.354430379746837%; position: relative; bottom: 0; left: 0; background-image: url(&apos;data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAECAYAAACOXx+WAAAACXBIWXMAABYlAAAWJQFJUiTwAAAAqElEQVR42m2QXQ6CMBCEexwKFVCEApWi/BkFJfHV+59j3CXVEPXhy842m9nZinF+wtgRdXOHPd1QVheoyCBOauhyQJp3yJiiX0id9gINz89+EMZecWxnNOcHGfSIthV8GvZVDhWWCAi14t3/M1sMNW1L8gbZNEF3I5kVkGTIrFPIr0S8kJGMC8CIVLfYEzWl5FM4YUhwjXcWm/jw0aHTS6Wev4Xfo9X8C3O6gY6GW619AAAAAElFTkSuQmCC&apos;); background-size: cover; display: block;&quot;
+  &gt;&lt;/span&gt;
+  &lt;img
+        class=&quot;gatsby-resp-image-image&quot;
+        alt=&quot;test&quot;
+        title=&quot;&quot;
+        src=&quot;/wkd2ev/static/3383e58e5e3d805a548253deba24ec49/f058b/test.png&quot;
+        srcset=&quot;/wkd2ev/static/3383e58e5e3d805a548253deba24ec49/c26ae/test.png 158w,
+/wkd2ev/static/3383e58e5e3d805a548253deba24ec49/6bdcf/test.png 315w,
+/wkd2ev/static/3383e58e5e3d805a548253deba24ec49/f058b/test.png 630w,
+/wkd2ev/static/3383e58e5e3d805a548253deba24ec49/40601/test.png 945w,
+/wkd2ev/static/3383e58e5e3d805a548253deba24ec49/78612/test.png 1260w,
+/wkd2ev/static/3383e58e5e3d805a548253deba24ec49/874d1/test.png 1310w&quot;
+        sizes=&quot;(max-width: 630px) 100vw, 630px&quot;
+        style=&quot;width:100%;height:100%;margin:0;vertical-align:middle;position:absolute;top:0;left:0;&quot;
+        loading=&quot;lazy&quot;
+        decoding=&quot;async&quot;
+      /&gt;
+  &lt;/a&gt;
+    &lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;다음 포스트는 &lt;strong&gt;useSyncExternalStore&lt;/strong&gt; 훅 이전 zustand3 버전에서는 어떻게 상태 관리를 하는지 알아보겠다.&lt;/p&gt;</content:encoded></item><item><title><![CDATA[타입 세이프하게 api를 호출해보기]]></title><description><![CDATA[최근 사내에서 서비스 개발 시 type safe하게 api를 호출할 수 있어 좋았던 경험이 있다.
+이를 좀 더 개선하여 간략하게 개발할 수 있도록 작성해 보았다. URL 구조 URL 구조는 다음과 같이 분리할 수 있다. 내용 설명 https…]]></description><link>null/타입 세이프하게 api를 호출해보자/</link><guid isPermaLink="false">null/타입 세이프하게 api를 호출해보자/</guid><pubDate>Sat, 04 May 2024 00:00:00 GMT</pubDate><content:encoded>&lt;p&gt;최근 사내에서 서비스 개발 시 type safe하게 api를 호출할 수 있어 좋았던 경험이 있다.
+이를 좀 더 개선하여 간략하게 개발할 수 있도록 작성해 보았다.&lt;/p&gt;
+&lt;h2&gt;URL 구조&lt;/h2&gt;
+&lt;deckgo-highlight-code   &gt;
+          &lt;code slot=&quot;code&quot;&gt;https://example.com/content/1?start=0&amp;amp;end=10&lt;/code&gt;
+        &lt;/deckgo-highlight-code&gt;
+&lt;p&gt;URL 구조는 다음과 같이 분리할 수 있다.&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;내용&lt;/th&gt;
+&lt;th&gt;설명&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;https&lt;/td&gt;
+&lt;td&gt;프로토콜&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;example.com&lt;/td&gt;
+&lt;td&gt;도메인&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;content/1&lt;/td&gt;
+&lt;td&gt;경로&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;?start=0&amp;#x26;end=10&lt;/td&gt;
+&lt;td&gt;쿼리스트링&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;아무래도 회사마다 개발자마다 다르겠지만 기본적으로
+baseUrl은 프로토콜과 도메인 까지는 기본 설정으로 주입하고 사용될 것이다.&lt;/p&gt;
+&lt;deckgo-highlight-code language=&quot;typescript&quot;  &gt;
+          &lt;code slot=&quot;code&quot;&gt;import axios from &amp;#39;axios&amp;#39;;
+import got from &amp;#39;got&amp;#39;;
+
+const axiosInstance = axios.create({
+  baseURL: &amp;#39;https://example.com&amp;#39;
+});
+
+const gotClient = got.extend({
+  url: &amp;#39;https://example.com&amp;#39;,
+});&lt;/code&gt;
+        &lt;/deckgo-highlight-code&gt;
+&lt;p&gt;예를 들어 호출해야 하는 api 주소가 아래와 같다고 해보자.
+해당 api는 유저가 입력한 키워드의 보여줄 게시글들을 반환하는데 키워드가 있고
+정렬 타입이 있으며 pagination 이 적용되어 있다.&lt;/p&gt;
+&lt;deckgo-highlight-code   &gt;
+          &lt;code slot=&quot;code&quot;&gt;https://example.com/search/?keyword=맛집&amp;amp;order=desc&amp;amp;start=0&amp;amp;end=10&lt;/code&gt;
+        &lt;/deckgo-highlight-code&gt;
+&lt;p&gt;이를 호출한다면 다음과 같을 것이다.&lt;/p&gt;
+&lt;deckgo-highlight-code language=&quot;typescript&quot;  &gt;
+          &lt;code slot=&quot;code&quot;&gt;await axios.get(
+    `https://example.com/search/?keyword=${keyword}&amp;amp;order=${order}&amp;amp;start=${start}&amp;amp;end=${end}`
+  );&lt;/code&gt;
+        &lt;/deckgo-highlight-code&gt;
+&lt;p&gt;그렇지만 api엔드포인트의 수정사항이 들어왔을 때 해당 api를 사용하는 쪽에 일괄 수정이 필요할 것이다.
+사실 이렇게 호출하는 방법이 좋지 않은 것을 알고 있을 것이다.&lt;/p&gt;
+&lt;p&gt;변경에 취약하기에 한번 함수로 감싸주는 것만으로 원할한 해결이 가능하다. 함수로 감싼다면 수정해야할
+관리 포인트를 하나로 집중할 수 있으니까&lt;/p&gt;
+&lt;deckgo-highlight-code language=&quot;typescript&quot;  &gt;
+          &lt;code slot=&quot;code&quot;&gt;async function getKeywordContents(
+  keyword: string, order: &amp;#39;desc&amp;#39; | &amp;#39;asec&amp;#39;, start: number, end: number) {
+
+  return await axios.get(
+    `https://example.com/search/?keyword=${keyword}&amp;amp;order=${order}&amp;amp;start=${start}&amp;amp;end=${end}`
+  );
+}&lt;/code&gt;
+        &lt;/deckgo-highlight-code&gt;
+&lt;p&gt;사실 api 호출 코드는 처음 프로젝트를 작성할 때 말고는 수정사항이 빈번한 영역이라고 보기는 힘들다.
+다만 처음 작성할 때 수정사항에 대응 하여 좀 더 수월하게 개발 할 수 있다면 더 좋을 것이다.&lt;/p&gt;
+&lt;h2&gt;적용&lt;/h2&gt;
+&lt;p&gt;&lt;em&gt;endpoint.ts&lt;/em&gt;&lt;/p&gt;
+&lt;deckgo-highlight-code language=&quot;typescript&quot;  &gt;
+          &lt;code slot=&quot;code&quot;&gt;type UpperMethod =
+  | &amp;#39;GET&amp;#39;
+  | &amp;#39;POST&amp;#39;
+  | &amp;#39;PUT&amp;#39;
+  | &amp;#39;PATCH&amp;#39;
+  | &amp;#39;DELETE&amp;#39;
+  | &amp;#39;HEAD&amp;#39;
+  | &amp;#39;OPTIONS&amp;#39;;
+
+type LowerMethod = Lowercase&amp;lt;UpperMethod&amp;gt;;
+
+type Method = UpperMethod | LowerMethod;
+
+type EndPoint = &amp;#39;search&amp;#39;;
+
+type QueryParams = {
+  [Key in EndPoint]: Key extends &amp;#39;search&amp;#39;
+    ? {
+        keyword: string;
+        start: number;
+        end: number;
+      }
+    : {
+        [key: string]: any;
+      };
+};&lt;/code&gt;
+        &lt;/deckgo-highlight-code&gt;
+&lt;p&gt;&lt;em&gt;index.ts&lt;/em&gt;&lt;/p&gt;
+&lt;deckgo-highlight-code language=&quot;typescript&quot;  &gt;
+          &lt;code slot=&quot;code&quot;&gt;import { Client, type Response } from &amp;#39;./client&amp;#39;;
+import type { Method, QueryParams, EndPoint } from &amp;#39;../endpoint&amp;#39;;
+
+export default class ApiClient&amp;lt;
+  Url extends EndPoint,
+  Data extends any = any,
+  Body extends Record&amp;lt;string, any&amp;gt; = any,
+&amp;gt; extends Client {
+  private url: URL;
+
+  private body: Body;
+
+  private method: Method = &amp;#39;get&amp;#39;;
+  
+  private headers: Record&amp;lt;string, any&amp;gt; = {};
+
+  constructor() {
+    super();
+  }
+
+  public setUrl(url: Url) {
+    try {
+      this.url = new URL(`${this.baseURL}/${url}`);
+      return this;
+    } catch (error) {
+      console.error(&amp;#39;URL error&amp;#39;, error);
+    }
+  }
+
+  public setMethod&amp;lt;M extends Method = &amp;#39;get&amp;#39;&amp;gt;(method: M) {
+    this.method = method;
+    return this;
+  }
+
+  public setQuery&amp;lt;K extends keyof QueryParams[Url]&amp;gt;(
+    key: K,
+    value: QueryParams[Url][typeof key]
+  ) {
+    if (!this.url) throw new Error(&amp;#39;url이 설정되어 있지 않습니다.&amp;#39;);
+
+    this.url.searchParams.set(String(key), String(value));
+    return this;
+  }
+
+  public setBody(body: Body) {
+    this.body = body;
+    return this;
+  }
+
+  public async retrieve(): Promise&amp;lt;Response&amp;lt;Data&amp;gt;&amp;gt; {
+    const reqData = this.transform&amp;lt;Body&amp;gt;({
+      url: this.url,
+      method: this.method,
+      body: this.body,
+      headers: this.headers,
+    });
+    return await this.instance&amp;lt;Data&amp;gt;(reqData).then((res) =&amp;gt; this.response(res));
+  }
+}&lt;/code&gt;
+        &lt;/deckgo-highlight-code&gt;
+&lt;p&gt;&lt;em&gt;client.ts&lt;/em&gt;&lt;/p&gt;
+&lt;deckgo-highlight-code language=&quot;typescript&quot;  &gt;
+          &lt;code slot=&quot;code&quot;&gt;import axios, {
+  AxiosResponse,
+  type AxiosInstance,
+  AxiosRequestConfig,
+} from &amp;#39;axios&amp;#39;;
+import type { Method } from &amp;#39;../types&amp;#39;;
+
+const baseURL = &amp;#39;https://example.com&amp;#39;;
+
+const axiosInstance: AxiosInstance = axios.create({
+  baseURL,
+});
+
+export interface Request&amp;lt;Body&amp;gt; {
+  url: URL;
+  method: Method;
+  body?: Body;
+  headers?: Record&amp;lt;string, any&amp;gt;;
+}
+
+export interface Response&amp;lt;D&amp;gt; {
+  status: number;
+  data: D;
+}
+
+export abstract class Client {
+  protected baseURL = baseURL;
+
+  protected instance: AxiosInstance;
+
+  constructor() {
+    this.instance = axiosInstance;
+  }
+
+  protected response&amp;lt;Data&amp;gt;(response: AxiosResponse&amp;lt;Data&amp;gt;): Response&amp;lt;Data&amp;gt; {
+    const { status, data } = response;
+    return { status, data };
+  }
+
+  protected transform&amp;lt;Body&amp;gt;({ url, method, body }: Request&amp;lt;Body&amp;gt;): AxiosRequestConfig {
+    return {
+      url: url.href,
+      method,
+      data: body,
+    };
+  }
+}&lt;/code&gt;
+        &lt;/deckgo-highlight-code&gt;
+&lt;p&gt;굳이 이렇게 까지 작성해야 하나 싶지만 처음 신경써서 작성한다면 클러이언트 호출 시 type safe하게 호출하여
+DX가 좋았다. 사용하는 쪽에서 자동완성으로 편하게 호출할 수 있다.&lt;/p&gt;
+&lt;p&gt;&lt;span
+      class=&quot;gatsby-resp-image-wrapper&quot;
+      style=&quot;position: relative; display: block; margin-left: auto; margin-right: auto; max-width: 630px; &quot;
+    &gt;
+      &lt;a
+    class=&quot;gatsby-resp-image-link&quot;
+    href=&quot;/wkd2ev/static/1a436d700c252066023b716654965123/65654/type-safe.png&quot;
+    style=&quot;display: block&quot;
+    target=&quot;_blank&quot;
+    rel=&quot;noopener&quot;
+  &gt;
+    &lt;span
+    class=&quot;gatsby-resp-image-background-image&quot;
+    style=&quot;padding-bottom: 20.253164556962027%; position: relative; bottom: 0; left: 0; background-image: url(&apos;data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAECAYAAACOXx+WAAAACXBIWXMAABYlAAAWJQFJUiTwAAAA7UlEQVR42kWP207CQBRF+RDFmtAyvcwwLUyZttAqptYokSjUy4P//xnLIwnxYWWfnMvOPhNtNtjsgYW9w5WipsX6AVsN+OGL5/GH0/jB4fhNfxrJuy22aOjqDUXVEWWeJF2j0vLMRC8axuOeYf9I+/ZCOz6h6x7tdihZXlqHW1VkRo5yJ31PqktcUWIKz0wtiYR57FCxGEZJweuhkRSS7N5j+5owzslcRSpGc+uZhoabyBCIBjNNIPW5F2pu5+ZMlElC45kkusKtG7byil41hJEMVEm96vjs3xl3B2aJ5UpppkqMYvOvl1q4lvkfvyOagICSk9ewAAAAAElFTkSuQmCC&apos;); background-size: cover; display: block;&quot;
+  &gt;&lt;/span&gt;
+  &lt;img
+        class=&quot;gatsby-resp-image-image&quot;
+        alt=&quot;type-safe한 api 호출&quot;
+        title=&quot;&quot;
+        src=&quot;/wkd2ev/static/1a436d700c252066023b716654965123/f058b/type-safe.png&quot;
+        srcset=&quot;/wkd2ev/static/1a436d700c252066023b716654965123/c26ae/type-safe.png 158w,
+/wkd2ev/static/1a436d700c252066023b716654965123/6bdcf/type-safe.png 315w,
+/wkd2ev/static/1a436d700c252066023b716654965123/f058b/type-safe.png 630w,
+/wkd2ev/static/1a436d700c252066023b716654965123/65654/type-safe.png 872w&quot;
+        sizes=&quot;(max-width: 630px) 100vw, 630px&quot;
+        style=&quot;width:100%;height:100%;margin:0;vertical-align:middle;position:absolute;top:0;left:0;&quot;
+        loading=&quot;lazy&quot;
+        decoding=&quot;async&quot;
+      /&gt;
+  &lt;/a&gt;
+    &lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;타입을 잘못 지정할 경우 에러를 뱉을 수 있다.&lt;/p&gt;
+&lt;p&gt;&lt;span
+      class=&quot;gatsby-resp-image-wrapper&quot;
+      style=&quot;position: relative; display: block; margin-left: auto; margin-right: auto; max-width: 630px; &quot;
+    &gt;
+      &lt;a
+    class=&quot;gatsby-resp-image-link&quot;
+    href=&quot;/wkd2ev/static/edee780ad281cfaa43ccbc7d226f05e7/58213/type-unsafe.png&quot;
+    style=&quot;display: block&quot;
+    target=&quot;_blank&quot;
+    rel=&quot;noopener&quot;
+  &gt;
+    &lt;span
+    class=&quot;gatsby-resp-image-background-image&quot;
+    style=&quot;padding-bottom: 27.848101265822784%; position: relative; bottom: 0; left: 0; background-image: url(&apos;data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAGCAYAAADDl76dAAAACXBIWXMAABYlAAAWJQFJUiTwAAABMklEQVR42oWQ2VLCQBBF+RKrRFmEEJaQIGSZrIQEQtg3XxD9/184DkFKyxcfTnVX99S5XVNqt3zUjo0pUhb7M3G2Q4R5UU2REM92TCSW3AfxCi+cEyUbNscPudtiu1OS+YE0PyKCjNJhm2NFEV6cs5yeGHtzpukeX8xw3YzF7ozjZ4X4JtlhezNmyzeMYYQlhb4M0l9D1K5N6fI5YbEN6I9CQifFGyV4vRBb9Rh0fUxXioMcRwZdCScbOj2XemOIoloFzZYpsWjLeen9krBeRxhZjHPKEOOYjm5SbepUXyT1PpWaVnDva3Jebxjf9afXDO8qDFhtBN3EYrgQtAcDXEND1/o8PCqUywqPT38o/6bJc6VzE+pS6AeO/GxBwzCpNw2qMlFRDBrFhX358H+uV96FX27wyurVMZRXAAAAAElFTkSuQmCC&apos;); background-size: cover; display: block;&quot;
+  &gt;&lt;/span&gt;
+  &lt;img
+        class=&quot;gatsby-resp-image-image&quot;
+        alt=&quot;type-unsafe한 api 호출&quot;
+        title=&quot;&quot;
+        src=&quot;/wkd2ev/static/edee780ad281cfaa43ccbc7d226f05e7/f058b/type-unsafe.png&quot;
+        srcset=&quot;/wkd2ev/static/edee780ad281cfaa43ccbc7d226f05e7/c26ae/type-unsafe.png 158w,
+/wkd2ev/static/edee780ad281cfaa43ccbc7d226f05e7/6bdcf/type-unsafe.png 315w,
+/wkd2ev/static/edee780ad281cfaa43ccbc7d226f05e7/f058b/type-unsafe.png 630w,
+/wkd2ev/static/edee780ad281cfaa43ccbc7d226f05e7/58213/type-unsafe.png 902w&quot;
+        sizes=&quot;(max-width: 630px) 100vw, 630px&quot;
+        style=&quot;width:100%;height:100%;margin:0;vertical-align:middle;position:absolute;top:0;left:0;&quot;
+        loading=&quot;lazy&quot;
+        decoding=&quot;async&quot;
+      /&gt;
+  &lt;/a&gt;
+    &lt;/span&gt;&lt;/p&gt;</content:encoded></item><item><title><![CDATA[type challange <Easy>]]></title><description><![CDATA[타입 챌린지 easy를 풀어봅시다...
+https://github.com/type-challenges/type-challenges?tab=readme-ov-file Pick 타입스크립트에서 기본적으로 제공해주는 유틸리티 타입인 Pick…]]></description><link>null/type challange &lt;Easy&gt;/</link><guid isPermaLink="false">null/type challange &lt;Easy&gt;/</guid><pubDate>Sun, 13 Nov 2022 00:00:00 GMT</pubDate><content:encoded>&lt;p&gt;타입 챌린지 easy를 풀어봅시다...
+&lt;a href=&quot;https://github.com/type-challenges/type-challenges?tab=readme-ov-file&quot;&gt;https://github.com/type-challenges/type-challenges?tab=readme-ov-file&lt;/a&gt;&lt;/p&gt;
+&lt;h3&gt;Pick&lt;/h3&gt;
+&lt;deckgo-highlight-code language=&quot;typescript&quot;  &gt;
+          &lt;code slot=&quot;code&quot;&gt;// Q
+interface Todo {
+  title: string
+  description: string
+  completed: boolean
+}
+ 
+type TodoPreview = MyPick&amp;lt;Todo, &amp;#39;title&amp;#39; | &amp;#39;completed&amp;#39;&amp;gt;
+ 
+const todo: TodoPreview = {
+    title: &amp;#39;Clean room&amp;#39;,
+    completed: false,
+}
+
+// A
+type MyPick&amp;lt;T, K extends keyof T&amp;gt; = {
+  [key in K]: T[key];
+}&lt;/code&gt;
+        &lt;/deckgo-highlight-code&gt;
+&lt;p&gt;타입스크립트에서 기본적으로 제공해주는 유틸리티 타입인 Pick이다.
+제너릭의 두번째 인자로 뽑고싶은 속성만 추출한다.
+K extends keyof T 는 K가 T 제너릭 타입이 가지고 있는 속성들의 서브타입임을 명시해준다.&lt;/p&gt;
+&lt;h3&gt;Readonly&lt;/h3&gt;
+&lt;deckgo-highlight-code language=&quot;typescript&quot;  &gt;
+          &lt;code slot=&quot;code&quot;&gt;// Q
+interface Todo {
+  title: string
+  description: string
+}
+ 
+const todo: MyReadonly&amp;lt;Todo&amp;gt; = {
+  title: &amp;quot;Hey&amp;quot;,
+  description: &amp;quot;foobar&amp;quot;
+}
+ 
+todo.title = &amp;quot;Hello&amp;quot; // Error: cannot reassign a readonly property
+todo.description = &amp;quot;barFoo&amp;quot; // Error: cannot reassign a readonly property
+
+// A
+type MyReadonly&amp;lt;T&amp;gt; = {
+  readonly [key in keyof T]: T[key];
+}&lt;/code&gt;
+        &lt;/deckgo-highlight-code&gt;
+&lt;p&gt;모든 속성을 읽기 속성으로 만들어야 한다.&lt;/p&gt;
+&lt;h3&gt;FirstofArray&lt;/h3&gt;
+&lt;deckgo-highlight-code language=&quot;typescript&quot;  &gt;
+          &lt;code slot=&quot;code&quot;&gt;// Q
+type arr1 = [&amp;#39;a&amp;#39;, &amp;#39;b&amp;#39;, &amp;#39;c&amp;#39;]
+type arr2 = [3, 2, 1]
+ 
+type head1 = First&amp;lt;arr1&amp;gt; // expected to be &amp;#39;a&amp;#39;
+type head2 = First&amp;lt;arr2&amp;gt; // expected to be 3
+type head3 = First&amp;lt;[]&amp;gt; // expected to be never
+
+// A
+type First&amp;lt;T extends any[]&amp;gt; = T extends [] ? never : T[0];&lt;/code&gt;
+        &lt;/deckgo-highlight-code&gt;
+&lt;p&gt;원소[0] 을 반환하면 될 것 같지만 빈 배열일 경우에도 생각해야 한다.&lt;/p&gt;
+&lt;p&gt;조건부 연산을 사용하여 제너릭 T가 빈배열의 서브타입일 경우 never를 반환하고
+아니라면 0번째 인덱스를 반환해준다.&lt;/p&gt;
+&lt;h3&gt;Length of Tuple&lt;/h3&gt;
+&lt;deckgo-highlight-code language=&quot;typescript&quot;  &gt;
+          &lt;code slot=&quot;code&quot;&gt;type tesla = [&amp;#39;tesla&amp;#39;, &amp;#39;model 3&amp;#39;, &amp;#39;model X&amp;#39;, &amp;#39;model Y&amp;#39;]
+type spaceX = [&amp;#39;FALCON 9&amp;#39;, &amp;#39;FALCON HEAVY&amp;#39;, &amp;#39;DRAGON&amp;#39;, &amp;#39;STARSHIP&amp;#39;, &amp;#39;HUMAN SPACEFLIGHT&amp;#39;]
+ 
+type teslaLength = Length&amp;lt;tesla&amp;gt;  // expected 4
+type spaceXLength = Length&amp;lt;spaceX&amp;gt; // expected 5
+
+type Length&amp;lt;T extends any[]&amp;gt; = T[&amp;quot;length&amp;quot;];&lt;/code&gt;
+        &lt;/deckgo-highlight-code&gt;
+&lt;p&gt;length 프로퍼티를 이용하여 반환하면 된다. 다만 as const로 타입 단언이 선언되었을 경우
+다음과 같이 작성해줘야 한다.&lt;/p&gt;
+&lt;deckgo-highlight-code language=&quot;typescript&quot;  &gt;
+          &lt;code slot=&quot;code&quot;&gt;const tesla = [&amp;#39;tesla&amp;#39;, &amp;#39;model 3&amp;#39;, &amp;#39;model X&amp;#39;, &amp;#39;model Y&amp;#39;] as const;
+type TeslaLen = Length&amp;lt;typeof tesla&amp;gt;; &amp;lt;---- ????
+
+type Length&amp;lt;T extends readonly any[]&amp;gt; = T[&amp;quot;length&amp;quot;];&lt;/code&gt;
+        &lt;/deckgo-highlight-code&gt;
+&lt;h3&gt;Exclude&lt;/h3&gt;
+&lt;deckgo-highlight-code language=&quot;typescript&quot;  &gt;
+          &lt;code slot=&quot;code&quot;&gt;// Q
+type Result = MyExclude&amp;lt;&amp;#39;a&amp;#39; | &amp;#39;b&amp;#39; | &amp;#39;c&amp;#39;, &amp;#39;a&amp;#39;&amp;gt; // &amp;#39;b&amp;#39; | &amp;#39;c&amp;#39;
+
+// A
+type MyExclude&amp;lt;T, U&amp;gt; = T extends U ? never : T;&lt;/code&gt;
+        &lt;/deckgo-highlight-code&gt;
+&lt;p&gt;첫 제너릭 속성에는 유니온 타입을 두번쨰 제너릭 인자로 제외하고 싶은 타입을 넣어
+제외시키는 타입이다.&lt;/p&gt;
+&lt;p&gt;T가 U의 서브타입이라면 never를 반환&lt;/p&gt;
+&lt;p&gt;&apos;a&apos; | &apos;b&apos; | &apos;c&apos; 중 &apos;a&apos;는 두번째 제너릭으로 들어온 타입 &apos;a&apos;의 서브타입이므로 never를 반환하고 아님 T를 반환한다.&lt;/p&gt;
+&lt;h3&gt;Awaited&lt;/h3&gt;
+&lt;deckgo-highlight-code language=&quot;typescript&quot;  &gt;
+          &lt;code slot=&quot;code&quot;&gt;// Q
+type X = Promise&amp;lt;string&amp;gt;
+type Y = Promise&amp;lt;{ field: number }&amp;gt;
+
+// A
+type MyAwaited&amp;lt;T&amp;gt; = T extends Promise&amp;lt;infer R&amp;gt; ? R : never;&lt;/code&gt;
+        &lt;/deckgo-highlight-code&gt;
+&lt;p&gt;프로미스의 타입을 뽑아내는 문제이다.
+infer 키워드를 사용하여 타입을 추출할 수 있다.&lt;/p&gt;
+&lt;p&gt;하지만 다음과 같이 프로미스가 프로미스를 반환한다면 프로미스가 프로미스를 반환하고
+재귀적으로 프로미스를 반환해줄 경우 재귀적으로 타입을 작성해준다.&lt;/p&gt;
+&lt;deckgo-highlight-code language=&quot;typescript&quot;  &gt;
+          &lt;code slot=&quot;code&quot;&gt;type Z = MyAwaited&amp;lt;Promise&amp;lt;string | number&amp;gt;&amp;gt;
+type Z1 = MyAwaited&amp;lt;Promise&amp;lt;Promise&amp;lt;string | boolean&amp;gt;&amp;gt;&amp;gt;
+
+type MyAwaited&amp;lt;T extends Promise&amp;lt;unknown&amp;gt;&amp;gt; = T extends Promise&amp;lt;infer R&amp;gt; 
+  ? R extends Promise&amp;lt;unknown&amp;gt;		// R이 프로미스의의 서브타입이라면
+    ? MyAwaited&amp;lt;R&amp;gt;			// 재귀적으로 R을 던짐으로 호출
+    : R		// R이 프로미스의 서브타입이 아니라면 R을 반환
+  : never; // 모든 케이스에 대응하지 않은 경우 never 반환&lt;/code&gt;
+        &lt;/deckgo-highlight-code&gt;
+&lt;h3&gt;IF&lt;/h3&gt;
+&lt;deckgo-highlight-code language=&quot;typescript&quot;  &gt;
+          &lt;code slot=&quot;code&quot;&gt;type A = If&amp;lt;true, &amp;#39;a&amp;#39;, &amp;#39;b&amp;#39;&amp;gt;  // expected to be &amp;#39;a&amp;#39;
+type B = If&amp;lt;false, &amp;#39;a&amp;#39;, &amp;#39;b&amp;#39;&amp;gt; // expected to be &amp;#39;b&amp;#39;
+
+type If&amp;lt;C extends boolean, T, F&amp;gt; = C extends true ? T : F;&lt;/code&gt;
+        &lt;/deckgo-highlight-code&gt;
+&lt;h3&gt;Concat&lt;/h3&gt;
+&lt;deckgo-highlight-code language=&quot;typescript&quot;  &gt;
+          &lt;code slot=&quot;code&quot;&gt;// Q
+type Result1 = MyConcat&amp;lt;[], []&amp;gt;
+type Result2 = MyConcat&amp;lt;[], [1]&amp;gt;
+type Result3 = MyConcat&amp;lt;[1, 2], [3, 4]&amp;gt;
+type Result4 = MyConcat&amp;lt;[&amp;#39;1&amp;#39;, 2, &amp;#39;3&amp;#39;], [false, boolean, &amp;#39;4&amp;#39;]&amp;gt;
+
+// A
+type MyConcat&amp;lt;T extends any[], U extends any[]&amp;gt; = [...T, ...U];&lt;/code&gt;
+        &lt;/deckgo-highlight-code&gt;
+&lt;p&gt;스프레드 연산자로 합쳐주면 된다.&lt;/p&gt;
+&lt;h3&gt;Equal&lt;/h3&gt;
+&lt;p&gt;해당 타입은 문제에 없지만 후에 나올 Include 타입 문제에 쓰이기 때문에 한번 알아본다.
+타입이 동등한지를 비교하는 타입이다.&lt;/p&gt;
+&lt;deckgo-highlight-code language=&quot;typescript&quot;  &gt;
+          &lt;code slot=&quot;code&quot;&gt;interface Person {
+  name: string;
+  age: number;
+}
+ 
+interface Person2 {
+  name: string;
+  age: number;
+}
+ 
+interface OtherType {
+  name:string;
+  money: number;
+}
+ 
+type Result1 = Equals&amp;lt;Person, Person&amp;gt;;  // expected true
+type Result2 = Equals&amp;lt;Person, Person2&amp;gt;;  // expected true
+type Result3 = Equals&amp;lt;Person2, OtherType&amp;gt;;  // expected false
+
+type Equals&amp;lt;X, Y&amp;gt; = 
+  (&amp;lt;T&amp;gt;() =&amp;gt; T extends X ? &amp;quot;A&amp;quot; : &amp;quot;B&amp;quot;) extends (&amp;lt;T&amp;gt;() =&amp;gt; T extends Y ? &amp;quot;A&amp;quot; : &amp;quot;B&amp;quot;)
+  ? true
+  : false;&lt;/code&gt;
+        &lt;/deckgo-highlight-code&gt;
+&lt;p&gt;꽤나 신기한 타입이다.
+제너릭 T를 받아 해당 타입이 Equals타입의 두 제너릭 타입의 서브 타입인지를 비교하고 또 서로 비교하는 과정을
+통해 true, false를 반환한다.&lt;/p&gt;
+&lt;h3&gt;Include&lt;/h3&gt;
+&lt;p&gt;배열 원소에 타입이 포함되어 있는지를 묻는 문제이다.&lt;/p&gt;
+&lt;deckgo-highlight-code language=&quot;typescript&quot;  &gt;
+          &lt;code slot=&quot;code&quot;&gt;// Q
+type isPillarMen = Includes&amp;lt;[&amp;#39;Kars&amp;#39;, &amp;#39;Esidisi&amp;#39;, &amp;#39;Wamuu&amp;#39;, &amp;#39;Santana&amp;#39;], &amp;#39;Dio&amp;#39;&amp;gt; // expected to be `false`
+
+// A
+type Equal&amp;lt;X, Y&amp;gt; =
+  (&amp;lt;T&amp;gt;() =&amp;gt; T extends X ? &amp;quot;A&amp;quot; : &amp;quot;B&amp;quot;) extends (&amp;lt;T&amp;gt;() =&amp;gt; T extends Y ? &amp;quot;A&amp;quot; : &amp;quot;B&amp;quot;)
+  ? true
+  : false;
+ 
+type Includes&amp;lt;T extends readonly any[], U&amp;gt; = T extends [infer First, ...infer Rest] // 제너릭 T 타입은 infer로 타입을 추출 처음 원소와 나머지 원소로 분리한다.
+  ? Equal&amp;lt;First, U&amp;gt; extends true	// Equal 타입으로 첫번째 원소와 U를 비교를 하고 true의 서브타입인지 판별한다.
+    ? true				// 조건이 맞다면 true를 반환
+    : Includes&amp;lt;Rest, U&amp;gt;			// 1에서 판별한 조건이 아니라면 재귀적으로 나머지 배열 원소의 타입들을 넣어주어 재귀적으로 호출한다.
+  : false;				// 모든 케이스에 대응 안하는 경우 false를 반환&lt;/code&gt;
+        &lt;/deckgo-highlight-code&gt;
+&lt;h3&gt;Push&lt;/h3&gt;
+&lt;deckgo-highlight-code language=&quot;typescript&quot;  &gt;
+          &lt;code slot=&quot;code&quot;&gt;// Q
+type Result = Push&amp;lt;[1, 2], &amp;#39;3&amp;#39;&amp;gt; // [1, 2, &amp;#39;3&amp;#39;]
+
+// A
+type Push&amp;lt;T extends any[], U&amp;gt; = [...T, U];
+&lt;/code&gt;
+        &lt;/deckgo-highlight-code&gt;
+&lt;h3&gt;Unshift&lt;/h3&gt;
+&lt;deckgo-highlight-code language=&quot;typescript&quot;  &gt;
+          &lt;code slot=&quot;code&quot;&gt;// Q
+type Result = Unshift&amp;lt;[1, 2], 0&amp;gt; // [0, 1, 2,]
+
+// A
+type Unshift&amp;lt;T extends any[], U&amp;gt; = [U, ...T];&lt;/code&gt;
+        &lt;/deckgo-highlight-code&gt;
+&lt;h3&gt;Parameters&lt;/h3&gt;
+&lt;p&gt;함수의 파라미터를 추출하는 문제다.&lt;/p&gt;
+&lt;deckgo-highlight-code language=&quot;typescript&quot;  &gt;
+          &lt;code slot=&quot;code&quot;&gt;// Q
+const foo = (arg1: string, arg2: number): void =&amp;gt; {}
+ 
+type FunctionParamsType = MyParameters&amp;lt;typeof foo&amp;gt; // [arg1: string, arg2: number]
+
+// A
+type MyParameters&amp;lt;T extends (...args: any[]) =&amp;gt; any&amp;gt; = 
+  T extends (...args: infer R) =&amp;gt; any
+  ? R
+  : never;&lt;/code&gt;
+        &lt;/deckgo-highlight-code&gt;
+&lt;p&gt;함수의 파라미터 타입을 infer로 추론한다.
+제너릭으로 받은 T타입이 함수 형태가 아니라면 never를 반환한다.&lt;/p&gt;</content:encoded></item></channel></rss>
