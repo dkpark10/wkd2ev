@@ -73,11 +73,6 @@ export const pageQuery = graphql`
         frontmatter: { 
           date: DESC 
         } 
-      },
-      filter: {
-        frontmatter: {
-          title: { ne: "zustands는 어떻게 root provider 없이 상태관리를 할 수 있을까(2)" }
-        }
       }
     ) {
       nodes {
