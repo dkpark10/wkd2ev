@@ -37,9 +37,9 @@ export default function Layout({ children, title }) {
                   alt="https://github.com/dkpark10 주소"
                 />
               </Link>
-              <button className={styles["darkMode"]} onClick={onClick}>
+              {/* <button className={styles["darkMode"]} onClick={onClick}>
                 다크모드
-              </button>
+              </button> */}
             </div>
           </header>
           <hr />

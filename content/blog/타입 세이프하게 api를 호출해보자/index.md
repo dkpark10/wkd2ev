@@ -7,7 +7,7 @@ description: "오버 엔지니어링인 감이 없지 않아 있다."
 최근 사내에서 서비스 개발 시 type safe하게 api를 호출할 수 있어 좋았던 경험이 있다. 
 이를 좀 더 개선하여 간략하게 개발할 수 있도록 작성해 보았다.
 
-### URL 구조
+## URL 구조
 
 ```
 https://example.com/content/1?start=0&end=10
@@ -73,7 +73,7 @@ async function getKeywordContents(
 사실 api 호출 코드는 처음 프로젝트를 작성할 때 말고는 수정사항이 빈번한 영역이라고 보기는 힘들다.
 다만 처음 작성할 때 수정사항에 대응 하여 좀 더 수월하게 개발 할 수 있다면 더 좋을 것이다.
 
-### 적용
+## 적용
 
 *endpoint.ts*
 ```typescript
