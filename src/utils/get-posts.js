@@ -36,7 +36,11 @@ export const getPosts = () => {
   return results;
 };
 
+/**
+ * 사용자 객체를 생성합니다.
+ * @returns {string}
+ */
 export const getOrgFileName = (slug) => {
-  if (cache) return cache;
+  if (cache) return cache.find((post) => post.slug === slug).orgFileName;;
   return getPosts().find((post) => post.slug === slug).orgFileName;
 };
