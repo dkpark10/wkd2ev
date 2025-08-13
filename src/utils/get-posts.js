@@ -18,7 +18,7 @@ export const getPosts = () => {
 
   const results = files
     .filter((file) => file.endsWith(".mdx"))
-    .map((fileName) => {
+    .map((fileName, idx) => {
       const filePath = path.join(postsDirectory, fileName);
 
       const fileContents = fs.readFileSync(filePath, "utf-8");
@@ -26,12 +26,14 @@ export const getPosts = () => {
       const { data } = matter(fileContents);
 
       return {
+        id: idx,
         slug: generateTitleSlug(fileName.replace(/\.mdx$/, "")),
         orgFileName: fileName,
         ...data,
       };
     })
     .sort((a, b) => new Date(b.date) - new Date(a.date)); // 최신순
+
   cache = results;
   return results;
 };
@@ -41,6 +43,10 @@ export const getPosts = () => {
  * @returns {string}
  */
 export const getOrgFileName = (slug) => {
-  if (cache) return cache.find((post) => post.slug === slug).orgFileName;;
-  return getPosts().find((post) => post.slug === slug).orgFileName;
+  if (isNaN(slug)) {
+    if (cache) return cache.find((post) => post.slug === slug).orgFileName;
+    return getPosts().find((post) => post.slug === slug).orgFileName;
+  }
+  if (cache) return cache.find((post) => post.id === Number(slug)).orgFileName;
+  return getPosts().find((post) => post.id === Number(slug)).orgFileName;
 };

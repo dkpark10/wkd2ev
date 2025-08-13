@@ -1,5 +1,4 @@
-import { generateTitleSlug } from '@/utils/generate-title-slug';
-import { getOrgFileName } from '@/utils/get-posts';
+import { getOrgFileName, getPosts } from "@/utils/get-posts";
 
 export default async function Page({ params }) {
   const { slug } = await params;
@@ -7,11 +6,21 @@ export default async function Page({ params }) {
   const fileName = getOrgFileName(decodeURIComponent(slug));
 
   const { default: Post } = await import(`@/content/${fileName}`);
-  return <Post />
+  return <Post />;
 }
 
 export function generateStaticParams() {
-  return [{ slug: generateTitleSlug('타입 세이프하게 api를 호출해보자') }];
+  const slugArray1 = getPosts().map((post) => ({
+    slug: String(post.id),
+  }));
+  const slugArray2 = getPosts().map((post) => ({
+    slug: post.slug,
+  }));
+
+  return [
+    ...slugArray1,
+    ...slugArray2,
+  ];
 }
 
 export const dynamicParams = false;
