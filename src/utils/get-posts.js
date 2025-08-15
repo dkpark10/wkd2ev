@@ -10,7 +10,7 @@ let cache = null;
 
 /**
  * 사용자 객체를 생성합니다.
- * @returns {Array<{ slug: string, orgFileName: string }>}
+ * @returns {Array<{ slug: string, orgFileName: string, id: number, description: string, date: string }>}
  */
 export const getPosts = () => {
   if (cache) return cache;

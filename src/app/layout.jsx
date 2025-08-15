@@ -1,16 +1,8 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "@/styles/globals.css";
+import "@/styles/_base.scss";
 import Link from "next/link";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+import Github from "@/components/github";
 
 export const metadata = {
   title: "Create Next App",
@@ -20,14 +12,19 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="ko">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <header>
-          <Link href="/">wkd2ev</Link>
-          <Link href="https://github.com/dkpark10/wkd2ev">wkd2ev</Link>
-        </header>
-        {children}
+      <body>
+        <div className="container">
+          <div className="inner">
+            <header>
+              <Link className="title" href="/">wkd2ev</Link>
+              <Link href="https://github.com/dkpark10"><Github /></Link>
+            </header>
+            <hr />
+            <main>
+              {children}
+            </main>
+          </div>
+        </div>
       </body>
     </html>
   );

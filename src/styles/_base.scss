@@ -1,0 +1,46 @@
+@use 'variables' as *;
+
+h1 {
+  font-size: $font-size-5xl;
+}
+
+h2 {
+  font-size: $font-size-3xl;
+}
+
+h3 {
+  font-size: $font-size-xl;
+}
+
+.container {
+  display: flex;
+  justify-content: center;
+
+  & .inner {
+    width: 784px;
+  }
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 32px 0px;
+
+  & .title {
+    font-size: $font-size-2xl;
+    font-weight: $font-bold;
+  }
+}
+
+main {
+  padding-top: 28px;
+}
+
+.post_item {
+  & .title {
+    font-size: $font-size-3xl;
+    font-weight: $font-bold;
+    padding-bottom: 20px;
+  }
+}

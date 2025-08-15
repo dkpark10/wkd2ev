@@ -1,4 +1,4 @@
-import '@/styles/components.scss';
+import '@/styles/mdx-components.scss';
 
 const components = {};
 

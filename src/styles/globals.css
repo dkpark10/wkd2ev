@@ -1,14 +1,22 @@
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
 html {
-  background-color: #fcfbff;
+  background-color: #f5f5fa;
 }
 
 a {
   text-decoration: none;
   color: inherit;
+}
+
+ul,
+ol,
+li {
+  list-style: none;
 }

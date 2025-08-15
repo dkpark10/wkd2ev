@@ -7,9 +7,17 @@ export default function Home() {
   return (
     <ul>
       {allPosts.map((post) => (
-        <li key={post.title}>
+        <li key={post.title} className='post_item'>
           <Link href={`/post/${post.slug}`}>
-            {post.title}
+            <div className='title'>
+              {post.title}
+            </div>
+            <div>
+              {post.description}
+            </div>
+            <time>
+              {post.date}
+            </time>
           </Link>
         </li>
       ))}
