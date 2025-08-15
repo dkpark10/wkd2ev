@@ -40,13 +40,15 @@ export const getPosts = () => {
 
 /**
  * 사용자 객체를 생성합니다.
- * @returns {string}
+ * @param {number | string} slug 첫 번째 숫자
+ * @returns {{ slug: string, orgFileName: string, id: number, description: string, date: string }}
+ * 
  */
-export const getOrgFileName = (slug) => {
+export const getPost = (slug) => {
   if (isNaN(slug)) {
-    if (cache) return cache.find((post) => post.slug === slug).orgFileName;
-    return getPosts().find((post) => post.slug === slug).orgFileName;
+    if (cache) return cache.find((post) => post.slug === slug);
+    return getPosts().find((post) => post.slug === slug);
   }
-  if (cache) return cache.find((post) => post.id === Number(slug)).orgFileName;
-  return getPosts().find((post) => post.id === Number(slug)).orgFileName;
+  if (cache) return cache.find((post) => post.id === Number(slug));
+  return getPosts().find((post) => post.id === Number(slug));
 };

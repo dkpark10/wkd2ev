@@ -1,12 +1,18 @@
-import { getOrgFileName, getPosts } from "@/utils/get-posts";
+import React from "react";
+import { getPost, getPosts } from "@/utils/get-posts";
 
 export default async function Page({ params }) {
   const { slug } = await params;
 
-  const fileName = getOrgFileName(decodeURIComponent(slug));
+  const currentPost = getPost(decodeURIComponent(slug));
 
-  const { default: Post } = await import(`@/content/${fileName}`);
-  return <Post />;
+  const { default: Post } = await import(`@/content/${currentPost.orgFileName}`);
+  return (
+    <React.Fragment>
+      <h1>{currentPost.title}</h1>
+      <Post />
+    </React.Fragment>
+  );
 }
 
 export function generateStaticParams() {
