@@ -73,6 +73,11 @@ header {
   }
 }
 
+img {
+  width: 100%;
+  object-fit: cover;
+}
+
 hr {
   margin-bottom: 28px;
 }
