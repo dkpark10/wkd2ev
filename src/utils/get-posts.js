@@ -53,6 +53,44 @@ function PostHandler() {
     if (cache) return cache.find((post) => post.id === Number(slug));
     return this.getPosts().find((post) => post.id === Number(slug));
   };
+
+  /**
+   * @param {number} slug 첫 번째 숫자
+   * @returns {{ slug: string, orgFileName: string, id: number, description: string, date: string } | null}
+   */
+  this.next = (slug) => {
+    if (cache) {
+      if (slug >= cache.length) {
+        return null;
+      }
+      return cache.find((_, idx) => idx === Number(slug + 1));
+    }
+
+    const posts = this.getPosts();
+    if (slug >= posts.length) {
+      return null;
+    }
+    return posts.find((post) => post.id === Number(slug + 1));
+  };
+
+  /**
+   * @param {number} slug 첫 번째 숫자
+   * @returns {{ slug: string, orgFileName: string, id: number, description: string, date: string } | null}
+   */
+  this.prev = (slug) => {
+    if (cache) {
+      if (slug < 0) {
+        return null;
+      }
+      return cache.find((_, idx) => idx === Number(slug - 1));
+    }
+
+    const posts = this.getPosts();
+    if (slug < 0) {
+      return null;
+    }
+    return posts.find((post) => post.id === Number(slug - 1));
+  };
 };
 
 export const postHandler = new PostHandler();
