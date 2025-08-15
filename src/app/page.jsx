@@ -1,8 +1,8 @@
-import { getPosts } from '@/utils/get-posts';
+import { postHandler } from '@/utils/get-posts';
 import Link from 'next/link';
 
 export default function Home() {
-  const allPosts = getPosts();
+  const allPosts = postHandler.getPosts();
 
   return (
     <ul>
