@@ -15,27 +15,30 @@ function PostHandler() {
   this.getPosts = () => {
     if (cache) return cache;
     const files = fs.readdirSync(postsDirectory);
-  
+
     const results = files
       .filter((file) => file.endsWith(".mdx"))
-      .map((fileName, idx) => {
+      .map((fileName) => {
         const filePath = path.join(postsDirectory, fileName);
-  
+
         const fileContents = fs.readFileSync(filePath, "utf-8");
-  
+
         const { data } = matter(fileContents);
-  
+
         return {
-          id: idx,
           slug: generateTitleSlug(fileName.replace(/\.mdx$/, "")),
           orgFileName: fileName,
           ...data,
         };
       })
-      .sort((a, b) => new Date(b.date) - new Date(a.date)); // 최신순
-  
+      .sort((a, b) => new Date(b.date) - new Date(a.date))
+      .map((post, idx, self) => ({
+        ...post,
+        id: self.length - idx - 1,
+      }));
+
     cache = results;
-    return results;    
+    return results;
   }
 
   /**
