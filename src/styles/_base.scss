@@ -1,0 +1,93 @@
+@use 'variables' as *;
+
+@mixin header-padding {
+  padding-bottom: 18px;
+}
+
+h1 {
+  font-size: $font-size-5xl;
+  @include header-padding;
+}
+
+h2 {
+  font-size: $font-size-3xl;
+  @include header-padding;
+}
+
+h3 {
+  font-size: $font-size-xl;
+  @include header-padding;
+}
+
+h4 {
+  font-size: $font-size-lg;
+  @include header-padding;
+}
+
+h5 {
+  font-size: $font-size-base;
+  @include header-padding;
+}
+
+h6 {
+  font-size: $font-size-sm;
+  @include header-padding;
+}
+
+body {
+  color: $black;
+}
+
+p {
+  padding-bottom: 8px;
+}
+
+pre {
+  padding-bottom: 14px;
+  border-radius: 10px;
+}
+
+.mdx-a {
+  color: #0998c4;  
+}
+
+.container {
+  display: flex;
+  justify-content: center;
+
+  & .inner {
+    width: 784px;
+  }
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 32px 0px;
+
+  & .title {
+    font-size: $font-size-2xl;
+    font-weight: $font-bold;
+    color: $black;
+  }
+}
+
+img {
+  width: 100%;
+  object-fit: cover;
+}
+
+hr {
+  margin-bottom: 28px;
+}
+
+.post_item {
+  padding-bottom: 44px;
+
+  & .title {
+    font-size: $font-size-3xl;
+    font-weight: $font-bold;
+    padding-bottom: 20px;
+  }
+}

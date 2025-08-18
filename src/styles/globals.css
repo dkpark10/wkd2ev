@@ -7,7 +7,18 @@
 }
 
 html {
-  background-color: #fcfbff;
+  background-color: #f5f5fa;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+ul,
+ol,
+li {
+  list-style: none;
 }
 
 a {

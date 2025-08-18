@@ -1,15 +1,23 @@
-import { getPosts } from "@/utils/get-posts";
-import Link from "next/link";
+import { postHandler } from '@/utils/get-posts';
+import Link from 'next/link';
 
 export default function Home() {
-  const allPosts = getPosts();
+  const allPosts = postHandler.getPosts();
 
   return (
     <ul>
       {allPosts.map((post) => (
-        <li key={post.title}>
+        <li key={post.title} className='post_item'>
           <Link href={`/post/${post.slug}`}>
-            <h3>{post.title}</h3>
+            <div className='title'>
+              {post.title}
+            </div>
+            <div>
+              {post.description}
+            </div>
+            <time>
+              {post.date}
+            </time>
           </Link>
         </li>
       ))}

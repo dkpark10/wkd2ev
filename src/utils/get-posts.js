@@ -5,48 +5,92 @@ import { generateTitleSlug } from "@/utils/generate-title-slug";
 
 const postsDirectory = path.join(process.cwd(), "/src/content");
 
-/** @type {Array<{ slug: string, orgFileName: string }> | null} */
-let cache = null;
+function PostHandler() {
+  /** @type {Array<{ slug: string, orgFileName: string }> | null} */
+  let cache = null;
 
-/**
- * 사용자 객체를 생성합니다.
- * @returns {Array<{ slug: string, orgFileName: string }>}
- */
-export const getPosts = () => {
-  if (cache) return cache;
-  const files = fs.readdirSync(postsDirectory);
+  /**
+  * @returns {Array<{ slug: string, orgFileName: string, id: number, description: string, date: string }>}
+  */
+  this.getPosts = () => {
+    if (cache) return cache;
+    const files = fs.readdirSync(postsDirectory);
 
-  const results = files
-    .filter((file) => file.endsWith(".mdx"))
-    .map((fileName, idx) => {
-      const filePath = path.join(postsDirectory, fileName);
+    const results = files
+      .filter((file) => file.endsWith(".mdx"))
+      .map((fileName) => {
+        const filePath = path.join(postsDirectory, fileName);
 
-      const fileContents = fs.readFileSync(filePath, "utf-8");
+        const fileContents = fs.readFileSync(filePath, "utf-8");
 
-      const { data } = matter(fileContents);
+        const { data } = matter(fileContents);
 
-      return {
-        id: idx,
-        slug: generateTitleSlug(fileName.replace(/\.mdx$/, "")),
-        orgFileName: fileName,
-        ...data,
-      };
-    })
-    .sort((a, b) => new Date(b.date) - new Date(a.date)); // 최신순
+        return {
+          slug: generateTitleSlug(fileName.replace(/\.mdx$/, "")),
+          orgFileName: fileName,
+          ...data,
+        };
+      })
+      .sort((a, b) => new Date(b.date) - new Date(a.date))
+      .map((post, idx, self) => ({
+        ...post,
+        id: self.length - idx - 1,
+      }));
 
-  cache = results;
-  return results;
-};
-
-/**
- * 사용자 객체를 생성합니다.
- * @returns {string}
- */
-export const getOrgFileName = (slug) => {
-  if (isNaN(slug)) {
-    if (cache) return cache.find((post) => post.slug === slug).orgFileName;
-    return getPosts().find((post) => post.slug === slug).orgFileName;
+    cache = results;
+    return results;
   }
-  if (cache) return cache.find((post) => post.id === Number(slug)).orgFileName;
-  return getPosts().find((post) => post.id === Number(slug)).orgFileName;
+
+  /**
+   * @param {number | string} slug 첫 번째 숫자
+   * @returns {{ slug: string, orgFileName: string, id: number, description: string, date: string }}
+   */
+  this.getPost = (slug) => {
+    if (isNaN(slug)) {
+      if (cache) return cache.find((post) => post.slug === slug);
+      return this.getPosts().find((post) => post.slug === slug);
+    }
+    if (cache) return cache.find((post) => post.id === Number(slug));
+    return this.getPosts().find((post) => post.id === Number(slug));
+  };
+
+  /**
+   * @param {number} slug 첫 번째 숫자
+   * @returns {{ slug: string, orgFileName: string, id: number, description: string, date: string } | null}
+   */
+  this.next = (slug) => {
+    if (cache) {
+      if (slug >= cache.length) {
+        return null;
+      }
+      return cache.find((_, idx) => idx === Number(slug + 1));
+    }
+
+    const posts = this.getPosts();
+    if (slug >= posts.length) {
+      return null;
+    }
+    return posts.find((post) => post.id === Number(slug + 1));
+  };
+
+  /**
+   * @param {number} slug 첫 번째 숫자
+   * @returns {{ slug: string, orgFileName: string, id: number, description: string, date: string } | null}
+   */
+  this.prev = (slug) => {
+    if (cache) {
+      if (slug < 0) {
+        return null;
+      }
+      return cache.find((_, idx) => idx === Number(slug - 1));
+    }
+
+    const posts = this.getPosts();
+    if (slug < 0) {
+      return null;
+    }
+    return posts.find((post) => post.id === Number(slug - 1));
+  };
 };
+
+export const postHandler = new PostHandler();

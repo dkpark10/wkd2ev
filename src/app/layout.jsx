@@ -1,6 +1,6 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "@/styles/globals.css";
-import "@/styles/base.scss";
+import "@/styles/_base.scss";
 import Link from "next/link";
 import Github from "@/components/github";
 
@@ -16,14 +16,13 @@ export default function RootLayout({ children }) {
         <div className="container">
           <div className="inner">
             <header>
-              <Link className="title" href="/">
-                wkd2ev
-              </Link>
-              <Link href="https://github.com/dkpark10/wkd2ev">
-                <Github />
-              </Link>
+              <Link className="title" href="/">wkd2ev</Link>
+              <Link href="https://github.com/dkpark10"><Github /></Link>
             </header>
-            {children}
+            <hr />
+            <main>
+              {children}
+            </main>
           </div>
         </div>
       </body>
