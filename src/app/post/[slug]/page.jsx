@@ -1,5 +1,5 @@
 import React from "react";
-import { postHandler } from '@/utils/get-posts';
+import { postHandler } from '@/utils/post-handler';
 
 export default async function Page({ params }) {
   const { slug } = await params;

@@ -46,12 +46,11 @@ function PostHandler() {
    * @returns {{ slug: string, orgFileName: string, id: number, description: string, date: string }}
    */
   this.getPost = (slug) => {
+    const posts = this.getPosts();
     if (isNaN(slug)) {
-      if (cache) return cache.find((post) => post.slug === slug);
-      return this.getPosts().find((post) => post.slug === slug);
+      return posts.find((post) => post.slug === slug);
     }
-    if (cache) return cache.find((post) => post.id === Number(slug));
-    return this.getPosts().find((post) => post.id === Number(slug));
+    return posts.find((post) => post.id === Number(slug));
   };
 
   /**
@@ -59,13 +58,6 @@ function PostHandler() {
    * @returns {{ slug: string, orgFileName: string, id: number, description: string, date: string } | null}
    */
   this.next = (slug) => {
-    if (cache) {
-      if (slug >= cache.length) {
-        return null;
-      }
-      return cache.find((_, idx) => idx === Number(slug + 1));
-    }
-
     const posts = this.getPosts();
     if (slug >= posts.length) {
       return null;
@@ -78,13 +70,6 @@ function PostHandler() {
    * @returns {{ slug: string, orgFileName: string, id: number, description: string, date: string } | null}
    */
   this.prev = (slug) => {
-    if (cache) {
-      if (slug < 0) {
-        return null;
-      }
-      return cache.find((_, idx) => idx === Number(slug - 1));
-    }
-
     const posts = this.getPosts();
     if (slug < 0) {
       return null;

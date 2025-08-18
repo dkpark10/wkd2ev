@@ -1,4 +1,4 @@
-import { postHandler } from '@/utils/get-posts';
+import { postHandler } from '@/utils/post-handler';
 import Link from 'next/link';
 
 export default function Home() {
