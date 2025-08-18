@@ -1,6 +1,10 @@
 import React from "react";
+import PostNav from "@/components/nav";
 import { postHandler } from '@/utils/post-handler';
 
+/**
+* @param {{ params: Promise<{ slug: number | string }> }}
+*/
 export default async function Page({ params }) {
   const { slug } = await params;
 
@@ -11,6 +15,7 @@ export default async function Page({ params }) {
     <React.Fragment>
       <h1>{currentPost.title}</h1>
       <Post />
+      <PostNav index={currentPost.id} />
     </React.Fragment>
   );
 }

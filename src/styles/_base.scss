@@ -48,7 +48,7 @@ pre {
 }
 
 .mdx-a {
-  color: #0998c4;  
+  color: $anchor-color;
 }
 
 .container {
@@ -89,5 +89,21 @@ hr {
     font-size: $font-size-3xl;
     font-weight: $font-bold;
     padding-bottom: 20px;
+  }
+}
+
+nav {
+  display: flex;
+  justify-content: space-between;
+  padding: 44px 0px 32px 0px;
+
+  & .item {
+    width: 360px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: $font-size-base;
+    font-weight: $font-medium;
+    color: $anchor-color;
   }
 }

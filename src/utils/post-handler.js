@@ -42,7 +42,7 @@ function PostHandler() {
   }
 
   /**
-   * @param {number | string} slug 첫 번째 숫자
+   * @param {number | string} slug
    * @returns {{ slug: string, orgFileName: string, id: number, description: string, date: string }}
    */
   this.getPost = (slug) => {
@@ -54,7 +54,7 @@ function PostHandler() {
   };
 
   /**
-   * @param {number} slug 첫 번째 숫자
+   * @param {number} slug
    * @returns {{ slug: string, orgFileName: string, id: number, description: string, date: string } | null}
    */
   this.next = (slug) => {
@@ -66,7 +66,7 @@ function PostHandler() {
   };
 
   /**
-   * @param {number} slug 첫 번째 숫자
+   * @param {number} slug
    * @returns {{ slug: string, orgFileName: string, id: number, description: string, date: string } | null}
    */
   this.prev = (slug) => {
