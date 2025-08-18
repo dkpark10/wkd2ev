@@ -1,16 +1,33 @@
 import React from "react";
 import PostNav from "@/components/nav";
-import { postHandler } from '@/utils/post-handler';
+import { postHandler } from "@/utils/post-handler";
 
 /**
-* @param {{ params: Promise<{ slug: number | string }> }}
-*/
+ * @param {{ params: Promise<{ slug: number | string }> }}
+* @returns {{ title: string, description: string, authors: string, generator: string }}
+ */
+export async function generateMetadata({ params }) {
+  const { slug } = await params;
+
+  const currentPost = postHandler.getPost(decodeURIComponent(slug));
+  return {
+    title: currentPost.title,
+    description: currentPost.description,
+    authors: 'wkd2ev',
+  }
+}
+
+/**
+ * @param {{ params: Promise<{ slug: number | string }> }}
+ */
 export default async function Page({ params }) {
   const { slug } = await params;
 
   const currentPost = postHandler.getPost(decodeURIComponent(slug));
 
-  const { default: Post } = await import(`@/content/${currentPost.orgFileName}`);
+  const { default: Post } = await import(
+    `@/content/${currentPost.orgFileName}`
+  );
   return (
     <React.Fragment>
       <h1>{currentPost.title}</h1>
@@ -28,10 +45,7 @@ export function generateStaticParams() {
     slug: post.slug,
   }));
 
-  return [
-    ...slugArray1,
-    ...slugArray2,
-  ];
+  return [...slugArray1, ...slugArray2];
 }
 
 export const dynamicParams = false;
