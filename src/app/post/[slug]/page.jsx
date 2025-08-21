@@ -42,7 +42,7 @@ export function generateStaticParams() {
     slug: String(post.id),
   }));
   const slugArray2 = postHandler.getPosts().map((post) => ({
-    slug: encodeURIComponent(post.slug),
+    slug: post.slug,
   }));
 
   return [...slugArray1, ...slugArray2];
