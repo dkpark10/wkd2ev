@@ -7,7 +7,7 @@ export async function GET() {
   const urls = allPosts.map((post) => `
     <url>
       <loc>https://dkpark10.github.io/wkd2ev/post/${post.slug}</loc>
-      <lastmod>${post.date}</lastmod>
+      <lastmod>${new Date(post.date).toISOString()}</lastmod>
       <changefreq>monthly</changefreq>
       <priority>${post.priority}</priority>
     </url>`);
