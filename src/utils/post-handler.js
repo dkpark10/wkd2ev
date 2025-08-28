@@ -10,7 +10,7 @@ function PostHandler() {
   let cache = null;
 
   /**
-  * @returns {Array<{ slug: string, orgFileName: string, id: number, title: string; description: string, date: string }>}
+  * @returns {Array<{ slug: string; orgFileName: string; id: number; title: string; description: string; date: string; priority: number; }>}
   */
   this.getPosts = () => {
     if (cache) return cache;
@@ -43,7 +43,8 @@ function PostHandler() {
 
   /**
    * @param {number | string} slug
-   * @returns {{ slug: string, orgFileName: string, id: number, title: string, description: string, date: string }}
+   * @returns {Array<{ slug: string; orgFileName: string; id: number; title: string; description: string; date: string; priority: number; }>}
+   * 
    */
   this.getPost = (slug) => {
     const posts = this.getPosts();
@@ -55,7 +56,7 @@ function PostHandler() {
 
   /**
    * @param {number} slug
-   * @returns {{ slug: string, orgFileName: string, id: number, title: string, description: string, date: string }}
+   * @returns {Array<{ slug: string; orgFileName: string; id: number; title: string; description: string; date: string; priority: number; }>}
    */
   this.next = (slug) => {
     const posts = this.getPosts();
@@ -67,7 +68,7 @@ function PostHandler() {
 
   /**
    * @param {number} slug
-   * @returns {{ slug: string, orgFileName: string, id: number, title: string, description: string, date: string }}
+   * @returns {Array<{ slug: string; orgFileName: string; id: number; title: string; description: string; date: string; priority: number; }>}
    */
   this.prev = (slug) => {
     const posts = this.getPosts();
