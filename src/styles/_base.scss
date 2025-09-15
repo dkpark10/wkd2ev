@@ -1,12 +1,12 @@
 @use 'variables' as *;
 
 @mixin header-padding {
-  padding-bottom: 18px;
+  padding: 18px 0px;
 }
 
 h1 {
   font-size: $font-size-5xl;
-  @include header-padding;
+  padding-bottom: 18px;
 }
 
 h2 {

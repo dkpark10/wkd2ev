@@ -5,7 +5,9 @@ description: "오버 엔지니어링인 감이 없지 않아 있다."
 priority: 0.5
 ---
 
-최근 사내에서 서비스 개발 시 type safe하게 api를 호출할 수 있어 좋았던 경험이 있다. 
+예제링크: [https://github.com/dkpark10/playground/tree/main/examples/type-safe-fetch](https://github.com/dkpark10/playground/tree/main/examples/type-safe-fetch)
+
+최근 사내에서 api 호출 시 **type safe** 하게 할 수 있어 DX가 좋았던 적이 있다. 
 이를 좀 더 개선하여 간략하게 개발할 수 있도록 작성해 보았다.
 
 ## URL 구조
@@ -20,11 +22,10 @@ URL 구조는 다음과 같이 분리할 수 있다.
 |---|---|
 |https|프로토콜|
 |example.com|도메인|
-|content/1|경로|
+|content/1|패스 파라미터|
 |?start=0&end=10|쿼리스트링|
 
-아무래도 회사마다 개발자마다 다르겠지만 기본적으로
-baseUrl은 프로토콜과 도메인 까지는 기본 설정으로 주입하고 사용될 것이다.
+사내 서비스는 baseUrl 프로토콜과 도메인 까지는 기본 설정으로 주입하고 사용하고 있다.
 
 ```typescript
 import axios from 'axios';
@@ -39,7 +40,7 @@ const gotClient = got.extend({
 });
 ```
 
-예를 들어 호출해야 하는 api 주소가 아래와 같다고 해보자.
+예를 들어 호출해야 하는 api 주소가 아래와 같다면
 해당 api는 유저가 입력한 키워드의 보여줄 게시글들을 반환하는데 키워드가 있고
 정렬 타입이 있으며 pagination 이 적용되어 있다.
 
@@ -47,7 +48,7 @@ const gotClient = got.extend({
 https://example.com/search/?keyword=맛집&order=desc&start=0&end=10
 ```
 
-이를 호출한다면 다음과 같을 것이다.
+이를 호출한다면 아래와 같다.
 
 ```typescript
 await axios.get(
@@ -55,11 +56,8 @@ await axios.get(
   );
 ```
 
-그렇지만 api엔드포인트의 수정사항이 들어왔을 때 해당 api를 사용하는 쪽에 일괄 수정이 필요할 것이다.
-사실 이렇게 호출하는 방법이 좋지 않은 것을 알고 있을 것이다. 
-
-변경에 취약하기에 한번 함수로 감싸주는 것만으로 원할한 해결이 가능하다. 함수로 감싼다면 수정해야할 
-관리 포인트를 하나로 집중할 수 있으니까
+그렇지만 호출주소의 수정사항이 들어왔을 때 해당 api를 사용하는 쪽에 일괄 수정이 필요할 것이다.
+보통 변경에 유연하게 대응하기 위해 한번 함수를 감싼다.
 
 ```typescript
 async function getKeywordContents(
@@ -71,7 +69,7 @@ async function getKeywordContents(
 }
 ```
 
-사실 api 호출 코드는 처음 프로젝트를 작성할 때 말고는 수정사항이 빈번한 영역이라고 보기는 힘들다.
+api 호출 로직은 처음 코드를 작성하고 그 후에는 수정사항이 빈번한 영역이라고 보기는 힘들다.
 다만 처음 작성할 때 수정사항에 대응 하여 좀 더 수월하게 개발 할 수 있다면 더 좋을 것이다.
 
 ## 적용
