@@ -102,8 +102,23 @@ nav {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    font-size: $font-size-base;
+    font-size: $font-size-xl;
     font-weight: $font-medium;
     color: $anchor-color;
   }
+}
+
+table {
+  border-collapse: collapse;
+  margin: 1rem 0;
+}
+
+th,
+td {
+  border: 1px solid $gray;
+  padding: 8px;
+}
+
+th {
+  text-align: left;
 }

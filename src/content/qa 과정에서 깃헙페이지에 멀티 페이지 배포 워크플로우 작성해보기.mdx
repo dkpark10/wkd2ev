@@ -5,7 +5,14 @@ description: "with react"
 priority: 0.8
 ---
 
-회사마다 다르겠지만 사내에서 신규 기능이나 버그를 수정하고 다시 피드백을 받는 과정은 간략하게 다음과 같다.
+### 예제 링크
+[https://github.com/dkpark10/action-test/tree/master/apps/react](https://github.com/dkpark10/action-test/tree/master/apps/react)
+
+[https://github.com/dkpark10/action-test/blob/master/.github/workflows/page-deploy.yaml](https://github.com/dkpark10/action-test/blob/master/.github/workflows/page-deploy.yaml)
+
+[https://dkpark10.github.io/action-test/pr-3/ 에제 페이지](https://dkpark10.github.io/action-test/pr-3/)
+
+사내에서 신규 기능이나 버그를 수정하고 다시 피드백을 받는 과정은 간략하게 다음과 같다.
 
 ![배포과정](/images/deploy-before.png)
 
@@ -23,13 +30,6 @@ eks 푸시 과정을 생략하여 깃헙페이지로 정적 배포 빠르게 피
 하나의 서비스에 여러 개발자가 따로 작업하고 있을 수 있기에 Pr 단위로 멀티 페이지를 배포 스크립트를 작성했다. 
 
 예제는 spa 라이브러리 react를 이용했다.
-
-## 링크
-[https://github.com/dkpark10/action-test/tree/master/apps/react](https://github.com/dkpark10/action-test/tree/master/apps/react)
-
-[https://github.com/dkpark10/action-test/blob/master/.github/workflows/page-deploy.yaml](https://github.com/dkpark10/action-test/blob/master/.github/workflows/page-deploy.yaml)
-
-[https://dkpark10.github.io/action-test/pr-3/ 에제 페이지](https://dkpark10.github.io/action-test/pr-3/)
 
 ## 배포 스크립트
 ```shell
