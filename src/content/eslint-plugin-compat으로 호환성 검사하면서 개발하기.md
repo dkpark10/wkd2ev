@@ -1,0 +1,252 @@
+---
+title: eslint-plugin-compat으로 호환성 검사하면서 개발하기 (with app router)
+date: "2025-10-07"
+description: ""
+priority: 0.8
+---
+
+### 예제 링크: [https://github.com/dkpark10/playground/tree/main/examples/lint-compat](https://github.com/dkpark10/playground/tree/main/examples/lint-compat)
+
+사내 서비스에서 레거시 브라우저의 원활한 지원을 위해 개발단계에서 호환성을 검사 아래 린트 도구를 이용하였다.
+
+[eslint-plugin-compat](https://www.npmjs.com/package/eslint-plugin-compat)은 https://github.com/mdn/browser-compat-data 을 기반으로
+브라우저 호환성을 검사해주는 린트 플러그인이다.
+
+## packagejson 설정
+
+```json
+{
+  "name": "lint-compat",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "build:bundle": "cross-env ANALYZE=true next build",
+    "start": "next start -p 8080",
+    "lint": "next lint",
+    "lint:fix": "eslint --fix './src/**/*.{ts,tsx,js,jsx}'",
+    "lint:compat": "next lint -f ./formatter.js",
+    "lint:compat:output": "pnpm run lint:compat -o ./compat.txt",
+    "test": "vitest --run",
+    "test:e2e": "npx playwright test",
+    "test:e2e:ui": "npx playwright test --ui"
+  },
+  "dependencies": {
+    "@next/font": "13.1.6",
+    "next": "^14",
+    "react": "18.2.0",
+    "react-dom": "18.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "@typescript-eslint/eslint-plugin": "^7.13.1",
+    "@typescript-eslint/parser": "^7.13.1",
+    "dependency-tree": "^11.1.1",
+    "eslint": "^8.5.0",
+    "eslint-config-next": "15.0.3",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-compat": "^6.0.2",
+    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-unused-imports": "^4.2.0",
+    "glob": "^11.0.2",
+    "prettier": "^3.3.3"
+  }
+}
+```
+
+
+## .browserslistrc 설정
+
+우선 next 공식문서에서 나와있는 브라우저 버전을 설정한다.
+[https://nextjs.org/docs/architecture/supported-browsers](https://nextjs.org/docs/architecture/supported-browsers)
+```
+# https://nextjs.org/docs/architecture/supported-browsers
+defaults
+chrome >= 64
+edge >= 79
+firefox >= 67
+opera >= 51
+safari >= 12
+
+not OperaMini all
+not KaiOS > 0
+```
+
+## 린트 설정
+
+8버전 기준
+**overrides** 속성으로 특정 파일만을 린트 검사하도록 한다. 여기서 특정 파일은 브라우저에서 실행되는 클라이언트 파일이다.
+
+오버라이드 파일 규칙은 상대경로로 들어가야 하기에 **__dirname** 변수로
+경로를 재수정하여 루트 경로를 설정하도록 한다.
+
+### .eslintrc.js
+```javascript
+const getClientFileList = require('./get-client-files');
+
+/** 
+ * @description lint overrides 파일 목록에는 상대 경로가 들어가야 한다
+ *   'Users/mac/Desktop/playground/examples/lint-compat/src/components/non-use-client.tsx', (x)
+ *   '/src/components/non-use-client.tsx', (o)
+ */
+const clientFileList = getClientFileList().map(
+  /** @param {string} clientFile @returns {string} */
+  (clientFile) => {
+    return clientFile.replace(__dirname, '');
+  }).map(
+    /** @param {string} clientFile @returns {string} */
+    (clientFile) => clientFile[0] === '/' ? clientFile.slice(1) : clientFile
+  )
+
+module.exports =
+{
+  root: true,
+  // lint는 js만 해석 가능하기에 ts를 트랜스파일할 Parser가 필요
+  parser: "@typescript-eslint/parser",
+
+  "env": {
+    "browser": true,
+    "node": true,
+    "es6": true
+  },
+
+  "parserOptions": {
+    "ecmaFeatures": {
+      "jsx": true
+    },
+    "ecmaVersion": "latest",
+    "sourceType": "module",
+    "project": "./tsconfig.json",
+    "tsconfigRootDir": __dirname, // tsconfig 파일을 현재 경로에서 찾도록 함
+  },
+
+  extends: [
+    "plugin:react/recommended",
+    "next/core-web-vitals",
+    "plugin:import/recommended",
+    "plugin:import/typescript",
+    "prettier"
+  ],
+
+  plugins: ["react", "import", "unused-imports"],
+
+  ignorePatterns: [".eslintrc.js", "get-client-files.js", "formatter.js"],
+
+  "rules": {
+    "import/no-unresolved": "off",
+
+    /** @description react 17 이상부터 react import 불필요  */
+    "react/react-in-jsx-scope": "off",
+  },
+
+  "overrides": [
+    {
+      "files": [...clientFileList, 'src/hooks/**'],
+      "plugins": ["compat"],
+      "extends": ["plugin:compat/recommended"],
+      "settings": {
+        // polyfills: ['IntersectionObserver'], // 폴리필
+      },
+    }
+  ],
+}
+```
+
+## 클라이언트 파일 추출
+
+![rsc dom tree](/images/compat-rsc-dom-tree.png)
+
+app router 에서는 서버컴포넌트에서 브라우저 호환성을 검사하기가 불필요 하기에 클라이언트 파일을 추출하여야 한다.
+진입점은 app/layout.tsx 로 시작한다. 클라이언트 파일은 아래와 같이 구별할 수 있겠다.
+
+```
+1. 'use client' 디렉티브가 명시되어 있는 파일
+2. 'use client' 디렉티브가 명시되어 있는 파일에서 불러오는 모든 모듈
+3. 클라이언트에서 사용되는 것이 확실하다고 생각하는 파일 (ex: 리액트 커스텀 훅 파일)
+```
+
+**glob**과 **dependency-tree**를 이용하여 파일을 추출할 수 있다.
+
+### get-client-files.js
+```javascript
+const { globSync } = require('glob');
+const fs = require('fs');
+const path = require('path');
+const dependencyTree = require('dependency-tree');
+
+function getClientFileList() {
+  try {
+    const srcPath = path.resolve(__dirname, `./src/app`);
+    /** @description root layout을 엔트리로 모든 tsx 파일리스트를 얻음 */
+    const tsxFilePaths = globSync(`${srcPath}/**/*.tsx`, {
+      ignore: 'node_modules/**'
+    });
+
+    /** 
+     * @param {string[]} fileList
+     * @return {string[]}
+     */
+    function getDependency(fileList) {
+      return fileList.reduce((acc, fileItem) => {
+        const d = dependencyTree.toList({
+          filename: fileItem,
+          directory: 'path/to/all/files',
+          filter: (path) =>
+            !(
+              /node_modules/.test(path) ||
+              /s?.css/.test(path) ||
+              /constants/.test(path)
+            ),
+          /** @description path alias를 사용할 경우 경로를 매칭하지 못하므로 tsconfig 경로 추가 */
+          tsConfig: require('./tsconfig.json'),
+        });
+
+        return [...acc, ...d];
+      }, []);
+    }
+
+    /** @description tsx로부터 불러오는 모든 의존성을 파악 */
+    const dependency = getDependency(tsxFilePaths);
+
+    const clientFiles = dependency.filter((tsxFile) => {
+      const content = fs.readFileSync(tsxFile, 'utf-8');
+      return /['"]use client['"]\;?/.test(content);
+    });
+
+    /** @description use client가 명시되어었는 파일로부터 다시 모든 의존성을 파악  */
+    const clintDependency = getDependency(clientFiles);
+
+    const result = [...new Set(clintDependency)];
+    return result;
+  } catch (err) {
+    console.error('get client file list error: ', err);
+    return ['./src/**/*.{tsx,ts}'];
+  }
+}
+
+module.exports = getClientFileList;
+
+/** @desc 린트 파일 검사 경로를 위한 log 출력 */
+console.log(getClientFileList().join(' '));
+```
+
+추출된 클라이언트 파일 목록을 린트 overrides에 명시한다면 아래와 같이 개발단계에서 검증할 수 있다.
+
+### 서버 컴포넌트
+
+![린트 경고문구가 나타나지 않는 서버 컴포넌트 코드 이미지](/images/compat-server.png)
+
+### 클라이언트 컴포넌트
+
+![린트 경고문구가 나타나는 클라이언트 컴포넌트 코드 이미지](/images/compat-client.png)
+
+### 한계 
+
+![린트 경고문구가 나타나지 않은 클라이언트 컴포넌트 코드 이미지](/images/compat-non-client.png)
+
+아래 파일은 'use client'가 명시된 클라이언트 파일에서 모듈을 호출하고 있으므로 오버라이드 파일 규칙에 들어가지만
+개발단계에서 린트가 에러를 검출하지 못한다.
