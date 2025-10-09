@@ -1,6 +1,9 @@
 import { postHandler } from '@/utils/post-handler';
 import { NextResponse } from "next/server";
 
+/** @description export 옵션으로 정적 빌드 캐시 필수 */
+export const dynamic = 'force-static'
+
 export async function GET() {
   const allPosts = postHandler.getPosts();
 
