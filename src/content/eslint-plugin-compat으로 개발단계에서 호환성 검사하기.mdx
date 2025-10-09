@@ -1,11 +1,9 @@
 ---
-title: eslint-plugin-compat으로 개발하면서 호환성 검사하기
+title: eslint-plugin-compat으로 개발단계에서 호환성 검사하기
 date: "2025-10-07"
 description: "with app router"
 priority: 0.8
 ---
-import SubTitleAnchor from '@/components/sub-title-anchor';
-
 
 ### 예제 링크: [https://github.com/dkpark10/playground/tree/main/examples/lint-compat](https://github.com/dkpark10/playground/tree/main/examples/lint-compat)
 
@@ -14,7 +12,7 @@ import SubTitleAnchor from '@/components/sub-title-anchor';
 [eslint-plugin-compat](https://www.npmjs.com/package/eslint-plugin-compat)은 https://github.com/mdn/browser-compat-data 을 기반으로
 브라우저 호환성을 검사해주는 린트 플러그인이다.
 
-<SubTitleAnchor subTitle='packagejson 설정' />
+## packagejson 설정
 
 ```json
 {
@@ -60,7 +58,7 @@ import SubTitleAnchor from '@/components/sub-title-anchor';
 }
 ```
 
-<SubTitleAnchor subTitle='.browserslistrc 설정' />
+## .browserslistrc 설정
 
 우선 next 공식문서에서 나와있는 브라우저 버전을 설정한다.
 [https://nextjs.org/docs/architecture/supported-browsers](https://nextjs.org/docs/architecture/supported-browsers)
@@ -77,7 +75,7 @@ not OperaMini all
 not KaiOS > 0
 ```
 
-<SubTitleAnchor subTitle='린트 설정' />
+## 린트 설정
 
 8버전 기준
 **overrides** 속성으로 특정 파일만을 린트 검사하도록 한다. 여기서 특정 파일은 브라우저에서 실행되는 클라이언트 파일이다.
@@ -157,7 +155,7 @@ module.exports =
 }
 ```
 
-<SubTitleAnchor subTitle='클라이언트 파일 추출' />
+## 클라이언트 파일 추출
 
 ![rsc dom tree](/images/compat-rsc-dom-tree.png)
 
