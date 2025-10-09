@@ -16,7 +16,7 @@ const components = {
   ),
 
   img: ({ src, alt }) => (
-    <img src={process.env.NODE_ENV === 'production' ?  `/wkd2ev${src}` : src} alt={alt} />
+    <img src={process.env.NODE_ENV === 'production' ? `/wkd2ev${src}` : src} alt={alt} />
   )
 };
 

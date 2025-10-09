@@ -122,3 +122,14 @@ td {
 th {
   text-align: left;
 }
+
+.sub_title .permalink {
+  margin-left: 2px;
+  color: $anchor-color;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.sub_title:hover .permalink {
+  opacity: 1;
+}
