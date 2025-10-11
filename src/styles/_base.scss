@@ -56,7 +56,7 @@ pre {
   justify-content: center;
 
   & .inner {
-    width: 784px;
+    width: $main-width;
   }
 }
 
@@ -89,6 +89,21 @@ hr {
     font-size: $font-size-3xl;
     font-weight: $font-bold;
     padding-bottom: 20px;
+  }
+}
+
+.index_container {
+  position: fixed;
+  top: 0;
+  transform: translate(calc($main-width + 24px), 100px);
+
+  & li {
+    cursor: pointer;
+    padding: 4px 0px;
+
+    &:hover {
+      color: $anchor-color;
+    }
   }
 }
 
