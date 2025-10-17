@@ -1,22 +1,27 @@
 'use client';
 
-import { useState, useEffect } from "react";
+import { useSubTitleList } from "@/components/sub-title-context";
+import { generateTitleSlug } from "@/utils/generate-title-slug";
 
 export default function PostLayout({ children }) {
-  /** @type {[string[], React.Dispatch<React.SetStateAction<string[]>>]} */
-  const [indexList, setIndexList] = useState([]);
+  const { subTitleElement } = useSubTitleList();
 
-  useEffect(() => {
-    document.querySelectorAll('h2').forEach((element) => {
-      setIndexList((prev) => [...prev, element.textContent.slice(0, element.textContent.length - 1)]);
-    })
-  }, []);
+  /** @param {string} str */
+  const sliceLastString = (str) => str.slice(0, str.length - 1);
+
+  /** @param {HTMLHeadElement} htmlHeadingElement */
+  const onClick = (htmlHeadingElement) => {
+    window.history.pushState(null, '', `#${generateTitleSlug(htmlHeadingElement.textContent)}`);
+
+    htmlHeadingElement.scrollIntoView({ behavior: 'smooth' });
+  }
 
   return (
     <>
       {children}
-      <ul className="index_container">
-        {indexList.map((item) => <li key={item}>{item}</li>)}
+      <ul className="table_content">
+        {subTitleElement.map((item, idx) =>
+          <li key={idx} onClick={() => onClick(item)}>{sliceLastString(item.textContent)}</li>)}
       </ul>
     </>
   );

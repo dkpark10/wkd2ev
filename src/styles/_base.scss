@@ -52,6 +52,7 @@ pre {
 }
 
 .container {
+  padding-top: $header-height + 12px;;
   display: flex;
   justify-content: center;
 
@@ -64,7 +65,12 @@ header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 32px 0px;
+  padding: 32px;
+  background-color: #f5f5fa;
+  width: 100vw;
+  height: $header-height;
+  position: fixed;
+  border-bottom: 1px solid $gray;
 
   & .title {
     font-size: $font-size-2xl;
@@ -78,10 +84,6 @@ img {
   object-fit: cover;
 }
 
-hr {
-  margin-bottom: 28px;
-}
-
 .post_item {
   padding-bottom: 44px;
 
@@ -92,10 +94,12 @@ hr {
   }
 }
 
-.index_container {
+.table_content {
   position: fixed;
   top: 0;
-  transform: translate(calc($main-width + 24px), 100px);
+  transform: translate(calc($main-width + 120px), 120px);
+  border-left: 1px solid $gray;
+  padding-left: 10px;
 
   & li {
     cursor: pointer;

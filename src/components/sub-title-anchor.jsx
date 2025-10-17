@@ -2,16 +2,25 @@
 
 import { generateTitleSlug } from "@/utils/generate-title-slug";
 import { useEffect, useRef } from "react";
+import { useSubTitleList } from "@/components/sub-title-context";
 
 /** @param {{ subTitle: string }} */
 export default function SubTitleAnchor({ subTitle }) {
   const refElement = useRef(null);
+
+  const { setSubTitleElement } = useSubTitleList();
 
   const scrollAction = () => {
     if (refElement) {
       refElement.current.scrollIntoView({ behavior: 'smooth' });
     }
   }
+
+  useEffect(() => {
+    if (refElement) {
+      setSubTitleElement((prev) => [...prev, refElement.current]);
+    }
+  }, []);
 
   useEffect(() => {
     const { hash } = window.location;
@@ -26,7 +35,7 @@ export default function SubTitleAnchor({ subTitle }) {
   const onClick = (e) => {
     e.preventDefault();
     window.history.pushState(null, '', `#${generateTitleSlug(subTitle)}`);
-    
+
     scrollAction();
   }
 
