@@ -52,7 +52,7 @@ pre {
 }
 
 .container {
-  padding-top: $header-height + 42px;;
+  padding-top: 42px;
   display: flex;
   justify-content: center;
 
@@ -69,7 +69,8 @@ header {
   background-color: #f5f5fa;
   width: 100vw;
   height: $header-height;
-  position: fixed;
+  position: sticky;
+  top: 0;
   border-bottom: 1px solid $gray;
 
   & .title {

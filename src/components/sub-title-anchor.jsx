@@ -7,6 +7,7 @@ import { useIntersectionObserver } from "@uidotdev/usehooks";
 
 /** @param {{ subTitle: string }} */
 export default function SubTitleAnchor({ subTitle }) {
+  /** @type {React.RefObject<HTMLHeadElement | null>} */
   const refElement = useRef(null);
 
   const { setSubTitleElement, setCurrentContent } = useSubTitleList();
@@ -19,8 +20,11 @@ export default function SubTitleAnchor({ subTitle }) {
 
   const scrollAction = () => {
     if (refElement) {
-      refElement.current.scrollIntoView({ behavior: 'smooth' });
-    }    
+      const rect = refElement.current.getBoundingClientRect();
+      const absoluteY = window.scrollY + rect.top;
+
+      window.scrollTo({ top: absoluteY - 93, behavior: 'smooth' });
+    }
   }
 
   useEffect(() => {

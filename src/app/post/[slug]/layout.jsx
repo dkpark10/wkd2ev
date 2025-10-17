@@ -14,7 +14,10 @@ export default function PostLayout({ children }) {
   const onClick = (htmlHeadingElement) => {
     window.history.pushState(null, '', `#${generateTitleSlug(htmlHeadingElement.textContent)}`);
 
-    htmlHeadingElement.scrollIntoView({ behavior: 'smooth' });
+    const rect = htmlHeadingElement.getBoundingClientRect();
+    const absoluteY = window.scrollY + rect.top;
+
+    window.scrollTo({ top: absoluteY - 93, behavior: 'smooth' });
   }
 
   return (
