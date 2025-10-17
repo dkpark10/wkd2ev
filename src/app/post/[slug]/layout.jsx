@@ -2,9 +2,10 @@
 
 import { useSubTitleList } from "@/components/sub-title-context";
 import { generateTitleSlug } from "@/utils/generate-title-slug";
+import clsx from 'clsx';
 
 export default function PostLayout({ children }) {
-  const { subTitleElement } = useSubTitleList();
+  const { subTitleElement, currentContent } = useSubTitleList();
 
   /** @param {string} str */
   const sliceLastString = (str) => str.slice(0, str.length - 1);
@@ -21,7 +22,12 @@ export default function PostLayout({ children }) {
       {children}
       <ul className="table_content">
         {subTitleElement.map((item, idx) =>
-          <li key={idx} onClick={() => onClick(item)}>{sliceLastString(item.textContent)}</li>)}
+          <li
+            key={idx}
+            className={clsx(item.isSameNode(currentContent) && 'selected')}
+            onClick={() => onClick(item)}>{sliceLastString(item.textContent)}
+          </li>
+        )}
       </ul>
     </>
   );

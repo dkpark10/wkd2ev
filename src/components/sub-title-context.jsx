@@ -8,16 +8,27 @@ export const SubTitleContext = createContext({
 
   /** @type {React.Dispatch<React.SetStateAction<HTMLHeadElement[]> | null>} */
   setSubTitleElement: null,
+
+  /** @type {HTMLHeadElement} */
+  currentContent: null,
+
+  /** @type {React.Dispatch<React.SetStateAction<number> | null>} */
+  setCurrentContent: null
 });
 
 export const SubTitleProvider = ({ children }) => {
   /** @type {[HTMLHeadElement[], React.Dispatch<React.SetStateAction<HTMLHeadElement[]>>]} */
   const [subTitleElement, setSubTitleElement] = useState([]);
+  
+  /** @type {[HTMLHeadElement | null, React.Dispatch<React.SetStateAction<HTMLHeadElement>>]} */
+  const [currentContent, setCurrentContent] = useState(null);
 
   return (
     <SubTitleContext.Provider value={{
       subTitleElement,
       setSubTitleElement,
+      currentContent,
+      setCurrentContent,
     }}>
       {children}
     </SubTitleContext.Provider>
