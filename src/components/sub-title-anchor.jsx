@@ -13,9 +13,9 @@ export default function SubTitleAnchor({ subTitle }) {
   const { setSubTitleElement, setCurrentContent } = useSubTitleList();
 
   const [targetRef, entry] = useIntersectionObserver({
-    threshold: 0,
+    threshold: 0.9,
     root: null,
-    rootMargin: "0px",
+    rootMargin: '0px 0px -60% 0px',
   });
 
   const scrollAction = () => {
@@ -28,7 +28,9 @@ export default function SubTitleAnchor({ subTitle }) {
   }
 
   useEffect(() => {
-    setCurrentContent(refElement.current);
+    if (entry?.isIntersecting) {
+      setCurrentContent(refElement.current);
+    }
   }, [entry?.isIntersecting]);
 
   useEffect(() => {
