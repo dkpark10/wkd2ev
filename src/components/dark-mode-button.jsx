@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import cookie from 'js-cookie';
 import clsx from "clsx";
 
 function Sun() {
@@ -15,22 +16,15 @@ function Moon() {
   )
 }
 
-const KEY = 'THEME';
-
-export default function DarkModeButton() {
+/** @param {{ initTheme: 'light' | 'dark' }} */
+export default function DarkModeButton({ initTheme }) {
   /** @type {['light' | 'dark' | null, React.Dispatch<React.SetStateAction<'light' | 'dark'>>]} */
-  const [theme, setTheme] = useState('light');
-
-  useEffect(() => {
-    const currentTheme = localStorage.getItem(KEY) || 'light';
-    setTheme(currentTheme);
-    document.body.dataset.theme = currentTheme;
-  }, []);
+  const [theme, setTheme] = useState(initTheme);
 
   const onClick = () => {
     const next = theme === "light" ? "dark" : "light";
-    localStorage.setItem(KEY, next);
     document.body.dataset.theme = next;
+    cookie.set('wkd2ev_theme', next);
     setTheme(next);
   }
 
