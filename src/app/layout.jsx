@@ -2,28 +2,24 @@ import "@/styles/globals.css";
 import "@/styles/_base.scss";
 import Link from "next/link";
 import { SubTitleProvider } from "@/components/sub-title-context";
-import DarkModeButton, { THEME_KEY } from "@/components/dark-mode-button";
-import { cookies } from 'next/headers'
+import DarkModeButton from "@/components/dark-mode-button";
 
 export const metadata = {
   title: "wkd2ev 블로그",
   description: "wkd2ev 블로그",
 };
 
-export default async function RootLayout({ children }) {
-  const cookieStore = await cookies()
-  const theme = cookieStore.get('wkd2ev_theme')?.value || 'light';
-
+export default function RootLayout({ children }) {
   return (
     <html lang="ko">
-      <body data-theme={theme}>
+      <body>
 
         <header>
           <Link className="title" href="/">wkd2ev</Link>
 
           <div className="right">
 
-            <DarkModeButton initTheme={theme} key={theme} />
+            <DarkModeButton />
 
             <Link href="https://github.com/dkpark10" className="github-container">
               <img src='/icons/github.svg' width={24} height={24} alt='깃허브 아이콘' />
