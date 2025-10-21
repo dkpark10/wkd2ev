@@ -21,8 +21,6 @@ export default function DarkModeButton() {
   /** @type {['light' | 'dark' | null, React.Dispatch<React.SetStateAction<'light' | 'dark'>>]} */
   const [theme, setTheme] = useState('light');
 
-  const [animationTrigger, setAnimationTrigger] = useState(false);
-
   useEffect(() => {
     const currentTheme = localStorage.getItem(KEY) || 'light';
     setTheme(currentTheme);
@@ -34,7 +32,6 @@ export default function DarkModeButton() {
     localStorage.setItem(KEY, next);
     document.body.dataset.theme = next;
     setTheme(next);
-    setAnimationTrigger((prev) => !prev);
   }
 
   return (
@@ -44,7 +41,7 @@ export default function DarkModeButton() {
       role='button'
     >
       <button
-        className={clsx(animationTrigger && 'active')}
+        className={clsx(theme === 'dark' && 'active')}
         type='button'
         role='switch'
       >
