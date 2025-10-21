@@ -4,6 +4,12 @@
   padding: 18px 0px;
 }
 
+body {
+  color: var(--text);
+  background-color: var(--bg);
+  transition: $transition-dark;
+}
+
 h1 {
   font-size: $font-size-5xl;
   padding-bottom: 18px;
@@ -34,10 +40,6 @@ h6 {
   @include header-padding;
 }
 
-body {
-  color: $black;
-}
-
 p {
   padding-bottom: 8px;
 }
@@ -66,17 +68,24 @@ header {
   justify-content: space-between;
   align-items: center;
   padding: 32px;
-  background-color: #f5f5fa;
   width: 100vw;
   height: $header-height;
   position: sticky;
   top: 0;
   border-bottom: 1px solid $gray;
+  background-color: var(--bg);
+  transition: $transition-dark;
 
   & .title {
     font-size: $font-size-2xl;
     font-weight: $font-bold;
-    color: $black;
+    color: var(--text);
+  }
+
+  & .right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
   }
 }
 
@@ -156,4 +165,46 @@ th {
 
 .sub_title:hover .permalink {
   opacity: 1;
+}
+
+.github-container {
+  width: 24px;
+  height: 24px;
+}
+
+.dark-container {
+  width: 60px;
+  height: 30px;
+  border-radius: 999px;
+  padding: 4px;
+  background-color: var(--text);
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  transition: background-color 0.3s ease-in-out;
+
+  button {
+    cursor: pointer;
+    width: 24px;
+    height: 24px;
+    outline: none;
+    border: none;
+    border-radius: inherit;
+    padding: 2px;
+    background-color: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s ease-in-out;
+
+    & img {
+      width: 96%;
+      height: 96%;
+      object-fit: cover;
+    }
+  }
+
+  .active {
+    transform: translateX(26px);
+  }
 }
