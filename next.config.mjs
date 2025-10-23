@@ -13,15 +13,12 @@ const nextConfig = {
     unoptimized: true,
   },
 
-  ...(process.env.NODE_ENV === 'production' && {
+  ...(process.env.NODE_ENV === "production" && {
     output: "export",
   }),
 
-  basePath:
-    process.env.NODE_ENV === 'production'
-      ? '/wkd2ev'
-      : '',
-
+  basePath: process.env.NODE_ENV === "production" ? "/wkd2ev" : "",
+  
   reactStrictMode: true,
 };
 
