@@ -27,8 +27,11 @@ export default function SubTitleAnchor({ subTitle }) {
     if (refElement) {
       const absoluteY = subTitleList.find(
         (item) => item.idx === id.current
-      ).scrollTop;
-      window.scrollTo({ top: absoluteY, behavior: "smooth" });
+      )?.scrollTop;
+
+      if (absoluteY) {
+        window.scrollTo({ top: absoluteY - 10, behavior: "smooth" });
+      }
     }
   };
 
@@ -69,10 +72,11 @@ export default function SubTitleAnchor({ subTitle }) {
       scrollAction();
     }
 
+    // 페이지 이탈 시 초기화
     return () => {
       setSubTitleList([]);
     };
-  }, [subTitle]);
+  }, [subTitle, JSON.stringify(subTitleList.map((item) => item.textContent).join(''))]);
 
   /** @param {MouseEventHandler<HTMLAnchorElement>} e */
   const onClick = (e) => {
@@ -85,13 +89,10 @@ export default function SubTitleAnchor({ subTitle }) {
   return (
     <h2
       className="sub_title"
-      ref={(element) => {
-        targetRef(element);
-        refElement.current = element;
-      }}
+      ref={targetRef}
     >
       {subTitle}
-      <a onClick={onClick} className="permalink">
+      <a ref={refElement} onClick={onClick} className="permalink">
         #
       </a>
     </h2>

@@ -15,7 +15,7 @@ export default function TableContent() {
       `#${generateTitleSlug(item.textContent)}`
     );
 
-    window.scrollTo({ top: item.scrollTop, behavior: "smooth" });
+    window.scrollTo({ top: item.scrollTop - 10, behavior: "smooth" });
   };
 
   return (

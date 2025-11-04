@@ -1,0 +1,21 @@
+---
+title: app router에서 referer 값 다루기
+date: "2025-10-31"
+description: ""
+priority: 0.9
+---
+
+### 예제 링크
+[https://github.com/dkpark10/playground/tree/main/examples/referrer-app](https://github.com/dkpark10/playground/tree/main/examples/referrer-app)
+
+## 개요 
+
+사내에서는 pv, 유저의 행동 추적을 위한 ga4 이외에도 따로 오래전부터 통계 서버를 두어 통계를 수집하고 있다.
+모든 서비스 통계에는 유저가 이전에 어느 경로를 통해 들어왔는지 추적이 필요한데 최근 
+next app router로 서비스를 개편하면서 window history api를 이용해 referer 값을 추적했다.
+
+## window history
+
+window history 는 브라우저의 세션 히스토리를 기록한다.
+pushState는 스택의 데이터 구조를 가지고 있다.
+
