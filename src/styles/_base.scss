@@ -4,6 +4,20 @@
   padding: 18px 0px;
 }
 
+@keyframes fade-in {
+  from {
+    opacity: 0.4;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.fade-in {
+  animation: fade-in 0.3s cubic-bezier(0.43, 0.14, 0.2, 1.05);
+}
+
 body {
   color: var(--text);
   background-color: var(--bg);
@@ -206,5 +220,9 @@ th {
 
   .active {
     transform: translateX(27px);
+  }
+
+  .fade_in {
+    animation: fade-in 0.3s cubic-bezier(0.43, 0.14, 0.2, 1.05);
   }
 }
