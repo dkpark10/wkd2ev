@@ -25,7 +25,6 @@ export default function DarkModeButton() {
   useEffect(() => {
     const currentTheme = localStorage.getItem(KEY) || 'light';
     setTheme(currentTheme);
-    document.body.dataset.theme = currentTheme;
   }, []);
 
   const onClick = () => {

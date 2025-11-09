@@ -11,9 +11,20 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }) {
+  const themeInitScript = `
+    (function() {
+      try {
+        const theme = localStorage.getItem('THEME');
+        document.body.dataset.theme = theme || 'light';
+      } catch (e) {}
+    })();
+  `;
+
   return (
     <html lang="ko">
-      <body>
+      <body suppressHydrationWarning>
+
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
 
         <header>
           <Link className="title" href="/">wkd2ev</Link>
