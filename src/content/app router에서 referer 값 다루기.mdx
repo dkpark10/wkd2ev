@@ -1,7 +1,7 @@
 ---
 title: app router에서 referer 값 다루기
 date: "2025-10-31"
-description: ""
+description: "react context"
 priority: 0.9
 ---
 
@@ -39,7 +39,7 @@ export function RefererProvider({ children }: PropsWithChildren) {
 
   const getReferer = useRef(() => {
     if (referer.current.length <= 0) return '';
-    return referer.current.slice(-1)[0];
+    return referer.current.slice(-1)[0]; // 항상 맨 마지막 요소를 반환함
   });
 
   useEffect(() => {
@@ -49,7 +49,7 @@ export function RefererProvider({ children }: PropsWithChildren) {
 
     window.history.pushState = function pushState(data: any, unused: string, url?: string | URL | null) {
       referer.current.push(window.location.href);
-      currentUrl.current = window.location.origin + (url as string);
+      currentUrl.current = window.location.origin + (url as string); // replaceState 때 레퍼러 리스트 마지막에 넣을 현재 url
       orgPushState(data, unused, url);
     };
 
@@ -113,28 +113,6 @@ const getReferer = useRef(() => {
 replaceState 또한 세번째 파라미터로 다음 랜딩할 타겟의 주소가 들어온다. 
 replaceState 동작을 도식화하면 아래와 같다.
 
-![pushState](/images/pushstate.png)
-
-1. 현재 경로는 / 이다. 아이디가 123인 게시글 주소로 라우팅 한다.
-2. pushState override 한 메소드에서 일어나는 일은 현재 경로를 리스트에 저장해둔다. 그리고 추후 replaceState에서 레퍼러를 다루기 위한
-현재값도 설정한다.
-
-```javascript
-referer.current.push(window.location.href);
-currentUrl.current = window.location.origin + (url as string);
-orgPushState(data, unused, url);
-```
-
-3. 페이지가 랜딩 후 현재 경로는 post/123 이고 레퍼러 리스트에는 pushState를 실행하며 넣어두었던 레퍼러 리스트가 있다.
-레퍼러 리스트의 맨 마지막 요소가 레퍼러가 된다.
-
-```javascript
-const getReferer = useRef(() => {
-  if (referer.current.length <= 0) return '';
-  return referer.current.slice(-1)[0];
-});
-```
-
 ![replaceState](/images/replacestate.png)
 
 1. 현재경로는 post/125 이다. 뒤로가기, 앞으로가기 액션 발생 시 replaceState가 호출된다. 
@@ -155,52 +133,40 @@ orgReplaceState(data, unused, url);
 ```javascript
 import { test, expect, type Page } from '@playwright/test';
 
-const checkReferer = async (page: Page, referer: string) => {
-  await page.route('**/api/stat', (route) => {
-    const request = route.request();
-    const postData = request.postData();
-
-    const payload = JSON.parse(postData!) as { referer: string };
-    expect(payload.referer).toBe(referer);
-
-    route.continue();
-  });
-};
-
 test('레퍼러 테스트', async ({ page }) => {
-  checkReferer(page, '');
   await page.goto('/dynamic/22');
+  expect(await page.getByTestId('referer').innerText()).toBe('');
 
-  checkReferer(page, 'http://localhost:3000/dynamic/22');
-  await page.getByRole('link', { name: /다음 페이지 이동/ }).click();
+  await page.getByRole('link', { name: /다음 페이지 이동\s*\d+/ }).click();
   await expect(page).toHaveURL('http://localhost:3000/dynamic/23');
+  expect(await page.getByTestId('referer').innerText()).toBe('http://localhost:3000/dynamic/22');
 
-  checkReferer(page, 'http://localhost:3000/dynamic/23');
-  await page.getByRole('link', { name: /다음 페이지 이동/ }).click();
+  await page.getByRole('link', { name: /다음 페이지 이동\s*\d+/ }).click();
   await expect(page).toHaveURL('http://localhost:3000/dynamic/24');
+  expect(await page.getByTestId('referer').innerText()).toBe('http://localhost:3000/dynamic/23');
 
-  checkReferer(page, 'http://localhost:3000/dynamic/24');
   await page.getByRole('link', { name: /다음 페이지 이동/ }).click();
   await expect(page).toHaveURL('http://localhost:3000/dynamic/25');
+  expect(await page.getByTestId('referer').innerText()).toBe('http://localhost:3000/dynamic/24');
 
-  checkReferer(page, 'http://localhost:3000/dynamic/25');
   await page.getByRole('button', { name: /뒤로/ }).click();
   await expect(page).toHaveURL('http://localhost:3000/dynamic/24');
+  expect(await page.getByTestId('referer').innerText()).toBe('http://localhost:3000/dynamic/25');
 
-  checkReferer(page, 'http://localhost:3000/dynamic/24');
   await page.getByRole('button', { name: /뒤로/ }).click();
   await expect(page).toHaveURL('http://localhost:3000/dynamic/23');
+  expect(await page.getByTestId('referer').innerText()).toBe('http://localhost:3000/dynamic/24');
 
-  checkReferer(page, 'http://localhost:3000/dynamic/23');
   await page.getByRole('button', { name: /앞으로/ }).click();
   await expect(page).toHaveURL('http://localhost:3000/dynamic/24');
+  expect(await page.getByTestId('referer').innerText()).toBe('http://localhost:3000/dynamic/23');
 
-  checkReferer(page, 'http://localhost:3000/dynamic/23');
   await page.getByRole('button', { name: /클릭 통계 버튼/ }).click();
 });
 ```
 
-![referer_test.png](/images/referer_test.png)
+![referer_test1.png](/images/referer_test1.png)
+![referer_test2.png](/images/referer_test2.png)
 
 ## 주의
 
