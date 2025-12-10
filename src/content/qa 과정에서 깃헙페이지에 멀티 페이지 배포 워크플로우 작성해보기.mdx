@@ -74,7 +74,7 @@ jobs:
       - name: Move Pr Folder
         run: |
           mkdir -p pr-${{ github.event.number }}
-          mv page/* pr-${{ github.event.number }}
+          mv page pr-${{ github.event.number }}
           cp -r pr-${{ github.event.number }} page
 
       - name: Deploy page
@@ -120,7 +120,7 @@ JamesIves/github-pages-deploy-action@v4
 - name: Move Pr Folder
   run: |
     mkdir -p pr-${{ github.event.number }}  // 배포될 폴더를 생성
-    mv page/* pr-${{ github.event.number }}   // 빌드 에셋이 들어 있는 page폴더를 이전 생성한 폴더로 이동
+    mv page pr-${{ github.event.number }}   // 빌드 에셋이 들어 있는 page폴더를 이전 생성한 폴더로 이동
     cp -r pr-${{ github.event.number }} page  // 복사
 
 - name: Deploy page

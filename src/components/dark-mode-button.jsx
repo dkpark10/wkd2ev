@@ -2,17 +2,17 @@
 
 import { useLayoutEffect, useState } from "react";
 import clsx from "clsx";
-import Image from "@/components/image";
+import { NextImage } from "@/components/image";
 
 function Sun() {
   return (
-    <Image src='/icons/sun.svg' width={16} height={16} alt='태양 아이콘' />
+    <NextImage src='/icons/sun.svg' width={16} height={16} alt='태양 아이콘' />
   );
 }
 
 function Moon() {
   return (
-    <Image src='/icons/moon.svg' width={16} height={16} alt='달 아이콘' />
+    <NextImage src='/icons/moon.svg' width={16} height={16} alt='달 아이콘' />
   )
 }
 

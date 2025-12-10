@@ -108,6 +108,18 @@ img {
   object-fit: cover;
 }
 
+.mdx_img_container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  & img {
+    object-fit: cover;
+    display: block;
+    width: auto !important;
+  }
+}
+
 .post_item {
   padding-bottom: 44px;
 
