@@ -100,6 +100,9 @@ header {
     display: flex;
     align-items: center;
     gap: 22px;
+    @media screen and (max-width: 876px) {
+      gap: 12px;
+    }
   }
 }
 
@@ -183,6 +186,7 @@ th {
 }
 
 .sub_title .permalink {
+    border: 1px solid red;
   margin-left: 2px;
   color: $anchor-color;
   opacity: 0;
@@ -193,7 +197,9 @@ th {
   opacity: 1;
 }
 
-.github-container {
+.github {
+  background-image: var(--github-icon);
+  background-repeat: no-repeat;
   width: 24px;
   height: 24px;
 }
@@ -223,10 +229,11 @@ th {
     justify-content: center;
     transition: transform 0.3s ease-in-out;
 
-    & img {
-      width: 96%;
-      height: 96%;
-      object-fit: cover;
+    & .toggle {
+      width: 16px;
+      height: 16px;
+      background-image: var(--dark-toggle);
+      background-repeat: no-repeat;
     }
   }
 

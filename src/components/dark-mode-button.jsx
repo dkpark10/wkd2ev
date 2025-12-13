@@ -2,19 +2,6 @@
 
 import { useLayoutEffect, useState } from "react";
 import clsx from "clsx";
-import { NextImage } from "@/components/image";
-
-function Sun() {
-  return (
-    <NextImage src='/icons/sun.svg' width={16} height={16} alt='태양 아이콘' />
-  );
-}
-
-function Moon() {
-  return (
-    <NextImage src='/icons/moon.svg' width={16} height={16} alt='달 아이콘' />
-  )
-}
 
 const KEY = 'THEME';
 
@@ -40,15 +27,13 @@ export default function DarkModeButton() {
       onClick={onClick}
       role='button'
     >
-      {theme === null ? <></> : (
-        <button
-          className={clsx(theme === 'dark' && 'active', 'fade_in')}
-          type='button'
-          role='switch'
-        >
-          {theme === 'dark' ? <Moon /> : <Sun />}
-        </button>
-      )}
+      <button
+        className={clsx(theme === 'dark' && 'active', 'fade_in')}
+        type='button'
+        role='switch'
+      >
+        <span className="toggle" />
+      </button>
     </div>
   )
 }

@@ -2,7 +2,7 @@
 
 import { generateTitleSlug } from "@/utils/generate-title-slug";
 import { useEffect, useRef } from "react";
-import { useSubTitleList } from "@/components/sub-title-context";
+import { useSubTitleList } from "@/provider/sub-title-context";
 import { useIntersectionObserver } from "@uidotdev/usehooks";
 
 const HEADER_HEIGHT = 93;

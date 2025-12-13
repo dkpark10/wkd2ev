@@ -1,6 +1,6 @@
 "use client";
 
-import { useSubTitleList } from "@/components/sub-title-context";
+import { useSubTitleList } from "@/provider/sub-title-context";
 import { generateTitleSlug } from "@/utils/generate-title-slug";
 import clsx from "clsx";
 
