@@ -55,15 +55,16 @@
   :root {
     --bg: #{$white};
     --text: #{$black};
-    --github-icon: url('/icons/github-light.svg');
-    --dark-toggle: url('/icons/sun.svg');
+    // TODO prefix 붙이기
+    --github-icon: url('/wkd2ev/icons/github-light.svg');
+    --dark-toggle: url('/wkd2ev/icons/sun.svg');
   }
 
   [data-theme="dark"] {
     --bg: #{$black};
     --text: #{$white};
-    --github-icon: url('/icons/github-dark.svg');
-    --dark-toggle: url('/icons/moon.svg');
+    --github-icon: url('/wkd2ev/icons/github-dark.svg');
+    --dark-toggle: url('/wkd2ev/icons/moon.svg');
   }
 
 $transition-dark: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
