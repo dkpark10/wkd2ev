@@ -157,7 +157,7 @@ module.exports =
 
 ## 클라이언트 파일 추출
 
-![rsc dom tree](/wkd2ev/images/compat-rsc-dom-tree.png)
+![rsc dom tree](/images/compat-rsc-dom-tree.png)
 
 app router 에서는 서버컴포넌트에서 브라우저 호환성을 검사하기가 불필요 하기에 클라이언트 파일을 추출하여야 한다.
 진입점은 app/layout.tsx 로 시작한다. 클라이언트 파일은 아래와 같이 구별할 수 있겠다.
@@ -238,12 +238,12 @@ console.log(getClientFileList().join(' '));
 ### 서버 컴포넌트
 
 서버 컴포넌트는 브라우저 호환성을 신경쓰지 않아도 되므로 린트 에러를 검출하지 아니한다.
-![린트 경고문구가 나타나지 않는 서버 컴포넌트 코드 이미지](/wkd2ev/images/compat-server.png)
+![린트 경고문구가 나타나지 않는 서버 컴포넌트 코드 이미지](/images/compat-server.png)
 
 ### 클라이언트 컴포넌트
 
 클라이언트 컴포넌트는 브라우저에서 동작하므로 린트 에러가 검출되는 것을 확인할 수 있다.
-![린트 경고문구가 나타나는 클라이언트 컴포넌트 코드 이미지](/wkd2ev/images/compat-client.png)
+![린트 경고문구가 나타나는 클라이언트 컴포넌트 코드 이미지](/images/compat-client.png)
 
 ### 한계 
 
@@ -251,4 +251,4 @@ console.log(getClientFileList().join(' '));
 개발단계에서 린트가 에러를 검출하지 못한다. 오버라이드 파일 속성은 하드코딩으로 경로를 명시할 시 개발단계에서
 린트 에러를 검출할 수 있지만 아무래도 동적으로 경로를 명시해서 생기는 이유로 추측된다.
 
-![린트 경고문구가 나타나지 않은 클라이언트 컴포넌트 코드 이미지](/wkd2ev/images/compat-non-client.png)
+![린트 경고문구가 나타나지 않은 클라이언트 컴포넌트 코드 이미지](/images/compat-non-client.png)
