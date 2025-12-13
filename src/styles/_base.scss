@@ -186,7 +186,6 @@ th {
 }
 
 .sub_title .permalink {
-    border: 1px solid red;
   margin-left: 2px;
   color: $anchor-color;
   opacity: 0;
@@ -205,10 +204,10 @@ th {
 }
 
 .dark-container {
-  width: 60px;
-  height: 30px;
+  width: 48px;
+  height: 24px;
   border-radius: 999px;
-  padding: 4px;
+  padding: 3px;
   background-color: var(--text);
   display: flex;
   align-items: center;
@@ -217,8 +216,8 @@ th {
 
   button {
     cursor: pointer;
-    width: 24px;
-    height: 24px;
+    width: 19px;
+    height: 19px;
     outline: none;
     border: none;
     border-radius: inherit;
@@ -230,15 +229,15 @@ th {
     transition: transform 0.3s ease-in-out;
 
     & .toggle {
-      width: 16px;
-      height: 16px;
+      width: 15.5px;
+      height: 15.5px;
       background-image: var(--dark-toggle);
       background-repeat: no-repeat;
     }
   }
 
   .active {
-    transform: translateX(27px);
+    transform: translateX(22px);
   }
 
   .fade_in {

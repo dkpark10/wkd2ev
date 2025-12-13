@@ -14,18 +14,18 @@ priority: 0.8
 
 사내에서 신규 기능이나 버그를 수정하고 다시 피드백을 받는 과정은 간략하게 다음과 같다.
 
-![배포과정](/images/deploy-before.png)
+![배포과정](/wkd2ev/images/deploy-before.png)
 
 ci/cd 에서 빌드 후 eks에 태그를 푸시하는 과정이 반드시 소요된다.
 
 1px 수정이나 개발자가 놓친것이 있어 빠르게 확인해야 할 때 또는 ssr이나 서버의 실행이 필요없는 정적 기능일 때 
 eks 푸시 과정을 생략하여 깃헙페이지로 정적 배포 빠르게 피드백을 받아 아래와 같이 효율성을 개선하고 싶었다.
 
-![배포과정](/images/deploy-after.png)
+![배포과정](/wkd2ev/images/deploy-after.png)
 
 실제로 사내에서 배포되고 있는 브랜치의 폴더 구조이다. pr 별로 구별하여 정적페이지를 확인하도록 했다.
 
-![real](/images/real.png)
+![real](/wkd2ev/images/real.png)
 
 하나의 서비스에 여러 개발자가 따로 작업하고 있을 수 있기에 Pr 단위로 멀티 페이지를 배포 스크립트를 작성했다. 
 

@@ -18,6 +18,8 @@ const nextConfig = {
   }),
 
   basePath: process.env.NODE_ENV === "production" ? "/wkd2ev" : "",
+
+  assetPrefix: '/wkd2ev',
   
   reactStrictMode: true,
 };
