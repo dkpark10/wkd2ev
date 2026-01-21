@@ -38,9 +38,15 @@ importers:
       react-icons:
         specifier: ^5.5.0
         version: 5.5.0(react@19.1.0)
+      react-strawberry-toast:
+        specifier: ^2.1.0
+        version: 2.1.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       react-syntax-highlighter:
         specifier: ^15.6.1
         version: 15.6.1(react@19.1.0)
+      react-tabs:
+        specifier: ^6.1.0
+        version: 6.1.0(react@19.1.0)
       remark-frontmatter:
         specifier: ^5.0.0
         version: 5.0.0
@@ -1997,10 +2003,21 @@ packages:
   react-is@16.13.1:
     resolution: {integrity: sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==}
 
+  react-strawberry-toast@2.1.0:
+    resolution: {integrity: sha512-LgJYpz8e3v+FavjeIYiQjAax5rxu+42ff2DC54GYQ1luIHXSWttySmHuRusIDhLBp6lfYhYq//LUknBKs7Mdgw==}
+    peerDependencies:
+      react: '>=18'
+      react-dom: '>=18'
+
   react-syntax-highlighter@15.6.1:
     resolution: {integrity: sha512-OqJ2/vL7lEeV5zTJyG7kmARppUjiB9h9udl4qHQjjgEos66z00Ia0OckwYfRxCSFrW8RJIBnsBwQsHZbVPspqg==}
     peerDependencies:
       react: '>= 0.14.0'
+
+  react-tabs@6.1.0:
+    resolution: {integrity: sha512-6QtbTRDKM+jA/MZTTefvigNxo0zz+gnBTVFw2CFVvq+f2BuH0nF0vDLNClL045nuTAdOoK/IL1vTP0ZLX0DAyQ==}
+    peerDependencies:
+      react: ^18.0.0 || ^19.0.0
 
   react@19.1.0:
     resolution: {integrity: sha512-FS+XFBNvn3GTAWq26joslQgWNoFu08F4kl0J4CgdNKADkdSGXQyTCnKteIAJy96Br6YbpEU1LSzV5dYtjMkMDg==}
@@ -4784,6 +4801,11 @@ snapshots:
 
   react-is@16.13.1: {}
 
+  react-strawberry-toast@2.1.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0):
+    dependencies:
+      react: 19.1.0
+      react-dom: 19.1.0(react@19.1.0)
+
   react-syntax-highlighter@15.6.1(react@19.1.0):
     dependencies:
       '@babel/runtime': 7.28.3
@@ -4793,6 +4815,12 @@ snapshots:
       prismjs: 1.30.0
       react: 19.1.0
       refractor: 3.6.0
+
+  react-tabs@6.1.0(react@19.1.0):
+    dependencies:
+      clsx: 2.1.1
+      prop-types: 15.8.1
+      react: 19.1.0
 
   react@19.1.0: {}
 

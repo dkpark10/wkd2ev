@@ -22,6 +22,7 @@ body {
   color: var(--text);
   background-color: var(--bg);
   transition: $transition-dark;
+  min-width: 940px;
 }
 
 h1 {
@@ -243,5 +244,18 @@ th {
 
   .fade_in {
     animation: fade-in 0.3s cubic-bezier(0.43, 0.14, 0.2, 1.05);
+  }
+}
+
+.gnb {
+  & ul {
+    display: flex; 
+    gap: 1.2rem;
+    font-size: $font-size-xl;
+
+    li {
+      text-align: center;
+      width: 54px;
+    }
   }
 }
