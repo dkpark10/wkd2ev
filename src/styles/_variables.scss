@@ -1,70 +1,77 @@
-  $font-size-xs: 0.75rem;
+$font-size-xs: 0.75rem;
+$font-size-sm: 0.875rem;
+$font-size-base: 1rem;
+$font-size-lg: 1.125rem;
+$font-size-xl: 1.25rem;
+$font-size-2xl: 1.5rem;
+$font-size-3xl: 1.875rem;
+$font-size-4xl: 2.25rem;
+$font-size-5xl: 3rem;
+$font-size-6xl: 3.75rem;
+$font-size-7xl: 4.5rem;
+$font-size-8xl: 6rem;
 
-  $font-size-sm: 0.875rem;
+$font-thin: 100;
+$font-extralight: 200;
+$font-light: 300;
+$font-normal: 400;
+$font-medium: 500;
+$font-semibold: 600;
+$font-bold: 700;
+$font-extrabold: 800;
+$font-black: 900;
 
-  $font-size-base: 1rem;
+$light-bg: #ffffff;
+$light-bg-secondary: #f8fafc;
+$light-bg-elevated: #f1f5f9;
+$light-text: #1e293b;
+$light-text-secondary: #64748b;
+$light-text-heading: #0f172a;
+$light-border: #e2e8f0;
 
-  $font-size-lg: 1.125rem;
+$dark-bg: #121212;
+$dark-bg-secondary: #1e293b;
+$dark-bg-elevated: #2a2a2a;
+$dark-text: #a9a9a9;
+$dark-text-secondary: #94a3b8;
+$dark-text-heading: #f1f5f9;
+$dark-border: #334155;
 
-  $font-size-xl: 1.25rem;
+$anchor-color-light: $light-text-heading;
+$anchor-color-dark: $dark-text-heading;
 
-  $font-size-2xl: 1.5rem;
+$black: $dark-bg;
+$gray: #64748b;
+$white: $light-bg;
+$anchor-color: $anchor-color-light;
 
-  $font-size-3xl: 1.875rem;
+$main-width: 874px;
+$header-height: 93px;
 
-  $font-size-4xl: 2.25rem;
+:root {
+  --bg: #{$light-bg};
+  --bg-secondary: #{$light-bg-secondary};
+  --bg-elevated: #{$light-bg-elevated};
+  --text: #{$light-text};
+  --text-secondary: #{$light-text-secondary};
+  --text-heading: #{$light-text-heading};
+  --border: #{$light-border};
+  --anchor: #{$anchor-color-light};
+  --github-icon: url('/icons/github-light.svg');
+  --dark-toggle: url('/icons/sun.svg');
+}
 
-  $font-size-5xl: 3rem;
-
-  $font-size-6xl: 3.75rem;
-
-  $font-size-7xl: 4.5rem;
-
-  $font-size-8xl: 6rem;
-
-  $font-thin: 100;
-
-  $font-extralight: 200;
-
-  $font-light: 300;
-
-  $font-normal: 400;
-
-  $font-medium: 500;
-
-  $font-semibold: 600;
-
-  $font-bold: 700;
-
-  $font-extrabold: 800;
-
-  $font-black: 900;
-
-  $black: #020715;
-
-  $gray: #838a9c;
-
-  $white: #f5f5fa;
-
-  $anchor-color: #0998c4;
-
-  $main-width: 874px;
-
-  $header-height: 93px;
-
-  :root {
-    --bg: #{$white};
-    --text: #{$black};
-    // TODO prefix 붙이기
-    --github-icon: url('/icons/github-light.svg');
-    --dark-toggle: url('/icons/sun.svg');
-  }
-
-  [data-theme="dark"] {
-    --bg: #{$black};
-    --text: #{$white};
-    --github-icon: url('/icons/github-dark.svg');
-    --dark-toggle: url('/icons/moon.svg');
-  }
+[data-theme="dark"] {
+  --bg: #{$dark-bg};
+  --bg-secondary: #{$dark-bg-secondary};
+  --bg-elevated: #{$dark-bg-elevated};
+  --text: #{$dark-text};
+  --text-secondary: #{$dark-text-secondary};
+  --text-heading: #{$dark-text-heading};
+  --border: #{$dark-border};
+  --anchor: #{$anchor-color-dark};
+  --github-icon: url('/icons/github-dark.svg');
+  --dark-toggle: url('/icons/moon.svg');
+}
 
 $transition-dark: background-color 0.2s ease-in-out, color 0.2s ease-in-out;

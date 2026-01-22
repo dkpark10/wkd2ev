@@ -1,21 +1,15 @@
-import Image from "next/image";
-
-export function NextImage({ children, ...props }) {
+export function NextImage({ src, alt, ...props }) {
   const prefix = process.env.NODE_ENV === "production" ? "/wkd2ev" : "";
   return (
-    <Image {...props} src={`${prefix}${props.src}`}>
-      {children}
-    </Image>
+    <img {...props} src={`${prefix}${src}`} alt={alt || ""} />
   );
 }
 
-export function MdxImage({ children, ...props }) {
+export function MdxImage({ src, alt, ...props }) {
   const prefix = process.env.NODE_ENV === "production" ? "/wkd2ev" : "";
   return (
     <div className="mdx_img_container">
-      <Image {...props} src={`${prefix}${props.src}`}>
-        {children}
-      </Image>
+      <img {...props} src={`${prefix}${src}`} alt={alt || ""} />
     </div>
   );
 }

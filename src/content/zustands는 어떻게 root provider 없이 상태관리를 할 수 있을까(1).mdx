@@ -7,11 +7,13 @@ priority: 0.8
 
 ### 예제 링크: [https://github.com/dkpark10/sangtae](https://github.com/dkpark10/sangtae)
 
-redux, recoil과는 다르게 zustand는 어떻게 root provider 없이 상태관리를 하는지 
-궁금했다.
+기존에 필자가 사용했던 상태관리 라이브러리 redux, recoil은 root provider를 요구했다.
+zustand가 대세로 떠오르는 지금 문득 root provider 없이 어떻게 사용이 가능한건지 궁금했다.
 
-아래는 리덕스 공식문서 튜토리얼에서 가져온 예제이다.
-[https://ko.redux.js.org/tutorials/fundamentals/part-5-ui-react/#passing-the-store-with-provider](https://ko.redux.js.org/tutorials/fundamentals/part-5-ui-react/#passing-the-store-with-provider)
+
+### react-redux, recoil
+
+아래는 리덕스 공식문서 튜토리얼에서 가져온 코드이다.
 
 ```javascript
 import React from 'react'
@@ -33,9 +35,16 @@ ReactDOM.render(
 )
 ```
 
-아래는 recoil 예제이다.
-[https://recoiljs.org/ko/docs/introduction/getting-started](https://recoiljs.org/ko/docs/introduction/getting-started)
+redux는 js용 전역상태 관리라이브러리 이고 react-redux는 react 인터페이스에 맞춰 react에서 사용할 수 있는 일종의 어댑터 역할을 한다.
+Provider 컴포넌트는 실제로 redux에서 관리하고 있는 전역 상태를 context로 주입시켜 데이터를 전달 시킨다.
 
+[https://github.com/reduxjs/react-redux/blob/97d446171cf329a64a59c47156253aac40603874/src/components/Provider.tsx#L23](https://github.com/reduxjs/react-redux/blob/97d446171cf329a64a59c47156253aac40603874/src/components/Provider.tsx#L23)
+
+```javascript
+return <Context.Provider value={contextValue}>{children}</Context.Provider>
+```
+
+아래는 recoil 예제이다.
 ```javascript
 import React from 'react';
 import {
@@ -54,57 +63,6 @@ function App() {
   );
 }
 ```
-
-이렇듯 전역상태 라이브러리는 앱의 최상단에 위치하여 상태를 관리한다.
-[https://www.slash.page/ko/libraries/react/use-overlay/src/useOverlay.i18n](https://www.slash.page/ko/libraries/react/use-overlay/src/useOverlay.i18n)
-toss에서 만든 modal을 선언적으로 관리하기 위한 훅도 최상단에서 모달을 관리한다. 아래는 useOverlay의 root provider 코드이다.
-
-```javascript
-/** @tossdocs-ignore */
-import React, { createContext, PropsWithChildren, ReactNode, useCallback, useMemo, useState } from 'react';
-
-export const OverlayContext = createContext<{
-  mount(id: string, element: ReactNode): void;
-  unmount(id: string): void;
-} | null>(null);
-if (process.env.NODE_ENV !== 'production') {
-  OverlayContext.displayName = 'OverlayContext';
-}
-
-export function OverlayProvider({ children }: PropsWithChildren) {
-  const [overlayById, setOverlayById] = useState<Map<string, ReactNode>>(new Map()); // <------- 여기서 모달 관리
-
-  const mount = useCallback((id: string, element: ReactNode) => {
-    setOverlayById(overlayById => {
-      const cloned = new Map(overlayById);
-      cloned.set(id, element);
-      return cloned;
-    });
-  }, []);
-
-  const unmount = useCallback((id: string) => {
-    setOverlayById(overlayById => {
-      const cloned = new Map(overlayById);
-      cloned.delete(id);
-      return cloned;
-    });
-  }, []);
-
-  const context = useMemo(() => ({ mount, unmount }), [mount, unmount]);
-
-  return (
-    <OverlayContext.Provider value={context}>
-      {children}
-      {[...overlayById.entries()].map(([id, element]) => (
-        <React.Fragment key={id}>{element}</React.Fragment>
-      ))}
-    </OverlayContext.Provider>
-  );
-}
-```
-
-이렇듯 전역으로 상태를 관리 하기 위해서는 최상단 루트 컴포넌트에 상태를 선언하고 이를 children으로 받아서 관리해주고 있다.
-그러나 zustand는 root provider 없이 바로 컴포넌트에서 바로 사용할 수 있다. 이는 어떻게 가능한 것일까?
 
 ## zustand 코드 파헤쳐 보기
 

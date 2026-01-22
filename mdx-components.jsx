@@ -1,11 +1,17 @@
 import '@/styles/mdx-components.scss';
 import { PrismLight } from 'react-syntax-highlighter';
 import SubTitleAnchor from '@/components/sub-title-anchor';
-import nightOwl from 'react-syntax-highlighter/dist/esm/styles/prism/night-owl';
+import theme from 'react-syntax-highlighter/dist/esm/styles/prism/gruvbox-dark';
 
 const components = {
   code: ({ children }) => (
-    <PrismLight language='javascript' style={nightOwl}>
+    <PrismLight language='javascript' style={theme}
+      codeTagProps={{
+        style: {
+          fontSize: "0.825rem",
+          lineHeight: "1.2"
+        }
+      }}>
       {children}
     </PrismLight>
   ),

@@ -1,7 +1,7 @@
 @use 'variables' as *;
 
 @mixin header-padding {
-  padding: 18px 0px;
+  padding: 1.1rem 0px;
 }
 
 @keyframes fade-in {
@@ -22,12 +22,24 @@ body {
   color: var(--text);
   background-color: var(--bg);
   transition: $transition-dark;
-  min-width: 940px;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: var(--text-heading);
 }
 
 h1 {
   font-size: $font-size-5xl;
   padding-bottom: 18px;
+
+  @media (max-width: 600px) {
+    font-size: $font-size-3xl;
+  }
 }
 
 h2 {
@@ -55,26 +67,30 @@ h6 {
   @include header-padding;
 }
 
-p {
-  padding-bottom: 8px;
-}
-
 pre {
-  padding-bottom: 14px;
-  border-radius: 10px;
+  border-radius: 6px;
+  overflow-x: auto;
+  max-width: 100%;
 }
 
 .mdx-a {
-  color: $anchor-color;
+  color: var(--anchor);
+  word-break: break-all;
 }
 
 .container {
-  padding-top: 42px;
+  padding-top: 22px;
   display: flex;
   justify-content: center;
 
   & .inner {
-    width: $main-width;
+    width: 100%;
+    max-width: $main-width;
+
+    // post 페이지는 3열 레이아웃이라 넓게
+    &:has(.post-layout) {
+      max-width: none;
+    }
   }
 }
 
@@ -83,36 +99,49 @@ header {
   justify-content: space-between;
   align-items: center;
   padding: 32px;
-  width: 100vw;
+  width: 100%;
   height: $header-height;
   position: sticky;
   top: 0;
-  border-bottom: 1px solid $gray;
+  border-bottom: 1px solid var(--border);
   background-color: var(--bg);
   transition: $transition-dark;
+
+  @media (max-width: 600px) {
+    padding: 16px 20px;
+    height: auto;
+  }
 
   & .title {
     font-size: $font-size-2xl;
     font-weight: $font-bold;
-    color: var(--text);
+    color: var(--text-heading);
+
+    @media (max-width: 600px) {
+      font-size: $font-size-xl;
+    }
   }
 
   & .right {
     display: flex;
     align-items: center;
     gap: 22px;
-    @media screen and (max-width: 876px) {
+
+    @media (max-width: 600px) {
       gap: 12px;
     }
   }
 }
 
 img {
-  width: 100%;
+  padding: 2px 0px;
+  max-width: 100%;
+  height: auto;
   object-fit: cover;
 }
 
 .mdx_img_container {
+  padding: 2px 0px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -120,38 +149,92 @@ img {
   & img {
     object-fit: cover;
     display: block;
-    width: auto !important;
+    max-width: 100%;
+    height: auto;
   }
 }
 
 .post_item {
   padding-bottom: 44px;
+  content-visibility: auto;
+  contain-intrinsic-size: 0 120px;
 
   & .title {
     font-size: $font-size-3xl;
     font-weight: $font-bold;
     padding-bottom: 20px;
+    color: var(--text-heading);
+  }
+}
+
+// Post 3-column layout
+.post-layout {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+
+  @media (max-width: 1200px) {
+    gap: 20px;
+  }
+
+  @media (max-width: 900px) {
+    flex-direction: column;
+  }
+}
+
+.post-spacer {
+  width: 200px;
+  flex-shrink: 0;
+
+  @media (max-width: 1200px) {
+    display: none;
+  }
+}
+
+.post-content {
+  width: 100%;
+  max-width: $main-width;
+  min-width: 0;
+  padding: 0px 32px;
+  @media (max-width: 600px) {
+    padding: 0px 20px;
+  }
+
+  p {
+    & a {
+      text-decoration: underline;
+    }
+  }
+}
+
+.post-toc {
+  width: 200px;
+  flex-shrink: 0;
+
+  @media (max-width: 900px) {
+    display: none;
   }
 }
 
 .table_content {
-  position: fixed;
-  top: 0;
-  transform: translate(calc($main-width + 120px), 120px);
-  border-left: 1px solid $gray;
-  padding-left: 10px;
-
-  & li {
-    cursor: pointer;
-    padding: 4px 0px;
-
-    &:hover {
-      color: $anchor-color;
-    }
+  @media (max-width: 1380px) {
+    display: none;
   }
 
-  .selected {
-    color: $anchor-color;
+  @media (min-width: 1380px) {
+    position: sticky;
+    & li {
+      cursor: pointer;
+      padding: 4px 0px;
+
+      &:hover {
+        color: var(--anchor);
+      }
+    }
+
+    .selected {
+      color: var(--anchor);
+    }
   }
 }
 
@@ -159,15 +242,25 @@ nav {
   display: flex;
   justify-content: space-between;
   padding: 44px 0px 32px 0px;
+  gap: 20px;
+
+  @media (max-width: 600px) {
+    flex-direction: column;
+    gap: 12px;
+  }
 
   & .item {
-    width: 360px;
+    max-width: 360px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     font-size: $font-size-xl;
     font-weight: $font-medium;
-    color: $anchor-color;
+    color: var(--anchor);
+
+    @media (max-width: 600px) {
+      max-width: 100%;
+    }
   }
 }
 
@@ -178,7 +271,7 @@ table {
 
 th,
 td {
-  border: 1px solid $gray;
+  border: 1px solid var(--border);
   padding: 8px;
 }
 
@@ -187,9 +280,8 @@ th {
 }
 
 .sub_title .permalink {
-    border: 1px solid red;
   margin-left: 2px;
-  color: $anchor-color;
+  color: var(--anchor);
   opacity: 0;
   cursor: pointer;
 }
@@ -207,10 +299,10 @@ th {
 
 .dark-container {
   width: 48px;
-  height: 24px;
+  height: 24.5px;
   border-radius: 999px;
   padding: 3px;
-  background-color: var(--text);
+  background-color: var(--text-heading);
   display: flex;
   align-items: center;
   cursor: pointer;
@@ -218,8 +310,8 @@ th {
 
   button {
     cursor: pointer;
-    width: 19px;
-    height: 19px;
+    width: 20px;
+    height: 20px;
     outline: none;
     border: none;
     border-radius: inherit;
@@ -235,6 +327,7 @@ th {
       height: 15.5px;
       background-image: var(--dark-toggle);
       background-repeat: no-repeat;
+      background-position: -0.5px 0px;
     }
   }
 
