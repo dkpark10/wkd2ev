@@ -11,13 +11,13 @@
       <loc>https://dkpark10.github.io/wkd2ev/post/eslint-plugin-compat으로-개발단계에서-호환성-검사하기</loc>
       <lastmod>2025-10-07T00:00:00.000Z</lastmod>
       <changefreq>monthly</changefreq>
-      <priority>0.8</priority>
+      <priority>0.6</priority>
     </url>,
     <url>
       <loc>https://dkpark10.github.io/wkd2ev/post/qa-과정에서-깃헙페이지에-멀티-페이지-배포-워크플로우-작성해보기</loc>
       <lastmod>2024-11-20T00:00:00.000Z</lastmod>
       <changefreq>monthly</changefreq>
-      <priority>0.8</priority>
+      <priority>0.5</priority>
     </url>,
     <url>
       <loc>https://dkpark10.github.io/wkd2ev/post/zustands는-어떻게-root-provider-없이-상태관리를-할-수-있을까-1</loc>
