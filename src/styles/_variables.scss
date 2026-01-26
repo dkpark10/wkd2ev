@@ -28,6 +28,7 @@ $light-text: #1e293b;
 $light-text-secondary: #64748b;
 $light-text-heading: #0f172a;
 $light-border: #e2e8f0;
+$light-anchor-color: #fb4934;
 
 $dark-bg: #121212;
 $dark-bg-secondary: #1e293b;
@@ -37,7 +38,7 @@ $dark-text-secondary: #94a3b8;
 $dark-text-heading: #f1f5f9;
 $dark-border: #334155;
 
-$anchor-color-light: $light-text-heading;
+$anchor-color-light: $light-anchor-color;
 $anchor-color-dark: $dark-text-heading;
 
 $black: $dark-bg;

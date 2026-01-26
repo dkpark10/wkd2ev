@@ -6,7 +6,8 @@ priority: 0.9
 ---
 import { MdxImage } from "@/components/image";
 
-### 예제 링크
+**예제 링크**
+
 [https://github.com/dkpark10/playground/tree/main/examples/referrer-app](https://github.com/dkpark10/playground/tree/main/examples/referrer-app)
 
 ## 유저 유입 경로 추적을 위한 레퍼러 
@@ -92,22 +93,17 @@ nextjs router 에서 세번째 파라미터로 넣어주는 값을 다루어 레
 다음 라우팅할 경로를 넣어준다.
 
 이를 도식화하면 아래와 같다.
-
 ![pushState](/images/pushstate.png)
-
 1. 현재 경로는 / 이다. 아이디가 123인 게시글 주소로 라우팅 한다.
 2. pushState override 한 메소드에서 일어나는 일은 현재 경로를 리스트에 저장해둔다. 그리고 추후 replaceState에서 레퍼러를 다루기 위한
 현재값도 설정한다.
-
 ```javascript
 referer.current.push(window.location.href);
 currentUrl.current = window.location.origin + (url as string);
 orgPushState(data, unused, url);
 ```
-
 3. 페이지가 랜딩 후 현재 경로는 post/123 이고 레퍼러 리스트에는 pushState를 실행하며 넣어두었던 레퍼러 리스트가 있다.
 레퍼러 리스트의 맨 마지막 요소가 레퍼러가 된다.
-
 ```javascript
 const getReferer = useRef(() => {
   if (referer.current.length <= 0) return '';
@@ -119,13 +115,10 @@ const getReferer = useRef(() => {
 
 replaceState 또한 세번째 파라미터로 다음 랜딩할 타겟의 주소가 들어온다. 
 replaceState 동작을 도식화하면 아래와 같다.
-
 ![replaceState](/images/replacestate.png)
-
 1. 현재경로는 post/125 이다. 뒤로가기, 앞으로가기 액션 발생 시 replaceState가 호출된다. 
 2. pushState를 진행하면서 현재 경로를 저장한 값을 레퍼러 리스트 맨 마지막 요소로 대체(replace)한다.
 즉 위 그림의 빨간색 값은 pushState를 진행하면서 저장한 현재 주소 값인 것이다.
-
 ```javascript
 referer.current[referer.current.length - 1] = currentUrl.current as string;
 currentUrl.current = window.location.origin + (url as string);

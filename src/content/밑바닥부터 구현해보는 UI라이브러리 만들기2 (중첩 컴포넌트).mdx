@@ -1,0 +1,446 @@
+---
+title: 밑바닥부터 구현해보는 UI라이브러리 만들기2 (중첩 컴포넌트)
+date: "2026-01-25"
+description: "lit, vue, react"
+priority: 8
+---
+import Space from '@/components/space';
+
+**예제링크**
+
+npm 링크: [https://www.npmjs.com/package/reona](https://www.npmjs.com/package/reona)
+
+프로젝트 링크: [https://github.com/dkpark10/reona](https://github.com/dkpark10/reona)
+
+해당 게시글에 관한 링크1: [https://github.com/dkpark10/reona-track/tree/master/track/02-component](https://github.com/dkpark10/reona-track/tree/master/track/02-component)
+
+해당 게시글에 관한 링크2: [https://github.com/dkpark10/reona-track/tree/master/track/03-nested_component](https://github.com/dkpark10/reona-track/tree/master/track/03-nested_component)
+
+## 컴포넌트 설계
+
+컴포넌트는 재사용 가능한 UI 조각이다. 단순히 HTML 태그만 사용한다면 문제가 없지만,
+컴포넌트 안에 다른 컴포넌트를 중첩해서 사용할 때는 각 컴포넌트의 상태를 어떻게 관리할지 고민이 필요하다.
+
+```javascript
+import { html, state, createComponent } from '../core';
+
+function Child({ value }) {
+  return html`<li>${value}</li>`;
+}
+
+export default function App() {
+  const data = state({
+    count: 0,
+  });
+
+  const onClick = () => {
+    data.count += 1;
+  }
+
+  return html`
+    <div id="app">
+      <button type="button" @click=${onClick}>increase</button>
+      <ul>
+        ${createComponent(Child, {
+          props: {
+            value: data.count + 1,
+          }
+        })}
+        ${createComponent(Child, {
+          props: {
+            value: data.count + 2,
+          }
+        })}
+        ${createComponent(Child, {
+          props: {
+            value: data.count + 3,
+          }
+        })}
+      </ul>
+    </div>
+  `;
+}
+```
+
+## 컴포넌트 인스턴스 관리
+
+컴포넌트는 mount 이후 unmount 되기 전까지 런타임에 내부 상태 객체(컴포넌트 인스턴스)로 유지된다.
+
+단일 렌더링 트리 기준으로 동일한 **depth + sibling index** 조합은 하나의 렌더링 페이즈 내에서 유일하다.
+
+따라서 학습용 구현에서는 DOM 트리 내에서 순차적으로 렌더링하는 순서를 기반으로 컴포넌트 인스턴스를 식별할 수 있다.
+
+이는 구현을 단순화하기 위한 순차적 아이디를 사용한다.
+
+key를 명시적으로 개발자가 넣는 경우도 고려했지만 DX의 저하와 컴포넌의 개수가 무수히 많을경우
+일일이 서로 다른 고유 key를 기억하고 주입하기에 어려움이 있다.
+
+![트리위치](/images/ui2/tree.png)
+
+```javascript
+// key: sequence (number), value: ComponentInstance
+const instanceMap = new Map();
+```
+
+## sequence를 통한 컴포넌트 식별
+
+컴포넌트 인스턴스를 식별하려면 트리 내 위치 정보가 필요하다. 이 위치값을 **sequence**라 부르며,
+parser가 Vdom을 순회하면서 순차적으로 할당한다.
+
+### createComponent 함수
+
+중첩 컴포넌트를 생성하는 함수를 작성해보자.
+
+```javascript
+/**
+ * @typedef {Object} ComponentOption
+ * @property {object} props
+ */
+
+/**
+ * @param {Function} component 
+ * @param {ComponentOption} options 
+ */
+function createComponent(component, options) {
+  const instanceMap = getInstanceMap();
+
+  /**
+   * @param {number} sequence 
+   * sequence를 key로서 사용
+   * parser에서 해당 함수를 사용한다.
+   */
+  const func = function getInstance(sequence) {
+    let instance = instanceMap.get(sequence);
+    if (!instance) {
+      instance = new ComponentInstance(component, sequence);
+      instanceMap.set(sequence, instance);
+    }
+
+    // props가 있다면 props를 할당
+    if (options && options.props) {
+      instance.props = options.props;
+    }
+
+    return instance;
+  }
+
+  // parser 에서 컴포넌트를 생성하는 함수
+  func.__isCreateComponent = true;
+  return func;
+}
+```
+
+여기서 해당 **createComponent**의 첫번째 파라미터로 받은 컴포넌트 함수는 dom tree에서 몇번째 순서에 위치해야 하는지
+해당 컴포넌트를 호출하는 부모가 누구인지 알 수 없다. 
+
+그래서 인스턴스를 생성하는 함수와 순서를 파라미터에 넣을 수 있도록 함수를 반환하는 고차함수를 사용한다.
+그저 컴포넌트 인스턴스를 생성할 함수만을 반환하고 사용하는 쪽에서 순서를 넣도록 위임하는 것이다. 
+
+그렇다면 해당 함수를 어디서 누가 사용해야 할까? **parser**에서 Vdom 생성 시 재귀적으로 탐색하는 도중 해당 함수를 사용하면 된다.
+
+[https://github.com/dkpark10/reona/blob/9ec3144dae83790d876bf4b57df6ad5e92d8a23f/track/02-component/src/core/parser.js#L152](https://github.com/dkpark10/reona/blob/9ec3144dae83790d876bf4b57df6ad5e92d8a23f/track/02-component/src/core/parser.js#L152)
+
+컴포넌트의 고유 위치는 rootRender시 componentInstance를 생성할 때 생성자로 **sequence**를 요구한다. 루트 렌더링 시 **0**으로 넣어준다.
+
+### runtime-dom.js
+```javascript
+// 부착할 엘리먼트와 함수형 컴포넌트를 파라미터로 넘김
+function rootRender(
+  container,
+  component,
+) {
+  const instance = new ComponentInstance(component, 0); // 컴포넌트를 관리할 인스턴스 생성
+  instance.render(container);
+  return instance;
+}
+```
+
+그렇다면 componentInstance에서 Vdom을 생성할 때 자식 컴포넌트가 부모와 동일한 키값을
+가지지 않도록 sequence의 멤버변수에 1을 추가하여 파싱한다.
+
+### component-instance.js
+```javascript
+constructor(component, sequence) {
+  this.component = component;
+  /** @description 해당 컴포넌트가 트리에서 어디에 위치해 있는지 식별하는 넘버 */
+  this.sequence = sequence;
+}
+
+render(parentElement, isRerender) {
+  // 부모 리렌더링으로 인한 자식 리렌더링이라면 훅 포인터를 초기화
+  if (isRerender) {
+    this.stateHookIndex = 0;
+  }
+  currentInstance = this;
+  // props가 있으면 props를 넘김
+  const template = this.component(this.props);
+
+  this.parentElement = parentElement;
+  // 해당 컴포넌트 인스턴스의 sequence 에서 1을 추가 후 호출
+  this.prevVnodeTree = parse(template, this.sequence + 1);
+}
+```
+
+그렇다면 parser 함수에서 해당 순서 파라미터를 받아서 파싱을 진행한다.
+
+```javascript
+export default function parse(renderResult, sequence) {
+  let valueIndex = 0;
+  let currentSequence = sequence; // <-----------------------
+  ... 코드 생략
+
+// createComponent 반환 함수일 시
++if (typeof value === 'function' && value.__isCreateComponent) {
++  const getInstance = value;
++  const instance = getInstance(currentSequence);
+
+  // 중복된 순서를 가지지 않기 위해 값을 증감
++  currentSequence++;
++  valueIndex++;
+
++  return {
++    type: 'component',
++    instance,
++  };
++}
+... 코드 생략
+```
+
+중첩 컴포넌트가 있을 때 Vdom 결과에서 핵심은 type: "component"가 추가되는 것이다.
+
+```javascript
+html`
+  <div id="app">
+    <button type="button" @click=${onClick}>increase</button>
+    <ul>
+      ${createComponent(Child, {
+        props: {
+          value: data.count + 1,
+        }
+      })}
+      ${createComponent(Child, {
+        props: {
+          value: data.count + 2,
+        }
+      })}
+      ${createComponent(Child, {
+        props: {
+          value: data.count + 3,
+        }
+      })}
+    </ul>
+  </div>
+`;
+
+// Vdom 생성
+
+{
+    "type": "element",
+    "tag": "div",
+    "children": [
+        {
+            "type": "element",
+            "tag": "button",
+            "children": [
+                {
+                    "type": "text",
+                    "value": "increase"
+                }
+            ],
+            "attr": {
+                "type": "button"
+            }
+        },
+        {
+            "type": "element",
+            "tag": "ul",
+            "children": [
+                {
+                    "type": "component",
+                    "instance": {...} // <----- component instace 객체
+                },
+                {
+                    "type": "component",
+                    "instance": {...} // <----- component instace 객체
+                },
+                {
+                    "type": "component",
+                    "instance": {...} // <----- component instace 객체
+                },
+            ]
+        }
+    ],
+    "attr": {
+        "id": "app"
+    }
+}
+```
+
+
+### createDOM에서 컴포넌트 타입 처리
+
+이제 실제 DOM을 생성하는 로직에서 type: "component"를 처리해야 한다.
+
+컴포넌트 타입을 만나면 해당 인스턴스의 render 메서드를 호출한다.
+두 번째 인자 true는 리렌더링 여부를 나타낸다. 
+실제 프레임워크에서는 각자의 재조정 전략, 알고리즘에 따라 자식을 리렌더링 하지 않을 수 있으나 본 구현에서는 부모가 렌더링함에 따라 자식도 리렌더링한다.
+
+
+**runtime-dom.js**
+
+```javascript
+export function createDOM(vnode, parentElement) {
+  // 텍스트 노드
+  if (vnode.type === 'text') {
+    return document.createTextNode(vnode.value);
+  }
+
+  // 컴포넌트 노드: 인스턴스의 render 호출
+  if (vnode.type === 'component') {
+    const instance = vnode.instance;
+    instance.render(parentElement, true);
+    return null;  // 컴포넌트는 자체적으로 DOM에 삽입
+  }
+
+  // 일반 엘리먼트 노드
+  const el = document.createElement(vnode.tag);
+  // ... 속성 및 이벤트 바인딩 생략
+
+  vnode.children?.forEach((child) => {
+    const c = createDOM(child, el);
+    if (c) el.appendChild(c);
+  });
+
+  return el;
+}
+```
+
+### 중첩 컴포넌트 예제
+<iframe src="https://dkpark10.github.io/reona-track/02-component" width="100%" />
+
+## 동일한 위치에서의 조건부 렌더링
+
+조건부 렌더링이나 구조 변경이 발생하면 동일 위치에 다른 컴포넌트가 배치될 수 있으므로, 추가 식별 전략이 필요하다.
+
+*참고로 모든 예제에 컴포넌트 루트 키는 0으로 가정한다.*
+
+```javascript
+// root = 0;
+return html`
+  <div id="app">
+    ${data.bool 
+      ? createComponent(Component, {
+          props: {
+            value: 1,
+          },
+        })
+      : createComponent(OtherComponent, {
+          props: {
+            value: 2
+          },
+        })
+    }
+  </div>`;
+```
+
+마운트된 컴포넌트 맵 관리는 위치값을 key로 두고 있기에 OtherComponent 컴포넌트가 렌더링 되야 하는 상황에서 
+동일한 key (여기서는 1)이 있기에 새로운 컴포넌트 인스턴스를 생성하지 않는다. 이러한 상황에서 OtherComponent를 
+어떻게 렌더링 해야 할까? 컴포넌트의 고유 정체성은 바로 무엇으로 정의해야 하는 것일까?
+
+```javascript
+function createComponent(component, options) {
+  const instanceMap = getInstanceMap();
+
+  const func = function getInstance(sequence) {
+    // 이미 키값 1의 인스턴스가 존재한다.
+    let instance = instanceMap.get(sequence);
+    if (!instance) {
+      instance = new ComponentInstance(component, sequence);
+      instanceMap.set(sequence, instance);
+    }
+    ... 생략
+  }
+}
+```
+
+### 컴포넌트 정체성
+
+동일한 위치에서 다른 컴포넌트를 렌더링하려면 key를 어떤 타입으로 할지 재정의 해야 한다.
+
+컴포넌트의 정체성은 **"위치"**만으로는 부족하다. **"무엇인가(함수)"**도 포함해야 한다.
+
+여기서 키를 **컴포넌트 함수**로 정의하고 값을 Map 객체로 정의한다면, 동일한 위치라도 다른 컴포넌트를 구분할 수 있다.
+
+```javascript
+// 변경 전: key가 sequence(number)
+const instanceMap = new Map();
+
+// 변경 후: key가 컴포넌트 함수, value가 Map(sequence, instance)
+const instanceMap = new WeakMap();
+```
+
+key를 함수로 쓰기위해 WeakMap을 사용했다. 그러나 **import**한 컴포넌트는 모듈 스코프에서 계속 참조되므로, GC가 객체를 수집할 수 없다.
+
+이제 createComponent 함수를 수정한다. 핵심은 **컴포넌트 함수를 1차 키**, **sequence를 2차 키**로 사용하는 것이다.
+
+```javascript
+function createComponent(component, options) {
+  const instanceMap = getInstanceMap();
+
+  const func = function getInstance(sequence) {
+    // 1차: 컴포넌트 함수로 Map을 조회
+    let instanceDeps = instanceMap.get(component);
+    if (!instanceDeps) {
+      instanceDeps = new Map();
+    }
+
+    // 2차: sequence로 인스턴스 조회
+    let instance = instanceDeps.get(sequence);
+    if (!instance) {
+      instance = new ComponentInstance(component, sequence);
+      instanceDeps.set(sequence, instance);
+      instanceMap.set(component, instanceDeps);
+    }
+
+    // props가 있다면 props를 할당
+    if (options && options.props) {
+      instance.props = options.props;
+    }
+
+    return instance;
+  }
+
+  // parser 에서 컴포넌트를 생성하는 함수를 식별하기 위한 코드
+  func.__isCreateComponent = true;
+  return func;
+}
+```
+
+이를 도식화 하자면 다음과 같다.
+
+### 위치(number)를 키로 할 경우
+
+괄호는 인스턴스 저장 map 객체(number, componentInstance)
+![number-key](/images/ui2/number-key.png)
+
+### 함수 컴포넌트를 키로 할 경우
+
+괄호는 인스턴스 저장 WeakMap 객체(Function, (number, componentInstance))
+![func-key](/images/ui2/func-key.png)
+
+### 조건부 렌더링 예제
+<iframe src="https://dkpark10.github.io/reona-track/03-nested_component" width="100%" />
+
+## 한계
+
+### 동일 컴포넌트 함수, 동일 위치에 다른 인스턴스 구분
+
+```javascript
+// 같은 함수, 같은 위치, 다른 용도
+${showA ? createComponent(Modal, { props: { type: 'alert' } })
+        : createComponent(Modal, { props: { type: 'confirm' } })}
+```
+
+인스턴스의 정체성은 함수 + 위치로 식별하기에 위에 코드는 confirm타입의 컴포넌트를 렌더링 하지 않는다.
+props 변경 시 인스턴스 재생성 여부를 판단하는 로직이 필요하다.
+

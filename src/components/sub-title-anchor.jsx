@@ -1,100 +1,77 @@
 "use client";
 
 import { generateTitleSlug } from "@/utils/generate-title-slug";
-import { useEffect, useRef } from "react";
+import { useEffect, useCallback } from "react";
 import { useSubTitleList } from "@/provider/sub-title-context";
 import { useIntersectionObserver } from "@uidotdev/usehooks";
 
-const HEADER_HEIGHT = 93;
+/** @param {{ subTitle: string; as?: "h2" | "h3" | "h4" | "h5" | "h6" }} */
+export default function SubTitleAnchor({ subTitle, as: Tag = "h2" }) {
+  const slug = generateTitleSlug(subTitle);
+  const level = Tag ? parseInt(Tag.charAt(1), 10) : 2;
+  const { setSubTitleList, headingRefs } = useSubTitleList();
 
-/** @param {{ subTitle: string }} */
-export default function SubTitleAnchor({ subTitle }) {
-  /** @type {React.RefObject<HTMLHeadElement | null>} */
-  const refElement = useRef(null);
-
-  /** @type {React.RefObject<number | null>} */
-  const id = useRef(null);
-
-  const { subTitleList, setSubTitleList } = useSubTitleList();
-
-  const [targetRef, entry] = useIntersectionObserver({
+  const [observerRef, entry] = useIntersectionObserver({
     threshold: 0.9,
     root: null,
     rootMargin: "0px 0px -60% 0px",
   });
 
-  const scrollAction = () => {
-    if (refElement) {
-      const absoluteY = subTitleList.find(
-        (item) => item.idx === id.current
-      )?.scrollTop;
-
-      if (absoluteY) {
-        window.scrollTo({ top: absoluteY - 10, behavior: "smooth" });
+  const setRefs = useCallback(
+    (node) => {
+      observerRef(node);
+      if (node) {
+        headingRefs.current.set(slug, node);
       }
-    }
-  };
+    },
+    [observerRef, headingRefs, slug]
+  );
 
+  // 현재 보이는 섹션 표시
   useEffect(() => {
     if (entry?.isIntersecting) {
       setSubTitleList((prev) =>
         prev.map((item) => ({
           ...item,
-          current: item.idx === id.current,
+          current: item.slug === slug,
         }))
       );
     }
-  }, [entry?.isIntersecting]);
+  }, [entry?.isIntersecting, slug, setSubTitleList]);
 
+  // 마운트 시 목록에 등록, 언마운트 시 제거
   useEffect(() => {
-    if (refElement) {
-      const rect = refElement.current.getBoundingClientRect();
-      const absoluteY = window.scrollY + rect.top - HEADER_HEIGHT;
+    setSubTitleList((prev) => {
+      if (prev.some((item) => item.slug === slug)) return prev;
+      return [
+        ...prev,
+        {
+          slug,
+          textContent: subTitle,
+          current: prev.length === 0,
+          level,
+        },
+      ];
+    });
 
-      setSubTitleList((prev) => {
-        id.current = prev.length + 1;
-        return [
-          ...prev,
-          {
-            idx: id.current,
-            textContent: subTitle,
-            current: id.current === 1,
-            scrollTop: absoluteY,
-          },
-        ];
-      });
-    }
-
-    const { hash } = window.location;
-
-    // #{title} -> # 제거
-    if (decodeURIComponent(hash).slice(1) === generateTitleSlug(subTitle)) {
-      scrollAction();
-    }
-
-    // 페이지 이탈 시 초기화
     return () => {
       setSubTitleList([]);
     };
-  }, [subTitle, JSON.stringify(subTitleList.map((item) => item.textContent).join(''))]);
+  }, [slug, subTitle, setSubTitleList]);
 
-  /** @param {MouseEventHandler<HTMLAnchorElement>} e */
+  /** @param {React.MouseEvent<HTMLAnchorElement>} e */
   const onClick = (e) => {
     e.preventDefault();
-    window.history.pushState(null, "", `#${generateTitleSlug(subTitle)}`);
-
-    scrollAction();
+    window.history.pushState(null, "", `#${slug}`);
+    headingRefs.current.get(slug)?.scrollIntoView({ behavior: "smooth" });
   };
 
   return (
-    <h2
-      className="sub_title"
-      ref={targetRef}
-    >
+    <Tag id={slug} className="sub_title" ref={setRefs}>
       {subTitle}
-      <a ref={refElement} onClick={onClick} className="permalink">
+      <a href={`#${slug}`} onClick={onClick} className="permalink">
         #
       </a>
-    </h2>
+    </Tag>
   );
 }

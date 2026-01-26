@@ -1,0 +1,725 @@
+---
+title: 밑바닥부터 구현해보는 UI라이브러리 만들기3 (생명주기 훅)
+date: "2026-01-27"
+description: "lit, vue, react"
+priority: 7
+---
+**예제링크**
+
+npm 링크: [https://www.npmjs.com/package/reona](https://www.npmjs.com/package/reona)
+
+프로젝트 링크: [https://github.com/dkpark10/reona](https://github.com/dkpark10/reona)
+
+해당 게시글에 관한 링크: [https://github.com/dkpark10/reona-track/tree/master/track/04-life-cycle](https://github.com/dkpark10/reona-track/tree/master/track/04-life-cycle)
+
+## 생명주기 훅
+
+컴포넌트 생명주기 제어를 위해 mount, unmount 훅을 직접 구현한다. 조건부 렌더링 상황에서 Child, Child2 컴포넌트의 생성과 제거 시점에
+각각의 훅이 정확히 호출되는 것을 목표로 한다.
+
+생명주기의 전체 다이어그램은 다음과 같다.
+
+```bash
+render phase
+↓
+dom patch
+↓
+mount hook
+↓
+update hook
+↓
+unmount hook
+```
+
+```javascript
+import { createComponent, state, html, mounted, updated } from '../core';
+
+function Child({ value }) {
++  mounted(() => {
++    console.log('mount child');
++    return () => {
++      console.log('unmount child');
++    }
++  });
+  return html`<div id="child1">${value}</div>`;
+}
+
+function Child2({ value }) {
++  mounted(() => {
++    console.log('mount child2');
++    return () => {
++      console.log('unmount child2');
++    }
++  });
+  return html`<div id="child2">${value}</div>`;
+}
+
+function App() {
+  const data = state({
+    bool: true,
+  });
+
+  const trigger = () => {
+    data.bool = !data.bool;
+  };
+
+  return html`
+    <div id="app">
+      <button type="button" @click=${trigger}>trigger</button>
+      ${data.bool ?
+        createComponent(Child, {
+          props: {
+            value: '1',
+          },
+        })
+        : createComponent(Child2, {
+          props: {
+            value: '2',
+          },
+        })
+      }
+    </div>
+  `;
+}
+```
+
+cleanUp 함수는 react interface와 같이 mount 콜백 안에 리턴 함수로 작성했다.
+이벤트 리스너 할당 및 타이머 설정 및 해제를 같은 클로저에 사용할 수 있으므로 DX의 이점이 있어서이다.
+
+```javascript
+mounted(() => {
+  // timer를 따로 외부에 둬야 하고 렌더링 시 같은 메모리 주소를 보장해야 한다.
+  timer = setTimeout(timerHandler, 1_000);
+  // handler를 따로 외부에 둬야 하고 렌더링 시 같은 메모리 주소를 보장해야 한다.
+  window.addEventListener('load', handler);
+})
+
+unmounted(() => {
+  clearTimeout(timer);
+  window.addEventListener('load', handler);
+})
+```
+
+### component-instance에서 훅을 다룰 멤버변수 추가
+
+component-instance에서 상태 훅과 마찬가지로 다수의 mount, unmount 훅을 받도록 배열을 선언한다.
+
+**component-instance.js**
+```javascript
+export default class ComponentInstance {
+  /** @type {Array<unknown>} */
+  states = [];
+
+  /** @type {Array<() => void | (() => () => void)} */
++  mountHooks = [];
+  
+  /** @type {Array<() => void>} */
++  unMountHooks = [];
+
+  hookIndex = 0;
+
+  hookLimit = 0;
+
+  stateHookIndex = 0;
+
+  isMounted = false;
+
+  constructor(component, sequence) {
+    this.component = component;
+    /** @description 해당 컴포넌트가 트리에서 어디에 위치해 있는지 식별하는 넘버 */
+    this.sequence = sequence;
+  }
+  // ...생략
+}
+```
+
+### mount 구현
+
+mount 함수는 콜백을 인자로 받아 일전에 선언한 mountHooks배열에 푸시한다.
+
+일전에 01(상태) 아티클에서 언급한것과 마찬가지로 렌더링 페이즈에서 현재 다루고 있는 컴포넌트 인스턴스가 falsy한 값이라면
+즉 함수형 컴포넌트 루트 스코프에 선언하지 않았다면 에러를 던진다.
+
+훅 개수는 최초 마운트 이전 시점에만 고정한다. 이는 React의 Hook Rule과 동일한 제약으로, 렌더링마다 훅 순서가 변경되어 발생하는 상태 불일치를 방지하기 위함이다.
+
+**hooks.js**
+```javascript
+import  { getCurrentInstance } from './component-instance';
+
+function checkInvalidHook(currentInstance) {
+  if (currentInstance.isMounted && currentInstance.hookIndex > currentInstance.hookLimit) {
+    throw new Error('훅은 함수 최상단에 선언해야 합니다.');
+  }
+
+  // 마운트 이전에만 훅 포인터를 증감
+  if (!currentInstance.isMounted) {
+    currentInstance.hookIndex += 1;
+  }
+}
+
+export function mounted(callback) {
+  const currentInstance = getCurrentInstance();
+  if (currentInstance === null) {
+    throw new Error('mount 함수는 컴포넌트 내에서 선언해야 합니다.');
+  }
+
+  checkInvalidHook(currentInstance);
+  if (currentInstance.isMounted) {
+    return;
+  }
+  currentInstance.mountHooks.push(callback);
+}
+```
+
+mount 훅은 DOM이 실제로 부착된 이후 실행되어야 한다. 따라서 초기 렌더링이 완료된 뒤 runMount 함수를 호출하도록 설계했다.
+
+mount 훅은 cleanup 함수를 반환할 수 있으며, 해당 반환값은 unMountHooks 배열에 저장된다.
+
+**component-instance.js**
+```javascript
+export default class ComponentInstance {
+  render(parentElement, isRerender) {
+    // 부모 리렌더링으로 인한 자식 리렌더링이라면
+    if (isRerender) {
+      this.hookIndexInitialize();
+    }
+
+    /** @description 현재 렌더링 되고 있는 컴포넌트를 할당 */
+    currentInstance = this;
+    const template = this.component(this.props);
+
+    this.parentElement = parentElement;
+    this.prevVnodeTree = parse(template, this.sequence + 1);
+
+    this.currentDom = createDOM(this.prevVnodeTree, parentElement);
+    parentElement.insertBefore(this.currentDom, null);
+-   this.isMounted = true;
+-   this.hookLimit = this.hookIndex;
++   this.runMount();
+  }
+
++ runMount() {
++   if (this.isMounted) return;
+
++   for (const fn of this.mountHooks) {
+      // 마운트 훅 실행
++     const cleanUp = fn();
++     if (cleanUp && typeof cleanUp === 'function') {
+        // 반환값이 있다면 푸시
++       this.unMountHooks.push(cleanUp);
++     }
++   }
++   this.isMounted = true;
++   this.hookLimit = this.hookIndex;
++   this.mountHooks = null;
+  }
+}
+```
+
+### unmount 구현
+
+unmount구현은 이전 렌더 페이즈에서 저장된 Vdom과 현재 렌더 페이즈에 저장된 Vdom과의 비교작업을 한다.
+
+그 이전에 앞서 현재 렌더링 결과를 Vdom으로 파싱해주는 작업이 선행되야 한다.
+
+#### 1. reRender에서 unmount 호출 시점
+
+현재 Vdom이 파싱된 후, DOM 교체 전에 unmount를 수행한다.
+
+**component-instance.js**
+```javascript
+export default class ComponentInstance {
+
+  reRender() {
+    this.hookIndexInitialize();
+    currentInstance = this;
+    const template = this.component(this.props);
+
+    this.nextVnodeTree = parse(template, this.sequence + 1);
+    // 이전 Vdom, 현재 Vdom을 비교하기 위해 this.nextVnodeTree가 할당된 후 unmount 수행
++   this.runUnmount(this.prevVnodeTree, this.nextVnodeTree);
+
+    const newDom = createDOM(this.nextVnodeTree, this.parentElement);
+    this.currentDom.replaceWith(newDom);
+    this.currentDom = newDom;
+    this.prevVnodeTree = this.nextVnodeTree;
+  }
+}
+```
+
+#### 2. runUnmount 로직
+
+이전/현재 Vdom에서 각각 인스턴스를 수집한 뒤, 이전에는 있었지만 현재에는 없는 인스턴스의 cleanup을 실행한다.
+
+```javascript
+ runUnmount(prevVnode, nextVnode) {
+    // 이전 렌더페이즈에서 존재하는 컴포넌트 인스턴스
+  const prevInstances = this.collectInstances(prevVnode);
+    // 현재 렌더페이즈에서 존재하는 컴포넌트 인스턴스
+  const nextInstances = this.collectInstances(nextVnode);
+
+    // 이전 렌더페이즈에서 인스턴스 순회
+  for (const prevInstance of prevInstances) {
+
+      // 현재 인스턴스에 존재하지 않는다면
+    if (!nextInstances.has(prevInstance)) {
+      for (const fn of prevInstance.unMountHooks) {
+          // 이전 인스턴스에 unMountHooks을 실행
+        fn();
+      }
+
+      const instanceMap = getInstanceMap();
+      instanceMap.get(prevInstance.component)?.delete(prevInstance.sequence);
+
+        /**
+         * instance.component는 함수형 컴포넌트
+         * ex) import FuntionalComponent from './FuntionalComponent'; 
+         * FuntionalComponent는 모듈스코프에 의해 unmount 되더라도 메모리에 남아있기에 GC가 수집을 못함
+        */
+      if ((instanceMap.get(prevInstance.component)?.size || 0) <= 0) {
+        instanceMap.delete(prevInstance.component);
+      }
+    }
+  }
+}
+```
+
+#### 3. 인스턴스 맵 정리와 GC
+
+인스턴스 맵은 WeakMap이지만, **import한 함수 컴포넌트를 키로 사용**하기 때문에 모듈 스코프에서 계속 참조된다.
+따라서 명시적으로 삭제해줘야 GC가 수집할 수 있다.
+
+```javascript
+const instanceMap = new WeakMap();
+
+if ((instanceMap.get(prevInstance.component)?.size || 0) <= 0) {
+  instanceMap.delete(prevInstance.component);
+}
+```
+
+**index.js**
+```javascript
+function createComponent(component, options) {
+  const instanceMap = getInstanceMap();
+
+  // component 파라미터를 키로 사용
+  const func = function getInstance(sequence) {
+    let instanceDeps = instanceMap.get(component);
+    if (!instanceDeps) {
+      instanceDeps = new Map();
+    }
+  }
+  // ...생략
+}
+```
+
+### Vdom을 활용하여 해당 렌더페이즈에서 살아있던 컴포넌트 인스턴스 수집 함수
+
+현재 렌더 페이즈에서 살아있는 컴포넌트 인스턴스를 수집하기 위해 Vdom 트리를 순회한다.
+
+- 타입이 component(createComponent 반환 함수)인 경우  
+  → 해당 인스턴스의 이전 Vdom을 추출하기 위해 재귀 수행
+
+- 타입이 element인 경우  
+  → children을 순회하며 동일하게 재귀 수행
+
+
+```javascript
+collectInstances(
+    vnode,
+    set = new Set()
+  ) {
+    if (!vnode) return set;
+    switch (vnode.type) {
+      case 'component':
+        set.add(vnode.instance);
+        this.collectInstances(vnode.instance.prevVnodeTree, set);
+        break;
+      case 'element':
+        vnode.children.forEach((child) => this.collectInstances(child, set));
+        break;
+      case 'text':
+        break;
+    }
+    return set;
+  }
+```
+
+### 예제
+
+아래 예제에서는 조건부 렌더링 시 mount / unmount 훅 호출 여부를 확인하는 예제이다.
+
+<iframe src="https://dkpark10.github.io/reona-track/04-life-cycle/" width="100%" />
+
+## updated 훅 구현
+
+vue의 updated, react의 의존성 값이 들어가 있는 useEffect와 같이 데이터 관찰 후 변경 시 수행할 훅을 만들어 본다.
+이전 렌더링 페이즈와 현재 렌더링 페이즈의 값 비교를 해야 하기에 콜백함수와 데이터를 저장할 객체 형식으로 만든다.
+
+
+### 인터페이스 설계
+
+첫 번째 파라미터로 관찰할 데이터 객체를, 두 번째 파라미터로 변경 시 실행할 콜백을 받는다.
+콜백의 인자로는 이전 값(prevSnapshot)이 전달된다.
+
+```javascript
+function Component() {
+  const data = state({
+    value: 1,
+  });
+
+  updated(data, (prev) => {
+    console.log(prev);
+  });
+
+  const trigger = () => {
+    data.value += 1;
+  };
+
+  return html`...`;
+}
+```
+
+**hooks.js**
+
+```javascript
+export function updated(data, callback) {
+  const currentInstance = getCurrentInstance();
+  if (currentInstance === null) {
+    throw new Error('updated 함수는 컴포넌트 내에서 선언해야 합니다.');
+  }
+
+  checkInvalidHook(currentInstance);
+
+  const dep = currentInstance.updatedHooks;
+  const index = currentInstance.updatedHookIndex++;
+
+  // 마운트 이후, 업데이트 시 
+  if (!dep[index]) {
+    dep[index] = {
+      data: data,
+      callback: callback,
+      prevSnapshot: { ...data },
+    };
+  // 마운트 이전
+  } else {
+    dep[index].callback = callback;
+  }
+}
+```
+
+**component-instance.js**
+
+```javascript
+export default class ComponentInstance {
+  states = [];
+
+  mountHooks = [];
+
+  unMountHooks = [];
+
+  /** @type {Array<object>} */
++  updatedHooks = [];
+
++  updatedHookIndex = 0;
+
+  constructor(component, sequence) { //...생략 }
+
+  hookIndexInitialize() {
+    this.stateHookIndex = 0;
++   this.updatedHookIndex = 0;
+  }
+
+  render(parentElement, isRerender) {
+    // ... 생략
+  }
+
+  reRender() {
+    this.hookIndexInitialize();
+    // ... 생략
+
+    this.prevVnodeTree = this.nextVnodeTree;
++   this.runUpdate();
+  }
+
++  runUpdate() {
++    for (const hook of this.updatedHooks) {
++      if (!hook) continue;
+
+      // 데이터를 객체형식으로 받아 메모리 값 비교가 아닌 값만을 확인하는 얕은 비교 수행
++      const hasChanged = Object.keys(hook.data).some(
++        (key) => hook.data[key] !== hook.prevSnapshot[key]
++      );
+
+      // 값이 변경되었다면 콜백을 실행하고 현재 스냅샷을 저장
++      if (hasChanged) {
++        hook.callback(hook.prevSnapshot);
+        // 이전 스냅샷을 저장
++        hook.prevSnapshot = { ...hook.data };
++      }
++    }
++  }
+}
+```
+
+runUpdate 함수는 react, vue와 같이 리렌더링 시 dom update 후 실행을 한다.
+updated 훅은 첫번째 파라미터로 데이터를 객체형식으로 받았기에 값만을 확인하는 얕은 비교를 수행한다.
+이는 React useEffect dependency 비교 방식과 동일한 동작 모델이다. (Object.is)
+
+## 테스트
+
+구현한 훅들이 정상 동작하는지 테스트한다.
+
+### 테스트 케이스
+
+| 테스트 | 검증 내용 |
+|-------|----------|
+| mount 1회 보장 | 리렌더링되어도 mount는 최초 1회만 실행 |
+| 조건부 mount/unmount | 컴포넌트 토글 시 각각의 훅이 정확히 호출 |
+| updated 실행 | 데이터 변경 시 콜백 실행 + 이전 값 전달 |
+| updated 미실행 | 값이 동일하면 콜백 미실행 |
+
+### 핵심 테스트: mount 1회 보장
+
+[https://github.com/dkpark10/reona-track/blob/master/track/04-life-cycle/src/tests/index.test.js](https://github.com/dkpark10/reona-track/blob/master/track/04-life-cycle/src/tests/index.test.js)
+
+```javascript
+import { expect, test, beforeEach, afterEach } from 'vitest';
+import { rootRender } from '../core/runtime-dom';
+import { createComponent, state, html, mounted, updated } from '../core';
+
+const flushRaf = () => new Promise((resolve) => requestAnimationFrame(() => resolve()));
+
+beforeEach(() => {
+  const div = document.createElement('div');
+  div.id = 'root';
+  document.body.appendChild(div);
+});
+
+afterEach(() => {
+  if (document.getElementById('root')) {
+    document.body.removeChild(document.getElementById('root'));
+  }
+});
+
+test('리렌더링 되어도 마운트 훅 실행은 1번이 보장 되어야 한다.', async () => {
+  const mountFn = vi.fn();
+
+  function Component() {
+    const data = state({
+      bool: true,
+    });
+
+    mounted(mountFn);
+
+    const trigger = () => {
+      data.bool = !data.bool;
+    };
+
+    return html`
+      <div id="app">
+        <button type="button" @click=${trigger}>trigger</button>
+      </div>
+      `;
+  }
+  rootRender(document.getElementById('root'), Component);
+
+  document.querySelector('button')?.click();
+  await flushRaf();
+  expect(mountFn).toHaveBeenCalledOnce();
+
+  document.querySelector('button')?.click();
+  await flushRaf();
+  expect(mountFn).toHaveBeenCalledOnce();
+});
+
+test('조건부 렌더링에 따라 각 컴포넌트 마다 mount, unmount 함수가 실행되어야 한다.', async () => {
+  const unMountFn1 = vi.fn(() => {
+    console.log('unmount1');
+  });
+  const mountFn1 = vi.fn(() => {
+    console.log('mount1');
+    return unMountFn1;
+  });
+  const unMountFn2 = vi.fn(() => {
+    console.log('unmount2');
+  });
+  const mountFn2 = vi.fn(() => {
+    console.log('mount2');
+    return unMountFn2;
+  });
+
+  function Child({ value }) {
+    mounted(mountFn1);
+    return html`<div id="child1">${value}</div>`;
+  }
+
+  function Child2({ value }) {
+    mounted(mountFn2);
+    return html`<div id="child2">${value}</div>`;
+  }
+
+  function App() {
+    const data = state({
+      bool: true,
+    });
+
+    const trigger = () => {
+      data.bool = !data.bool;
+    };
+
+    return html`
+      <div id="app">
+        <button type="button" @click=${trigger}>trigger</button>
+        ${data.bool ?
+        createComponent(Child, {
+          props: {
+            value: '1',
+          },
+        })
+        : createComponent(Child2, {
+          props: {
+            value: '2',
+          },
+        })
+      }
+      </div>
+    `;
+  }
+
+  rootRender(document.getElementById('root'), App);
+
+  expect(document.getElementById('child1')).toBeInTheDocument();
+  expect(document.getElementById('child1')?.textContent).toBe('1');
+
+  document.querySelector('button')?.click();
+  await flushRaf();
+  expect(unMountFn1).toHaveBeenCalled();
+  expect(mountFn2).toHaveBeenCalled();
+  expect(document.getElementById('child2')).toBeInTheDocument();
+  expect(document.getElementById('child2')?.textContent).toBe('2');
+
+  document.querySelector('button')?.click();
+  await flushRaf();
+  expect(unMountFn2).toHaveBeenCalled();
+  expect(mountFn1).toHaveBeenCalled();
+  expect(document.getElementById('child1')).toBeInTheDocument();
+  expect(document.getElementById('child1')?.textContent).toBe('1');
+
+  document.querySelector('button')?.click();
+  await flushRaf();
+  expect(unMountFn1).toHaveBeenCalled();
+  expect(mountFn2).toHaveBeenCalled();
+  expect(document.getElementById('child2')).toBeInTheDocument();
+  expect(document.getElementById('child2')?.textContent).toBe('2');
+
+  document.querySelector('button')?.click();
+  await flushRaf();
+  expect(unMountFn2).toHaveBeenCalled();
+  expect(mountFn1).toHaveBeenCalled();
+  expect(document.getElementById('child1')).toBeInTheDocument();
+  expect(document.getElementById('child1')?.textContent).toBe('1');
+});
+
+test('데이터 변경 시 업데이트 훅 실행이 되야 한다.', async () => {
+  let expectedValue;
+  const updatedFn = vi.fn((prev) => {
+    expectedValue = prev;
+  });
+
+  function Component() {
+    const data = state({
+      value: 1,
+    });
+
+    updated(data, updatedFn);
+
+    const trigger = () => {
+      data.value += 1;
+    };
+
+    return html`
+      <div id="app">
+        <button type="button" @click=${trigger}>trigger</button>
+      </div>
+      `;
+  }
+  rootRender(document.getElementById('root'), Component);
+
+  document.querySelector('button')?.click();
+  await flushRaf();
+  expect(updatedFn).toHaveBeenCalledTimes(1);
+  expect(expectedValue).toEqual({ value: 1 });
+
+  document.querySelector('button')?.click();
+  await flushRaf();
+  expect(updatedFn).toHaveBeenCalledTimes(2);
+  expect(expectedValue).toEqual({ value: 2 });
+});
+
+test('데이터 미변경 시 업데이트 훅 실행이 되서는 아니된다.', async () => {
+  let expectedValue;
+  const updatedFn = vi.fn((prev) => {
+    expectedValue = prev;
+  });
+
+  function Component() {
+    const data = state({
+      value: 1,
+    });
+
+    updated(data, updatedFn);
+
+    const noop = () => {
+      data.value = data.value;
+    };
+
+    return html`
+      <div id="app">
+        <button type="button" @click=${noop}>noop</button>
+      </div>
+      `;
+  }
+  rootRender(document.getElementById('root'), Component);
+
+  document.querySelector('button')?.click();
+  await flushRaf();
+  expect(updatedFn).not.toHaveBeenCalled();
+  expect(expectedValue).toBeUndefined();
+
+  document.querySelector('button')?.click();
+  await flushRaf();
+  expect(updatedFn).not.toHaveBeenCalled();
+  expect(expectedValue).toBeUndefined();
+});
+```
+
+![test](/images/ui3/test.png)
+
+## 한계
+
+### updated 훅의 의존성 추적
+
+```javascript
+// 현재: 전체 객체를 관찰
+updated(objectData, (prev) => {});
+
+// 원시 객체도 의존성 추가
+updated(1, (prev) => {});
+```
+
+전체 객체를 관찰하면 관련 없는 속성 변경에도 콜백이 실행될 수 있다. 현재 원시객체가(number, string...) 이 들어올 때 
+비교를 안하고 있으므로 정확히는 Obejct.keys()로 비교를 하고 있어 객체 타입이 강제화 된다.
+
+### 비동기 콜백에 대한 구현
+
+```javascript
+mounted(async () => {
+  const data = await fetch(...);
+  return () => {
+    ...
+  };
+});
+```
+
+비동기 콜백에 대해 promise를 반환 시 cleanUp 함수를 수집할 수 없다.
