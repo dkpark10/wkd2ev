@@ -2,6 +2,24 @@
   <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     
     <url>
+      <loc>https://dkpark10.github.io/wkd2ev/post/밑바닥부터-구현해보는-ui라이브러리-만들기3-생명주기-훅</loc>
+      <lastmod>2026-01-27T00:00:00.000Z</lastmod>
+      <changefreq>monthly</changefreq>
+      <priority>7</priority>
+    </url>,
+    <url>
+      <loc>https://dkpark10.github.io/wkd2ev/post/밑바닥부터-구현해보는-ui라이브러리-만들기2-중첩-컴포넌트</loc>
+      <lastmod>2026-01-25T00:00:00.000Z</lastmod>
+      <changefreq>monthly</changefreq>
+      <priority>8</priority>
+    </url>,
+    <url>
+      <loc>https://dkpark10.github.io/wkd2ev/post/밑바닥부터-구현해보는-ui라이브러리-만들기1-상태</loc>
+      <lastmod>2026-01-21T00:00:00.000Z</lastmod>
+      <changefreq>monthly</changefreq>
+      <priority>9</priority>
+    </url>,
+    <url>
       <loc>https://dkpark10.github.io/wkd2ev/post/app-router에서-referer-값-다루기</loc>
       <lastmod>2025-10-31T00:00:00.000Z</lastmod>
       <changefreq>monthly</changefreq>
