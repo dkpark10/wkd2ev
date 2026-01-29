@@ -1,39 +1,41 @@
-'use client';
+"use client";
 
-import { useLayoutEffect, useState } from "react";
-import clsx from "clsx";
-
-const KEY = 'THEME';
+import { useTheme } from "next-themes";
+import { cn } from "@/lib/utils";
+import { useLayoutEffect, useState, useRef } from "react";
 
 export default function DarkModeButton() {
-  /** @type {['light' | 'dark' | null, React.Dispatch<React.SetStateAction<'light' | 'dark'>>]} */
-  const [theme, setTheme] = useState(null);
+  const { setTheme, resolvedTheme } = useTheme();
+
+  const [isDark, setIsDark] = useState("light");
 
   useLayoutEffect(() => {
-    const currentTheme = localStorage.getItem(KEY) || 'light';
-    setTheme(currentTheme);
+    setIsDark(resolvedTheme);
   }, []);
 
   const onClick = () => {
-    const next = theme === "light" ? "dark" : "light";
-    localStorage.setItem(KEY, next);
-    document.body.dataset.theme = next;
-    setTheme(next);
-  }
+    const value = resolvedTheme === "light" ? "dark" : "light";
+    setTheme(value);
+    setIsDark(value);
+  };
 
   return (
     <div
-      className="dark-container"
+      className="flex h-6 w-12 cursor-pointer items-center rounded-full bg-card-foreground p-[3px] transition-colors duration-300"
       onClick={onClick}
-      role='button'
+      role="button"
     >
       <button
-        className={clsx(theme === 'dark' && 'active', 'fade_in')}
-        type='button'
-        role='switch'
+        className={cn(
+          "flex h-5 w-5 items-center cursor-pointer justify-center rounded-full border-none bg-background transition-transform duration-300 ease-in-out",
+          isDark === 'dark' && "translate-x-[22px]"
+        )}
+        type="button"
+        role="switch"
+        aria-checked={isDark}
       >
-        <span className="toggle" />
+        <span className="h-4 w-4 bg-contain bg-center bg-no-repeat [background-image:var(--dark-toggle)]" />
       </button>
     </div>
-  )
+  );
 }

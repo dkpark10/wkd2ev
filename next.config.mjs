@@ -7,6 +7,7 @@ import remarkGfm from "remark-gfm";
 const nextConfig = {
   pageExtensions: ["js", "jsx", "md", "mdx", "ts", "tsx"],
 
+  // 정적 페이지이므로 서버가 없어 최적화 비활성화
   images: {
     unoptimized: true,
   },

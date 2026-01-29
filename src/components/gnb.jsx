@@ -1,17 +1,16 @@
 "use client";
 
 import { useRef } from "react";
-import Link from "next/link"
+import Link from "next/link";
 import { toast } from "react-strawberry-toast";
 
 const placeHolder = [
-  '공유하고 싶은 글을 게시합니다.',
-  '배웠던 것을 기록합니다.',
+  "공유하고 싶은 글을 게시합니다.",
+  "배웠던 것을 기록합니다.",
 ];
 
 export default function GNB() {
   const linkRef1 = useRef(null);
-
   const linkRef2 = useRef(null);
 
   const onMouseEnter = (placeHolder, toastId) => {
@@ -22,7 +21,7 @@ export default function GNB() {
       target: {
         element: linkRef1.current,
         offset: [-100, 50],
-      }
+      },
     });
   };
 
@@ -33,29 +32,29 @@ export default function GNB() {
   };
 
   return (
-    <nav className="gnb">
-      <ul>
-        <li>
+    <nav>
+      <ul className="flex gap-5 text-xl">
+        <li className="w-[54px] text-center">
           <Link
             ref={linkRef1}
             href="/"
-            onMouseEnter={() => onMouseEnter(placeHolder[0], '0')}
-            onMouseLeave={() => onMouseLeave('0')}
+            onMouseEnter={() => onMouseEnter(placeHolder[0], "0")}
+            onMouseLeave={() => onMouseLeave("0")}
           >
             글
           </Link>
         </li>
-        <li>
+        <li className="w-[54px] text-center">
           <Link
             ref={linkRef2}
             href="/trace"
-            onMouseEnter={() => onMouseEnter(placeHolder[1], '1')}
-            onMouseLeave={() => onMouseLeave('1')}
+            onMouseEnter={() => onMouseEnter(placeHolder[1], "1")}
+            onMouseLeave={() => onMouseLeave("1")}
           >
             기록
           </Link>
         </li>
       </ul>
     </nav>
-  )
+  );
 }

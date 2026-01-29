@@ -27,7 +27,6 @@ export default function SubTitleAnchor({ subTitle, as: Tag = "h2" }) {
     [observerRef, headingRefs, slug]
   );
 
-  // 현재 보이는 섹션 표시
   useEffect(() => {
     if (entry?.isIntersecting) {
       setSubTitleList((prev) =>
@@ -39,7 +38,6 @@ export default function SubTitleAnchor({ subTitle, as: Tag = "h2" }) {
     }
   }, [entry?.isIntersecting, slug, setSubTitleList]);
 
-  // 마운트 시 목록에 등록, 언마운트 시 제거
   useEffect(() => {
     setSubTitleList((prev) => {
       if (prev.some((item) => item.slug === slug)) return prev;
@@ -67,9 +65,13 @@ export default function SubTitleAnchor({ subTitle, as: Tag = "h2" }) {
   };
 
   return (
-    <Tag id={slug} className="sub_title" ref={setRefs}>
+    <Tag id={slug} className="group" ref={setRefs}>
       {subTitle}
-      <a href={`#${slug}`} onClick={onClick} className="permalink">
+      <a
+        href={`#${slug}`}
+        onClick={onClick}
+        className="ml-0.5 cursor-pointer text-primary opacity-0 group-hover:opacity-100"
+      >
         #
       </a>
     </Tag>

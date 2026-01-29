@@ -9,20 +9,26 @@ export default function PostNav({ index }) {
   const nextPost = postHandler.next(index);
 
   return (
-    <nav>
+    <nav className="flex justify-between gap-5 pb-8 pt-11 max-xs:flex-col max-xs:gap-3">
       {prevPost ? (
-        <Link className="item" href={`/post/${prevPost.slug}`}>
+        <Link
+          href={`/post/${prevPost.slug}`}
+          className="max-w-[360px] overflow-hidden text-ellipsis whitespace-nowrap text-xl font-medium text-primary max-xs:max-w-full"
+        >
           {prevPost.slug}
         </Link>
       ) : (
-        <div className="item" />
+        <div />
       )}
       {nextPost ? (
-        <Link className="item" href={`/post/${nextPost.slug}`}>
+        <Link
+          href={`/post/${nextPost.slug}`}
+          className="max-w-[360px] overflow-hidden text-ellipsis whitespace-nowrap text-xl font-medium text-primary max-xs:max-w-full"
+        >
           {nextPost.slug}
         </Link>
       ) : (
-        <div className="item" />
+        <div />
       )}
     </nav>
   );
