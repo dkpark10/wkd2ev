@@ -1,0 +1,962 @@
+---
+title: atlassian-design-system 코드를 분석하여 간단한 디자인 시스템 구축하기
+date: "2026-02-24"
+description: "atlassian-frontend-mirror"
+priority: 0.9
+---
+**링크**
+
+아틀라시안 디자인 시스템
+[https://atlassian.design/design-system](https://atlassian.design/design-system)
+
+아틀라시안 디자인 시스템 코드 저장소
+[https://bitbucket.org/atlassian/atlassian-frontend-mirror/src/master/design-system/](https://bitbucket.org/atlassian/atlassian-frontend-mirror/src/master/design-system/)
+
+한국 디자인 시스템 가이드
+[https://www.krds.go.kr/html/site/index.html](https://www.krds.go.kr/html/site/index.html)
+
+예제링크
+[https://github.com/dkpark10/wkd2ev-post-example/blob/master/apps/app/src/app/my-design-system/page.tsx](https://github.com/dkpark10/wkd2ev-post-example/blob/master/apps/app/src/app/my-design-system/page.tsx)
+
+## 에제 페이지
+<iframe src="https://dkpark10.github.io/wkd2ev-post-example/my-design-system/" width="100%" height="460px" />
+
+## 개요
+
+회사 재직 중 디자인 시스템 구축 업무를 맡아보고 싶었으나, 여건상 기회가 닿지 않아 아쉬움이 남았습니다.
+마침 좋은 참고자료가 있어 **Atlassian Design System**을 분석하고, 이를 토대로 직접 버튼 컴포넌트를 만들어보겠습니다.
+
+## 디자인 토큰
+
+디자인 시스템을 코드로 구현하려면 **디자인 토큰**에 대한 이해가 필수입니다.
+<br />
+
+> 디자인 토큰(Design Tokens)은 디자인 시스템에서 반복적으로 사용되는 디자인 속성을 효율적으로 관리하기 위한 일종의 추상화된 값을 변수로 정의한 코드이다. 색상, 글자, 간격, 그림자 등과 같은 스타일의 속성을 정의하고, 이를 코드로 변환하여 디자인 시스템 전반에 걸쳐 일관된 스타일을 유지할 수 있게 도와준다.
+  <Cite>KRDS</Cite>
+
+<br />
+
+디자인 토큰은 UI 구성정보 및 디자인 결정을 위한 작은 데이터 단위입니다. 핵심은 **Raw 값을 직접 사용하지 않고, 의미 있는 이름으로 감싸는 것**입니다.
+
+### 디자인 토큰 사용이유?
+
+CSS 변수보다는 토큰 네이밍으로 좀 더 명확한 의미를 보여줄 수 있습니다.
+
+```css
+/* CSS 변수만 사용 */
+.button {
+  background-color: var(--blue-500);  /* 색상이 뭘 의미하는지 알 수 없음 */
+}
+
+/* 디자인 토큰 사용 */
+.button {
+  background-color: var(--ds-background-brand-bold);  /* "브랜드 강조 배경"임을 알 수 있음 */
+}
+```
+
+디자인 토큰의 핵심 가치는 다음과 같습니다.
+
+1. **의미 전달**: *blue-500*은 색상값일 뿐이지만, *background-brand-bold*는 용도를 명시합니다.
+2. **테마 대응**: 다크 모드에서 *--blue-500*을 직접 바꾸면 의도치 않은 곳에 영향을 줄 수 있지만, 시맨틱 토큰은 테마별로 다른 값을 안전하게 매핑합니다.
+3. **변경 용이성**: "경고 색상을 주황에서 빨강으로 바꿔주세요"라는 요청에 토큰 정의 한 곳만 수정하면 됩니다.
+
+### 토큰 계층 구조
+
+디자인 토큰은 보통 **3계층**으로 구성됩니다.
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  Component Token (컴포넌트 토큰)                              │
+│  예: button.background.primary                               │
+│  → 특정 컴포넌트에서만 사용                                    │
+├─────────────────────────────────────────────────────────────┤
+│  Semantic Token (시맨틱 토큰)                                 │
+│  예: color.background.brand.bold                             │
+│  → 의미/용도를 나타냄                                         │
+├─────────────────────────────────────────────────────────────┤
+│  Primitive Token (프리미티브 토큰)                            │
+│  예: --ds-blue-500: #0052CC                                  │
+│  → 실제 값 (절대 직접 사용하지 않음)                           │
+└─────────────────────────────────────────────────────────────┘
+```
+
+Atlassian Design System은 주로 **Primitive**와 **Semantic** 2계층을 사용하며, Component 토큰은 각 컴포넌트 내부에서 정의합니다.
+
+![dt](/images/ds/design-token.png)
+
+위 이미지의 아이콘 색상을 선택하는 과정에서 직접 색상값 #22C55E 이나 변수 $green-500 를 사용하는 대신, *color.icon.success* 디자인 토큰을 적용할 수 있습니다. 이렇게 하면 "성공"이라는 **의미**가 코드에 명시적으로 드러나며, 추후 색상 변경 시에도 토큰 정의만 수정하면 됩니다.
+
+이 글은 코드 레벨에서 디자인 시스템을 구축하는 것에 초점을 맞추고 있습니다. 토큰의 개념적 정의와 사용 이유에 대해서는 [KRDS 디자인 토큰 가이드](https://www.krds.go.kr/html/site/style/style_07.html)를 참고하세요.
+
+
+### 토큰 읽는법
+
+atlassian design system 에서 정의하는 디자인 토큰에 대해 3분류로 구분되어 있습니다. *color.background.information.pressed* 토큰에 대해 아래와 같이
+정의하고 있습니다.
+
+```javascript
+color.background.information.pressed
+ |       |                |
+ |       |                |
+(1)     (2)              (3)
+```
+
+1. (1) **Foundation**(color): 색상, 높이, 여백 등 디자인을 구성하는 기초 속성입니다.
+2. (2) **Property**(background): 해당 토큰이 적용될 UI 속성입니다. (테두리, 배경, 그림자)
+3. (3) **Modifier**(information.pressed): 해당 토큰의 목적에 대한 상세 액션정보입니다. ex)정보, 위험, 경고, 강조
+모든 토큰이 Modifier를 가지고 있지 않습니다. **color.text** 는 기본 폰트 색상입니다.
+
+<br />
+
+## atlassian-frontend-mirror 분석하기
+
+이제 실제 코드를 살펴보겠습니다. Atlassian은 자사 프론트엔드 코드를 [atlassian-frontend-mirror](https://bitbucket.org/atlassian/atlassian-frontend-mirror)에 공개하고 있어, 실제 프로덕션에서 어떻게 디자인 시스템을 구현했는지 직접 확인할 수 있습니다.
+
+버튼 컴포넌트의 UI를 구성하기 위해 필요한 토큰은 최소 4가지입니다(디자인에 따라 더 요구될 수 있음).
+
+1. **색상 정보**: 배경색, 텍스트 색상, 테두리 색상
+2. **보더 둥글기**: 버튼 모서리의 radius 값
+3. **여백 정보**: 내부 padding, 요소 간 gap
+4. **텍스트 정보**: 폰트 크기, 굵기, 행간
+
+![tv](/images/ds/token_visual.png)
+
+해당 css가 선언된 변수 파일 링크는 여기 있습니다.
+
+색상 변수
+[https://bitbucket.org/atlassian/atlassian-frontend-mirror/src/master/design-system/tokens/src/artifacts/themes/atlassian-light.tsx](https://bitbucket.org/atlassian/atlassian-frontend-mirror/src/master/design-system/tokens/src/artifacts/themes/atlassian-light.tsx)
+
+여백 변수
+[https://bitbucket.org/atlassian/atlassian-frontend-mirror/src/master/design-system/tokens/src/artifacts/themes/atlassian-spacing.tsx](https://bitbucket.org/atlassian/atlassian-frontend-mirror/src/master/design-system/tokens/src/artifacts/themes/atlassian-spacing.tsx)
+
+텍스트 변수
+[https://bitbucket.org/atlassian/atlassian-frontend-mirror/src/master/design-system/tokens/src/artifacts/themes/atlassian-typography.tsx](https://bitbucket.org/atlassian/atlassian-frontend-mirror/src/master/design-system/tokens/src/artifacts/themes/atlassian-typography.tsx)
+
+보더 둥글기 변수
+[https://bitbucket.org/atlassian/atlassian-frontend-mirror/src/master/design-system/tokens/src/artifacts/themes/atlassian-shape-rounder.tsx](https://bitbucket.org/atlassian/atlassian-frontend-mirror/src/master/design-system/tokens/src/artifacts/themes/atlassian-shape-rounder.tsx)
+
+### atlassian-light.tsx (primitive token 레벨)
+
+변수 설정이 되어 있는 파일입니다. primitive token 레벨에 해당된다고 볼 수 있습니다.
+
+```css
+html[data-theme~="shape:shape-rounder"] {
+	--ds-radius-xsmall: 0.125rem;
+	--ds-radius-small: 0.25rem;
+	--ds-radius-medium: 0.375rem;
+	--ds-radius-large: 0.75rem;
+	--ds-radius-xlarge: 1rem;
+	--ds-radius-full: 624.9375rem;
+	--ds-radius-tile: 25%;
+	--ds-border-width: 0.0625rem;
+	--ds-border-width-selected: 0.125rem;
+	--ds-border-width-focused: 0.125rem;
+}
+
+html[data-theme~="typography:typography"],
+[data-subtree-theme][data-theme~="typography:typography"] {
+	--ds-font-heading-xxlarge: normal 653 2rem/2.25rem "Atlassian Sans", ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Ubuntu, "Helvetica Neue", sans-serif;
+	--ds-font-heading-xlarge: normal 653 1.75rem/2rem "Atlassian Sans", ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Ubuntu, "Helvetica Neue", sans-serif;
+	--ds-font-heading-large: normal 653 1.5rem/1.75rem "Atlassian Sans", ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Ubuntu, "Helvetica Neue", sans-serif;
+	--ds-font-heading-medium: normal 653 1.25rem/1.5rem "Atlassian Sans", ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Ubuntu, "Helvetica Neue", sans-serif;
+	--ds-font-heading-small: normal 653 1rem/1.25rem "Atlassian Sans", ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Ubuntu, "Helvetica Neue", sans-serif;
+	--ds-font-heading-xsmall: normal 653 0.875rem/1.25rem "Atlassian Sans", ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Ubuntu, "Helvetica Neue", sans-serif;
+	--ds-font-heading-xxsmall: normal 653 0.75rem/1rem "Atlassian Sans", ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Ubuntu, "Helvetica Neue", sans-serif;
+	...생략
+}
+
+html[data-theme~="spacing:spacing"],
+[data-subtree-theme][data-theme~="spacing:spacing"] {
+	--ds-space-0: 0rem;
+	--ds-space-025: 0.125rem;
+	--ds-space-050: 0.25rem;
+	--ds-space-075: 0.375rem;
+	--ds-space-100: 0.5rem;
+	--ds-space-150: 0.75rem;
+	--ds-space-200: 1rem;
+  ...생략
+}
+
+html[data-color-mode="light"][data-theme~="light:light"],
+[data-subtree-theme][data-color-mode="light"][data-theme~="light:light"],
+html[data-color-mode="dark"][data-theme~="dark:light"],
+[data-subtree-theme][data-color-mode="dark"][data-theme~="dark:light"] {
+	color-scheme: light;
+	--ds-text: #292A2E;
+	--ds-text-accent-lime: #4C6B1F;
+	--ds-text-accent-lime-bolder: #37471F;
+	--ds-text-accent-red: #AE2E24;
+	--ds-text-accent-red-bolder: #5D1F1A;
+	--ds-text-accent-orange: #9E4C00;
+	--ds-text-accent-orange-bolder: #693200;
+	--ds-text-accent-yellow: #7F5F01;
+	--ds-text-accent-yellow-bolder: #533F04;
+	--ds-text-accent-green: #216E4E;
+	...생략
+}
+
+html[data-color-mode="light"][data-theme~="light:dark"],
+[data-subtree-theme][data-color-mode="light"][data-theme~="light:dark"],
+html[data-color-mode="dark"][data-theme~="dark:dark"],
+[data-subtree-theme][data-color-mode="dark"][data-theme~="dark:dark"] {
+	color-scheme: dark;
+	--ds-text: #CECFD2;
+	--ds-text-accent-lime: #B3DF72;
+	--ds-text-accent-lime-bolder: #D3F1A7;
+	--ds-text-accent-red: #FD9891;
+	--ds-text-accent-red-bolder: #FFD5D2;
+	--ds-text-accent-orange: #FBC828;
+	--ds-text-accent-orange-bolder: #FCE4A6;
+	--ds-text-accent-yellow: #EED12B;
+	--ds-text-accent-yellow-bolder: #F5E989;
+	--ds-text-accent-green: #7EE2B8;
+	...생략
+}
+```
+
+디자인 시스템 가이드에서는 변수를 선언한 rawValue의 사용을 금지하고 있습니다. 이를 이제 선언한 css 변수명들을 다시 한번 감싸주어 시맨틱 토큰 레벨에 해당되는 객체를 생성합니다.
+
+### token-names.tsx (semantic token 레벨)
+```javascript
+const tokens = {
+	'color.text': '--ds-text',
+	'color.text.accent.lime': '--ds-text-accent-lime',
+	'color.text.accent.lime.bolder': '--ds-text-accent-lime-bolder',
+	'color.text.accent.red': '--ds-text-accent-red',
+	'color.text.accent.red.bolder': '--ds-text-accent-red-bolder',
+	'color.text.accent.orange': '--ds-text-accent-orange',
+	'color.text.accent.orange.bolder': '--ds-text-accent-orange-bolder',
+  ...생략 
+}
+
+export type CSSTokenMap = {
+	'color.text': 'var(--ds-text)';
+	'color.text.accent.lime': 'var(--ds-text-accent-lime)';
+	'color.text.accent.lime.bolder': 'var(--ds-text-accent-lime-bolder)';
+	'color.text.accent.red': 'var(--ds-text-accent-red)';
+	'color.text.accent.red.bolder': 'var(--ds-text-accent-red-bolder)';
+	'color.text.accent.orange': 'var(--ds-text-accent-orange)';
+	'color.text.accent.orange.bolder': 'var(--ds-text-accent-orange-bolder)';
+  ...생략 
+};
+
+export type CSSToken = CSSTokenMap[keyof CSSTokenMap];
+```
+
+이제 시맨틱 토큰까지 완성되었으니 버튼컴포넌트를 분석해보겠습니다.
+버튼컴포넌트의 UI 구성정보는 위에 작성한것처럼 색상 정보, 보더 둥글기, 여백 정보, 텍스트 정보를 최소로 필요로 합니다.
+이제는 해당 버튼이 어떠한 역할을 하는지 현재 상태가 어떤지에 대한 정보가 필요합니다.
+
+기본적인 유형(Appearance)과 상태(State)는 다음과 같이 구성됩니다.
+
+**유형 (Appearance)**
+- **Primary**: 주요 액션 (페이지당 1개 권장)
+- **Warning**: 주의가 필요한 액션
+- **Danger**: 삭제 등 위험한 액션
+- **Default**: 일반적인 보조 액션
+- **Subtle**: 시각적으로 덜 강조되는 액션
+<br />
+**상태 (State)**
+- **Disabled**: 클릭 불가능한 상태
+- **Selected**: 토글 등에서 선택된 상태
+- **Loading**: 비동기 작업 진행 중
+
+여기서는 버튼을 예시로 들었지만 text를 받는 input element 같은경우 유형으로 입력값의 성공, 실패, 유효하지 못한 값 입력 등이 있을 것이고
+상태로는 입력불가, hover event 등 존재할 것입니다.
+
+이제 실제 Atlassian의 버튼 컴포넌트 코드를 살펴보겠습니다. 아래는 핵심 부분만 추출한 코드입니다.
+
+### button-based.tsx 
+
+```javascript
+const styles = cssMap({
+	base: {
+		display: 'inline-flex',
+		boxSizing: 'border-box',
+		width: 'auto',
+		maxWidth: '100%',
+		position: 'relative',
+		alignItems: 'baseline',
+		justifyContent: 'center',
+		columnGap: token('space.050'),
+		borderRadius: token('radius.small', '3px'),
+		borderWidth: 0,
+		flexShrink: 0,
+		height: '2rem',
+		font: token('font.body'),
+		fontWeight: token('font.weight.medium'),
+		paddingBlock: token('space.075'),
+		paddingInlineEnd: token('space.150'),
+		paddingInlineStart: token('space.150'),
+		textAlign: 'center',
+		transition: 'background 0.1s ease-out',
+		verticalAlign: 'middle',
+		'&::after': {
+			borderRadius: 'inherit',
+			inset: token('space.0'),
+			borderStyle: 'solid',
+			borderWidth: token('border.width'),
+			pointerEvents: 'none',
+			position: 'absolute',
+		},
+	},
+	... 생략
+});
+
+const defaultStyles = cssMap({
+	root: {
+		backgroundColor: token('color.background.neutral.subtle'),
+		color: token('color.text.subtle'),
+		'&::after': {
+			content: '""',
+			borderColor: token('color.border'),
+		},
+		'&:visited': {
+			color: token('color.text.subtle'),
+		},
+		'&:hover': {
+			color: token('color.text.subtle'),
+		},
+		'&:active': {
+			// @ts-expect-error
+			color: token('color.text.subtle'),
+		},
+		'&:focus': {
+			color: token('color.text.subtle'),
+		},
+	},
+	... 생략
+});
+
+const ButtonBase = React.forwardRef((
+	{
+		appearance: propAppearance,
+		...unsafeRest
+	}) => {
+		const appearance = propAppearance;
+		const { className: _className, css: _css, as: _as, style: _style, ...saferRest } = unsafeRest;
+
+		return (
+			<button
+				{...saferRest}
+				className={cx(
+					styles.base,
+					appearance === 'default' && defaultStyles.root,
+					...생략
+				)}
+			>
+				{children}
+			</button>
+		);
+	},
+);
+
+export default ButtonBase;
+```
+
+버튼 컴포넌트는 appearance prop으로 다양한 variant를 받아 해당하는 className들을 병합합니다.
+
+여기서 눈여겨볼 점이 두 가지 있습니다.
+
+1. **cssMap**: Atlassian이 자체 개발한 zero-runtime CSS 라이브러리 **@compiled/react**의 함수입니다. 빌드 타임에 CSS를 추출하여 런타임 오버헤드가 없습니다.
+
+2. **token 함수**: 모든 스타일 값이 *token()* 으로 감싸져 있습니다.
+
+```javascript
+function token<T extends keyof Tokens>(path: T, fallback?: string): CSSTokenMap[T] {
+  const token: Tokens[keyof Tokens] = tokens[path];
+
+  const tokenCall = fallback ? `var(${token}, ${fallback})` : `var(${token})`;
+
+  return tokenCall as CSSTokenMap[T];
+}
+```
+
+token 함수의 역할은 단순합니다. **시맨틱 토큰 이름**을 받아서 **CSS 변수 문자열**을 반환합니다.
+
+```javascript
+token('color.text.accent.orange.bolder') // -> 'var(--ds-text-accent-orange-bolder)'
+```
+
+이 단순한 래퍼 함수는 정말 중요합니다.
+
+1. **타입 안전성**: 시맨틱 토큰 객체의 키를 TypeScript 타입으로 정의하면, 존재하지 않는 토큰을 사용할 때 컴파일 에러가 발생합니다.
+2. **자동완성**: 에디터에서 token('color.')까지 입력하면 사용 가능한 모든 색상 토큰이 자동완성으로 표시됩니다.
+3. **일관성 강제**: CSS 변수를 직접 작성하는 것보다 오타 가능성이 현저히 낮아집니다.
+
+수백 개의 토큰을 다루는 대규모 디자인 시스템에서 이 타입 안전성은 필수입니다.
+
+![type-safe](/images/ds/type-safe.png)
+
+결국 컴포넌트 구현의 핵심은 **prop → style 매핑**입니다. appearance, state, spacing 같은 prop을 받아서
+해당하는 className 조합을 반환하는 것
+
+<br />
+그러고보니 위에 코드는 어딘가 정말 많이 닮았습니다.
+
+바로 **shadcn/ui**의 기본 구성정보가 정말 똑같습니다.
+
+### https://ui.shadcn.com/docs/components/radix/button 
+
+```javascript
+import * as React from "react"
+import { cva, type VariantProps } from "class-variance-authority"
+import { Slot } from "radix-ui"
+import { cn } from "@/lib/utils"
+const buttonVariants = cva(
+  "focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-lg border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-3 aria-invalid:ring-3 [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none",
+  {
+    variants: {
+      variant: {
+        default: "bg-primary text-primary-foreground [a]:hover:bg-primary/80",
+        outline: "border-border bg-background hover:bg-muted hover:text-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 aria-expanded:bg-muted aria-expanded:text-foreground",
+        secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80 aria-expanded:bg-secondary aria-expanded:text-secondary-foreground",
+        ghost: "hover:bg-muted hover:text-foreground dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground",
+        destructive: "bg-destructive/10 hover:bg-destructive/20 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/20 text-destructive focus-visible:border-destructive/40 dark:hover:bg-destructive/30",
+        link: "text-primary underline-offset-4 hover:underline",
+      },
+      size: {
+        default: "h-8 gap-1.5 px-2.5 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2",
+        xs: "h-6 gap-1 rounded-[min(var(--radius-md),10px)] px-2 text-xs in-data-[slot=button-group]:rounded-lg has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3",
+        sm: "h-7 gap-1 rounded-[min(var(--radius-md),12px)] px-2.5 text-[0.8rem] in-data-[slot=button-group]:rounded-lg has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3.5",
+        lg: "h-9 gap-1.5 px-2.5 has-data-[icon=inline-end]:pr-3 has-data-[icon=inline-start]:pl-3",
+        icon: "size-8",
+        "icon-xs": "size-6 rounded-[min(var(--radius-md),10px)] in-data-[slot=button-group]:rounded-lg [&_svg:not([class*='size-'])]:size-3",
+        "icon-sm": "size-7 rounded-[min(var(--radius-md),12px)] in-data-[slot=button-group]:rounded-lg",
+        "icon-lg": "size-9",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+      size: "default",
+    },
+  }
+)
+
+function Button({
+  className,
+  variant = "default",
+  size = "default",
+  asChild = false,
+  ...props
+}) {
+  return (
+    <button
+      data-slot="button"
+      data-variant={variant}
+      data-size={size}
+      className={cn(buttonVariants({ variant, size, className }))}
+      {...props}
+    />
+  )
+}
+```
+
+shadcn/ui는 **cva + tailwind** 조합으로 버튼을 구성한다는 점을 제외하고는 메인 컨셉은 똑같습니다.
+결국 props의 조합으로 스타일 조합의 반환입니다.
+
+## 버튼 만들기
+
+이론은 충분합니다. 이제 직접 버튼을 만들어 보겠습니다.
+
+**기술 스택 선택:**
+- **@compiled/react**는 zero runtime css의 특성상 번들러의 추가 설정이 필요하고 번거롭습니다.
+- **Tailwind CSS + CVA(Class Variance Authority)** 조합을 사용합니다. 이 조합은 이미 많은 프로젝트에서 검증되었고, 설정이 간단합니다.
+
+목표는 단순히 shadcn/ui를 복제하는 것이 아닙니다. **타입 안전한 token 함수**를 통해 디자인 토큰의 이점을 살리면서, Tailwind의 생산성을 함께 가져가는 것입니다.
+
+먼저 primitive token 레벨을 지정해줍니다. 이는 atlassian-light.tsx파일을 css에 옮긴 것에 불과합니다.
+
+### index.css (primitive token 레벨)
+```css
+html[data-theme~="shape:shape-rounder"] {
+	--ds-radius-xsmall: 0.125rem;
+	--ds-radius-small: 0.25rem;
+}
+
+html[data-theme~="typography:typography"],
+[data-subtree-theme][data-theme~="typography:typography"] {
+	--ds-font-heading-xxlarge: normal 653 2rem/2.25rem "Atlassian Sans", ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Ubuntu, "Helvetica Neue", sans-serif;
+	--ds-font-heading-xlarge: normal 653 1.75rem/2rem "Atlassian Sans", ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Ubuntu, "Helvetica Neue", sans-serif;
+	...생략
+}
+
+html[data-theme~="spacing:spacing"],
+[data-subtree-theme][data-theme~="spacing:spacing"] {
+	--ds-space-0: 0rem;
+	--ds-space-025: 0.125rem;
+  ...생략
+}
+
+html[data-color-mode="light"][data-theme~="light:light"],
+[data-subtree-theme][data-color-mode="light"][data-theme~="light:light"],
+html[data-color-mode="dark"][data-theme~="dark:light"],
+[data-subtree-theme][data-color-mode="dark"][data-theme~="dark:light"] {
+	color-scheme: light;
+	--ds-text: #292A2E;
+	--ds-text-accent-lime: #4C6B1F;
+	...생략
+}
+
+html[data-color-mode="light"][data-theme~="light:dark"],
+[data-subtree-theme][data-color-mode="light"][data-theme~="light:dark"],
+html[data-color-mode="dark"][data-theme~="dark:dark"],
+[data-subtree-theme][data-color-mode="dark"][data-theme~="dark:dark"] {
+	color-scheme: dark;
+	--ds-text: #CECFD2;
+	--ds-text-accent-lime: #B3DF72;
+	...생략
+}
+```
+
+### tokens.json (semantic token 레벨)
+
+semantic token 레벨의 객체를 json으로 만들어 줍니다.
+
+```json
+{
+  "color.text": "--ds-text",
+  "color.text.accent.lime": "--ds-text-accent-lime",
+  "color.text.accent.lime.bolder": "--ds-text-accent-lime-bolder",
+  "color.text.accent.red": "--ds-text-accent-red",
+  "color.text.accent.red.bolder": "--ds-text-accent-red-bolder",
+  "color.text.accent.orange": "--ds-text-accent-orange",
+	...생략
+}
+```
+
+### button.tsx
+
+```javascript
+import { cva } from 'class-variance-authority';
+import {
+  forwardRef,
+  type PropsWithChildren,
+  type ComponentType,
+  type SVGProps as ReactSVGProps,
+  type ComponentPropsWithoutRef,
+} from 'react';
+import { token, rawToken } from '@/utils/token';
+import { cn } from '@/utils/cn';
+import Spinner from '@atlaskit/spinner';
+
+const buttonVariants = cva(
+  [
+    // layout
+    'inline-flex',
+    'box-border',
+    'w-auto',
+    'max-w-full',
+    'relative',
+    'items-baseline',
+    'justify-center',
+    'shrink-0',
+    // spacing
+    token('gap', 'space.050'),
+    // border
+    token('rounded', 'radius.small'),
+    // sizing
+    'h-8',
+    // typography
+    `[font-weight:${rawToken('font.weight.medium')}]`,
+    // padding
+    token('py', 'space.075'),
+    token('px', 'space.150'),
+    // alignment
+    'text-center',
+    'align-middle',
+    // interaction
+    'cursor-pointer',
+    'transition-[background]',
+    'duration-100',
+    'ease-out',
+    // ::after pseudo element
+    'after:rounded-[inherit]',
+    token('after:inset', 'space.0'),
+    'after:border-solid',
+    `after:border-[length:${rawToken('border.width')}]`,
+    'after:border-transparent',
+    'after:pointer-events-none',
+    'after:absolute',
+    `after:content-['']`,
+  ],
+  {
+    variants: {
+      appearance: {
+        default: [
+          // root
+          token('bg', 'color.background.neutral.subtle'),
+          token('text', 'color.text.subtle'),
+          'border',
+          token('border', 'color.border'),
+          // states
+          token('visited:text', 'color.text.subtle'),
+          token('hover:text', 'color.text.subtle'),
+          token('active:text', 'color.text.subtle'),
+          token('focus:text', 'color.text.subtle'),
+          // interactive
+          token('hover:bg', 'color.background.neutral.subtle.hovered'),
+          token('active:bg', 'color.background.neutral.subtle.pressed'),
+        ],
+        primary: [
+          // root
+          token('bg', 'color.background.brand.bold'),
+          token('text', 'color.text.inverse'),
+          // states
+          token('visited:text', 'color.text.inverse'),
+          token('hover:text', 'color.text.inverse'),
+          token('active:text', 'color.text.inverse'),
+          token('focus:text', 'color.text.inverse'),
+          // interactive
+          token('hover:bg', 'color.background.brand.bold.hovered'),
+          token('active:bg', 'color.background.brand.bold.pressed'),
+        ],
+        warning: [
+          // root
+          token('bg', 'color.background.warning.bold'),
+          token('text', 'color.text.warning.inverse'),
+          // states
+          token('visited:text', 'color.text.warning.inverse'),
+          token('hover:text', 'color.text.warning.inverse'),
+          token('active:text', 'color.text.warning.inverse'),
+          token('focus:text', 'color.text.warning.inverse'),
+          // interactive
+          token('hover:bg', 'color.background.warning.bold.hovered'),
+          token('active:bg', 'color.background.warning.bold.pressed'),
+        ],
+        danger: [
+          // root
+          token('bg', 'color.background.danger.bold'),
+          token('text', 'color.text.inverse'),
+          // states
+          token('visited:text', 'color.text.inverse'),
+          token('hover:text', 'color.text.inverse'),
+          token('active:text', 'color.text.inverse'),
+          token('focus:text', 'color.text.inverse'),
+          // interactive
+          token('hover:bg', 'color.background.danger.bold.hovered'),
+          token('active:bg', 'color.background.danger.bold.pressed'),
+        ],
+        discovery: [
+          // root
+          token('bg', 'color.background.discovery.bold'),
+          token('text', 'color.text.inverse'),
+          // states
+          token('visited:text', 'color.text.inverse'),
+          token('hover:text', 'color.text.inverse'),
+          token('active:text', 'color.text.inverse'),
+          token('focus:text', 'color.text.inverse'),
+          // interactive
+          token('hover:bg', 'color.background.discovery.bold.hovered'),
+          token('active:bg', 'color.background.discovery.bold.pressed'),
+        ],
+        subtle: [
+          // root
+          'bg-transparent',
+          token('text', 'color.text.subtle'),
+          // states
+          token('visited:text', 'color.text.subtle'),
+          token('hover:text', 'color.text.subtle'),
+          token('active:text', 'color.text.subtle'),
+          token('focus:text', 'color.text.subtle'),
+          // interactive
+          token('hover:bg', 'color.background.neutral.subtle.hovered'),
+          token('active:bg', 'color.background.neutral.subtle.pressed'),
+        ],
+      },
+      spacing: {
+        default: '',
+        compact: [
+          token('gap-x', 'space.050'),
+          'h-6',
+          token('py', 'space.025'),
+          token('px', 'space.150'),
+          'align-middle',
+        ],
+      },
+      loading: {
+        true: [
+          'cursor-progress',
+          token('px', 'space.500'),
+        ],
+        false: '',
+      },
+      selected: {
+        true: '',
+        false: '',
+      },
+      disabled: {
+        true: [
+          'cursor-not-allowed',
+          token('text', 'color.text.disabled'),
+          token('hover:text', 'color.text.disabled'),
+          token('active:text', 'color.text.disabled'),
+          'bg-transparent',
+          'hover:bg-transparent',
+          'active:bg-transparent',
+          `after:${token('border', 'color.border.disabled')}`,
+        ],
+        false: '',
+      },
+    },
+    compoundVariants: [
+      // selected + default/primary/subtle
+      {
+        selected: true,
+        appearance: ['default', 'primary', 'subtle'],
+        class: [
+          token('bg', 'color.background.selected'),
+          token('text', 'color.text.selected'),
+          `after:${token('border', 'color.border.selected')}`,
+          token('visited:text', 'color.text.selected'),
+          token('hover:text', 'color.text.selected'),
+          token('active:text', 'color.text.selected'),
+          token('focus:text', 'color.text.selected'),
+          token('hover:bg', 'color.background.selected.hovered'),
+          token('active:bg', 'color.background.selected.pressed'),
+        ],
+      },
+      // selected + warning
+      {
+        selected: true,
+        appearance: 'warning',
+        class: [
+          token('bg', 'color.background.selected'),
+          token('text', 'color.text.selected'),
+          token('hover:text', 'color.text.selected'),
+          token('active:text', 'color.text.selected'),
+          token('hover:bg', 'color.background.selected'),
+          token('active:bg', 'color.background.selected'),
+        ],
+      },
+      // selected + danger
+      {
+        selected: true,
+        appearance: 'danger',
+        class: [
+          token('bg', 'color.background.selected'),
+          token('text', 'color.text.selected'),
+          token('hover:text', 'color.text.selected'),
+          token('active:text', 'color.text.selected'),
+          token('hover:bg', 'color.background.selected'),
+          token('active:bg', 'color.background.selected'),
+        ],
+      },
+      // selected + discovery
+      {
+        selected: true,
+        appearance: 'discovery',
+        class: [
+          token('bg', 'color.background.selected'),
+          token('text', 'color.text.selected'),
+          token('hover:text', 'color.text.selected'),
+          token('active:text', 'color.text.selected'),
+          token('hover:bg', 'color.background.selected'),
+          token('active:bg', 'color.background.selected'),
+        ],
+      },
+    ],
+    defaultVariants: {
+      appearance: 'default',
+      spacing: 'default',
+    },
+  }
+);
+
+type Appearance =
+  'default'
+  | 'danger'
+  | 'primary'
+  | 'subtle'
+  | 'warning'
+  | 'discovery';
+
+interface IconProp extends ReactSVGProps<SVGSVGElement> {
+  glyph?: ComponentType<{
+    'data-testid'?: string;
+    'aria-label'?: string;
+    className?: string;
+  }>;
+}
+
+type ButtonProps = PropsWithChildren & ComponentPropsWithoutRef<"button"> & {
+  iconAfter?: IconProp;
+  iconBefore?: IconProp;
+  isLoading?: boolean;
+  isSelected?: boolean;
+  isDisabled?: boolean;
+  appearance?: Appearance;
+  spacing?: 'compact' | 'default';
+  className?: string;
+};
+
+export default forwardRef<HTMLButtonElement, ButtonProps>(function Button(
+  props,
+  ref
+) {
+  const {
+    children,
+    appearance,
+    spacing,
+    isLoading,
+    isDisabled,
+    className,
+    isSelected,
+    ...rest
+  } = props;
+
+  return (
+    <button
+      ref={ref}
+      disabled={isDisabled || false}
+      className={cn(
+        buttonVariants({ appearance, spacing, loading: isLoading, disabled: isDisabled, selected: isSelected }),
+        className
+      )}
+      {...rest}
+    >
+      {!isLoading && children}
+      {isLoading && (
+        <span
+          className={cn(
+            'flex',
+            'absolute',
+            'items-center',
+            'justify-center',
+            'overflow-hidden',
+            token('inset', 'space.0'),
+          )}
+        >
+          <Spinner appearance="invert" size="medium" />
+        </span>
+      )}
+    </button>
+  );
+});
+```
+
+여기서 token함수를 둘로 나누었습니다.
+rawToken함수는 그대로 semantic token 값을 넣으면 primitive token 문자열을 반환하는 함수입니다.
+token 함수는 tailwind 문법에 맞춰 동적으로 클래스 이름을 지정하기 위한 함수입니다.
+
+### token.ts
+```javascript
+import tokens from './tokens.json';
+
+// TypeScript 타입 생성
+type TokenKeys = keyof typeof tokens;
+
+export type CSSTokenMap = {
+  [K in TokenKeys]: `var(${(typeof tokens)[K]})`;
+};
+
+export type CSSToken = CSSTokenMap[keyof CSSTokenMap];
+
+const CSS_PREFIX = 'ds';
+const TOKEN_NOT_FOUND_CSS_VAR: '--ds-token-not-found' = `--${CSS_PREFIX}-token-not-found`;
+
+type Tokens = typeof tokens;
+
+export function rawToken<T extends keyof Tokens>(path: T, fallback?: string): CSSTokenMap[T] {
+  let token: Tokens[keyof Tokens] | typeof TOKEN_NOT_FOUND_CSS_VAR = tokens[path];
+
+  if (!token) {
+    token = TOKEN_NOT_FOUND_CSS_VAR;
+  }
+
+  const tokenCall = fallback ? `var(${token}, ${fallback})` : `var(${token})`;
+
+  return tokenCall as CSSTokenMap[T];
+}
+
+export function token<T extends keyof Tokens>(property: string, path: T, fallback?: string) {
+  return `${property}-[${rawToken(path, fallback)}]`;
+}
+```
+
+token 함수의 사용 예시입니다.
+
+```javascript
+// rawToken: CSS 변수 문자열만 반환
+rawToken('font.weight.medium')
+// -> 'var(--ds-font-weight-medium)'
+
+// token: Tailwind 클래스 형태로 반환
+token('bg', 'color.background.neutral.subtle')
+// -> 'bg-[var(--ds-background-neutral-subtle)]'
+
+token('hover:bg', 'color.background.neutral.subtle.hovered')
+// -> 'hover:bg-[var(--ds-background-neutral-subtle-hovered)]'
+```
+
+이 접근 방식의 장점은 **Tailwind의 모든 modifier를 그대로 사용할 수 있다**는 것입니다. hover:, active:, focus:, after: 등의 pseudo-class/element를 첫 번째 인자에 포함시키면 됩니다.
+
+여기서 Tailwind의 추가 설정이 필요합니다. **token 함수는 런타임에서 실행됩니다.** Tailwind JIT는 빌드타임에 정적 문자열만을 스캔하므로 token 함수의 반환값을 인식하지 못합니다. 이 문제를 해결하기 위해 **Safelist**를 사용하여 빌드타임에 Tailwind에게 생성할 클래스 이름을 명시적으로 지정해야 합니다.
+
+> **주의**: Safelist는 번들 크기를 증가시킬 수 있습니다. 프로덕션 환경에서는 실제 사용되는 토큰만 포함하도록 필터링하거나, 빌드 스크립트에서 정적 분석을 통해 사용 중인 토큰만 추출하는 방식을 고려해볼 수 있습니다.
+
+
+### tailwind.config.js
+
+```javascript
+/** @type {import('tailwindcss').Config} */
+import tokens from './src/utils/tokens.json' with { type: 'json' };
+
+// safelist 생성
+const colorProps = ['bg', 'text', 'border', 'hover:bg', 'hover:text', 'hover:border', 'active:bg', 'active:text', 'active:border', 'focus:text', 'visited:text', 'after:border'];
+const spacingProps = ['p', 'px', 'py', 'pt', 'pr', 'pb', 'pl', 'm', 'mx', 'my', 'gap', 'inset', 'after:inset'];
+const radiusProps = ['rounded'];
+
+const safelist = [];
+
+Object.entries(tokens).forEach(([name, cssVar]) => {
+  if (name.startsWith('color.') || name.startsWith('elevation.surface')) {
+    colorProps.forEach(prop => safelist.push(`${prop}-[var(${cssVar})]`));
+  }
+  if (name.startsWith('space.')) {
+    spacingProps.forEach(prop => safelist.push(`${prop}-[var(${cssVar})]`));
+  }
+  if (name.startsWith('radius.')) {
+    radiusProps.forEach(prop => safelist.push(`${prop}-[var(${cssVar})]`));
+  }
+  if (name.startsWith('font.weight.')) {
+    safelist.push(`[font-weight:var(${cssVar})]`);
+  }
+  if (name.startsWith('border.width')) {
+    safelist.push(`after:border-[length:var(${cssVar})]`);
+    safelist.push(`border-[length:var(${cssVar})]`);
+  }
+});
+
+export default {
+  content: [
+    './index.html',
+    './src/**/*.{js,ts,jsx,tsx}',
+  ],
+  safelist,
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+};
+```
+
+## 결론
+
+디자인 시스템은 결국 **"의미 있는 이름으로 스타일을 추상화하는 것"**입니다. #0052CC라는 값 대신 color.background.brand.bold라는 토큰을 사용하면 다음과 같은 이점이 있습니다.
+
+1. **의도가 명확해집니다** - 이 색상이 "브랜드를 강조하는 배경색"임을 코드만 봐도 알 수 있습니다.
+2. **변경에 유연해집니다** - 브랜드 색상이 바뀌어도 토큰 정의만 수정하면 됩니다.
+3. **일관성이 보장됩니다** - 같은 토큰을 사용하면 항상 같은 결과를 얻습니다.
+
+Atlassian과 shadcn/ui의 유사성이 확인됩니다.
+
+| 구분 | Atlassian | shadcn/ui |
+|------|-----------|-----------|
+| CSS 솔루션 | @compiled/react (zero-runtime) | Tailwind CSS |
+| 토큰 시스템 | 자체 token() 함수 | CSS Variables + Tailwind |
+| 번들 영향 | 빌드타임에 CSS 추출 | JIT로 사용된 클래스만 생성 |
+| 타입 안전성 | TypeScript로 토큰 자동완성 | 문자열 기반 |
+
+shadcn/ui의 공식문서를 들어가면 **The Foundation for your Design System** 이라는 문구가 처음 보여집니다. 어떠한 css 라이브러리를 사용하더라도
+이미 검증된 보일러 플레이트 위에 우리만의 토큰 체계를 얹는 다면 디자인 시스템 구축은 크게 어렵지 않을 것입니다.
