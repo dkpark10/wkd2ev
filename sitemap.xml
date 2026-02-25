@@ -2,6 +2,12 @@
   <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     
     <url>
+      <loc>https://dkpark10.github.io/wkd2ev/post/atlassian-design-system-코드를-분석하여-간단한-디자인-시스템-구축하기</loc>
+      <lastmod>2026-02-24T00:00:00.000Z</lastmod>
+      <changefreq>monthly</changefreq>
+      <priority>0.9</priority>
+    </url>,
+    <url>
       <loc>https://dkpark10.github.io/wkd2ev/post/밑바닥부터-구현해보는-ui라이브러리-만들기3-생명주기-훅</loc>
       <lastmod>2026-01-27T00:00:00.000Z</lastmod>
       <changefreq>monthly</changefreq>
