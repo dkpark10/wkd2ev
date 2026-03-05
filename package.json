@@ -21,7 +21,7 @@
     "next-themes": "^0.4.6",
     "react": "19.1.0",
     "react-dom": "19.1.0",
-    "react-strawberry-toast": "^2.1.0",
+    "react-strawberry-toast": "^3.0.0",
     "react-syntax-highlighter": "^15.6.1",
     "remark-frontmatter": "^5.0.0",
     "remark-gfm": "^4.0.1",
