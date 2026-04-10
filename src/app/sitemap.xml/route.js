@@ -1,19 +1,23 @@
-import { postHandler } from '@/utils/post-handler';
+import { postHandler } from "@/utils/post-handler";
 import { NextResponse } from "next/server";
 
 /** @description export 옵션으로 정적 빌드 캐시 필수 */
-export const dynamic = 'force-static'
+export const dynamic = "force-static";
 
 export async function GET() {
   const allPosts = postHandler.getPosts();
 
-  const urls = allPosts.map((post) => `
-    <url>
-      <loc>https://dkpark10.github.io/wkd2ev/post/${post.slug}</loc>
-      <lastmod>${new Date(post.date).toISOString()}</lastmod>
-      <changefreq>monthly</changefreq>
-      <priority>${post.priority}</priority>
-    </url>`);
+  const urls = allPosts
+    .map(
+      (post) => `
+        <url>
+          <loc>https://dkpark10.github.io/wkd2ev/post/${post.slug}</loc>
+          <lastmod>${new Date(post.date).toISOString()}</lastmod>
+          <changefreq>monthly</changefreq>
+          <priority>${post.priority}</priority>
+        </url>`,
+        )
+    .join("\n");
 
   const xml = `<?xml version="1.0" encoding="UTF-8" ?>
   <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
